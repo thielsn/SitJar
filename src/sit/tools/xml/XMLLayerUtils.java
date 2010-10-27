@@ -1,0 +1,16 @@
+/*
+ * XMLLayerUtils.java
+ *
+ * Created on 1. September 2004, 11:23
+ */
+
+package sit.tools.xml;
+
+/**
+ *
+ * @author Simon Thiel
+ */
+public interface XMLLayerUtils {
+    public String toXML();
+    public void readXMLInput(org.w3c.dom.Node xmlInput);
+}
