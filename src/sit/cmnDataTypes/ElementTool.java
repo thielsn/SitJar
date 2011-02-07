@@ -6,7 +6,6 @@
  */
 
 package sit.cmnDataTypes;
-import sit.GlobalConsts;
 import sit.tools.xml.XMLAttribute;
 /**
  *
@@ -14,9 +13,6 @@ import sit.tools.xml.XMLAttribute;
  */
 public class ElementTool {
     
-    /**debughelper*/
-    protected sit.tools.DebugHelper dbg
-    = sit.tools.DebugHelper.getInstance();
     
     
     /** Creates a new instance of ElementTool */
@@ -202,7 +198,7 @@ public class ElementTool {
             //check if it is the searched one
             if ((aktNodeName!=null)&& (aktNodeName.equals(searchedTagName))){
                 result.add(aktNode); //element found
-                dbg.print("Element found:"+aktNode.getTagName(),GlobalConsts.DEBUG_ELEMENTOOL);
+
             }
         }
         return result;
@@ -244,16 +240,5 @@ public class ElementTool {
         return aktElement.getFirstAttributeByName(aktElement.getAttributes(),attribName);
     }
     
-    /**
-     * helper function to exit on error
-     * @param source ..
-     * @param exp ..
-     */
-    private void errorExit(String source, Exception exp){
-        dbg.print("Error in " + source,GlobalConsts.DEBUG_CDS_ERROR);
-        dbg.print("stacktrace:--------------------------",GlobalConsts.DEBUG_CDS_ERROR);
-        exp.printStackTrace();
-        System.exit(-1);
-        
-    }
+
 }

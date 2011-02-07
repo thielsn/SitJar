@@ -6,7 +6,6 @@
 
 package sit.cmnDataTypes;
 
-import sit.GlobalConsts;
 import sit.tools.xml.XMLAttribute;
 
 /**
@@ -65,9 +64,7 @@ public class Element extends CommonDataStructure implements sit.tools.xml.XMLLay
         //init
         text="";
         elements = new java.util.Vector();
-        
-        dbg.print("ElementType:" +xmlInput.getNodeType(),GlobalConsts.DEBUG_CDS_DEFAULT);
-        
+       
         //read attributes
         attributes = getAttributes(xmlInput);
         
@@ -95,9 +92,9 @@ public class Element extends CommonDataStructure implements sit.tools.xml.XMLLay
      */
     public String toXML() {
         
-        dbg.printEF(this.getClass()+".toXML()", GlobalConsts.DEBUG_CDS_XML);
+
         
-        StringBuffer result = new StringBuffer("\t");
+        StringBuilder result = new StringBuilder("\t");
         java.util.Iterator iter;
         Element aktElement;
         //lead in

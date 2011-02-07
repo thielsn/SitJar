@@ -5,16 +5,16 @@
  */
 
 package sit.cmnDataTypes;
-import sit.GlobalConsts;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  *
  * @author Simon Thiel
  */
 public class CommonDataStructure extends sit.tools.xml.XMLTool {
-    /**debughelper*/
-    protected sit.tools.DebugHelper dbg
-    = sit.tools.DebugHelper.getInstance();
+   
     
     /** Creates a new instance of CommonDataStructure */
     public CommonDataStructure() {
@@ -30,9 +30,8 @@ public class CommonDataStructure extends sit.tools.xml.XMLTool {
      */    
     @Override
     protected void errorExit(String source, Exception exp){
-        dbg.print("Error in " + source,GlobalConsts.DEBUG_CDS_ERROR);
-        dbg.print("stacktrace:--------------------------",GlobalConsts.DEBUG_CDS_ERROR);
-        exp.printStackTrace();
+        Logger.getLogger(getClass().getName()).log(Level.SEVERE, 
+                "Error in common data structure:"+source,exp);
         System.exit(-1);
         
     }

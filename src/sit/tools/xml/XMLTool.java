@@ -5,7 +5,9 @@
  */
 
 package sit.tools.xml;
-import sit.GlobalConsts;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Simon Thiel
@@ -13,8 +15,6 @@ import sit.GlobalConsts;
 public class XMLTool {
     
     
-    /**debughelper*/
-    private sit.tools.DebugHelper dbg = sit.tools.DebugHelper.getInstance();
     
     
     /** Creates a new instance of XMLTool */
@@ -43,7 +43,7 @@ public class XMLTool {
         //add attributes
         while (iter.hasNext()){
             attr = (XMLAttribute)iter.next();
-            result.append(" "+attr.toString());
+            result.append(" ").append(attr.toString());
         }
         
         result.append(">");
@@ -57,7 +57,7 @@ public class XMLTool {
         result.append("\n<");
         result.append(tagName);
         
-        result.append(" "+xmlAttribute.toString());
+        result.append(" ").append(xmlAttribute.toString());
         
         result.append(">");
         
@@ -102,12 +102,13 @@ public class XMLTool {
             try {
                 result = Boolean.parseBoolean(value);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "", e);
                 result = false;
             }
 
         }else{
-            System.err.println("Empty value or attribute attribute not found:"+tag+" returning false !");
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                    "Empty value or attribute attribute not found:"+tag+" returning false !");
         }
         
         return result;
@@ -120,13 +121,14 @@ public class XMLTool {
 
             try {
                 result = Integer.parseInt(value);
-            } catch (NumberFormatException numberFormatException) {
-                System.err.println("Exception while parsing number for attribute:"+tag);
-                numberFormatException.printStackTrace();
-                result = -1;
+            } catch (NumberFormatException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                        "Exception while parsing number for attribute:"+tag, ex);
+                                result = -1;
             }
         }else{
-            System.err.println("Empty value or attribute attribute not found:"+tag+" returning -1 !");
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                    "Empty value or attribute attribute not found:"+tag+" returning -1 !");
         }
         return result;
     }
@@ -138,13 +140,14 @@ public class XMLTool {
 
             try {
                 result = Double.parseDouble(value);
-            } catch (NumberFormatException numberFormatException) {
-                System.err.println("Exception while parsing number for attribute:"+tag);
-                numberFormatException.printStackTrace();
+            } catch (NumberFormatException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                        "Exception while parsing number for attribute:"+tag, ex);
                 result = -1;
             }
         }else{
-            System.err.println("Empty value or attribute attribute not found:"+tag+" returning -1 !");
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                    "Empty value or attribute attribute not found:"+tag+" returning -1 !");
         }
         return result;
     }
@@ -165,9 +168,10 @@ public class XMLTool {
                 aktAttr = new XMLAttribute(aktNode.getNodeName(),aktNode.getNodeValue());
             }
             catch (org.w3c.dom.DOMException exp){
-                exp.printStackTrace();
-                System.err.println("DOMException - Attributevalue of "
-                +aktNode.getNodeName()+" is set to Zero");
+                
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                        "DOMException - Attributevalue of "
+                        +aktNode.getNodeName()+" is set to Zero", exp);
                 aktAttr = new XMLAttribute(aktNode.getNodeName(),"");
             }
             result.add(aktAttr);
@@ -186,9 +190,10 @@ public class XMLTool {
             result=xmlInput.getNodeValue();
         }
         catch (org.w3c.dom.DOMException exp){
-            exp.printStackTrace();
-            System.err.println("DOMException - Textvalue of "
-            +xmlInput.getNodeName()+" is set to Zero");
+           
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                    "DOMException - Textvalue of "
+            +xmlInput.getNodeName()+" is set to Zero", exp);
             
         }
         return result;
@@ -246,9 +251,8 @@ public class XMLTool {
      * @param exp
      */
     protected void errorExit(String source, Exception exp){
-        dbg.print("Error in " + source,GlobalConsts.DEBUG_CDS_ERROR);
-        dbg.print("stacktrace:--------------------------",GlobalConsts.DEBUG_CDS_ERROR);
-        exp.printStackTrace();
+        Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                "Error :"+source,exp);
         System.exit(-1);
         
     }

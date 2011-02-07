@@ -17,6 +17,8 @@ import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 
 /**
@@ -127,7 +129,7 @@ public class ImageIconHelper {
     }
 
     public Image rotateImage(Image img, double degree) {
-        
+    
         if (degree==0){
             return img;
         }

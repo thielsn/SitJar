@@ -50,4 +50,30 @@ public class Pair<A,B> {
         this.b = b;
     }
 
+    @Override
+    public int hashCode() {
+        return (a.hashCode()+(17*b.hashCode()));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Pair<A, B> other = (Pair<A, B>) obj;
+        if (this.a != other.a && (this.a == null || !this.a.equals(other.a))) {
+            return false;
+        }
+        if (this.b != other.b && (this.b == null || !this.b.equals(other.b))) {
+            return false;
+        }
+        return true;
+    }
+
+
+
+
 }

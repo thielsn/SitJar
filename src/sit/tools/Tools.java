@@ -1,5 +1,7 @@
 package sit.tools;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -147,7 +149,8 @@ public class Tools {
             
         }
         catch (Exception err) {
-            err.printStackTrace();
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null,err);
+            
         }
         
     }
@@ -157,13 +160,8 @@ public class Tools {
      * @return the directory
      */    
     public String pureDir(String fileName){
-        //mit backslash
-        int cj=0;
-        for (int ci=0;ci<fileName.length();ci++ ) {
-            if (fileName.charAt(ci)=='\\') {  cj=ci; }
-        }
-        if (cj>0) return fileName.substring(0,cj+1);
-        else return "";
+
+        return (new File(fileName)).getPath();
     }
     
     /**
@@ -172,17 +170,7 @@ public class Tools {
      * @return filename
      */    
     public String pureFile(String fileName){
-        //gibt den kompletten dateinamen zur�ck aber ohne pfad
-        String result="";
-        for (int i = 0; i < fileName.length(); i++) {
-            if (fileName.charAt(i)=='\\'){
-                result="";
-            }
-            else {
-                result=result+ fileName.charAt(i);
-            }
-        }
-        return result;
+        return (new File(fileName)).getName();
     }
 
 
