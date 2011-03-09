@@ -23,17 +23,4 @@ public class CommonDataStructure extends sit.tools.xml.XMLTool {
 
  
     
-    /**
-     *
-     * @param source
-     * @param exp
-     */    
-    @Override
-    protected void errorExit(String source, Exception exp){
-        Logger.getLogger(getClass().getName()).log(Level.SEVERE, 
-                "Error in common data structure:"+source,exp);
-        System.exit(-1);
-        
-    }
-    
 }

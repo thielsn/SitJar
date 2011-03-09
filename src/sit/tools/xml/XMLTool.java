@@ -21,7 +21,7 @@ public class XMLTool {
     public XMLTool() {
     }
     
-    protected StringBuffer createLeadIn(String tagName){
+    public StringBuffer createLeadIn(String tagName){
         StringBuffer result = new StringBuffer();
         
         result.append("\n<");
@@ -31,18 +31,16 @@ public class XMLTool {
         return result;
     }
     
-    protected StringBuffer createLeadIn(String tagName, java.util.Vector xmlAttributeList){
-        
-        XMLAttribute attr;
+    public StringBuffer createLeadIn(String tagName, java.util.Vector<XMLAttribute> xmlAttributeList){
+                
         StringBuffer result = new StringBuffer();
-        java.util.Iterator iter = xmlAttributeList.iterator();
+        
         
         result.append("\n<");
         result.append(tagName);
         
         //add attributes
-        while (iter.hasNext()){
-            attr = (XMLAttribute)iter.next();
+        for (XMLAttribute attr : xmlAttributeList){
             result.append(" ").append(attr.toString());
         }
         
@@ -50,7 +48,7 @@ public class XMLTool {
         
         return result;
     }
-    protected StringBuffer createLeadIn(String tagName, XMLAttribute xmlAttribute){
+    public StringBuffer createLeadIn(String tagName, XMLAttribute xmlAttribute){
         
         StringBuffer result = new StringBuffer();
         
@@ -65,7 +63,7 @@ public class XMLTool {
     }
     
     
-    protected StringBuffer createLeadOut(String tagName){
+    public StringBuffer createLeadOut(String tagName){
         StringBuffer result = new StringBuffer();
         
         result.append("</");
@@ -78,7 +76,7 @@ public class XMLTool {
     /**
      *  get all text of a element node
      **/
-    protected String getText(org.w3c.dom.Node xmlInput){
+    public String getText(org.w3c.dom.Node xmlInput){
         String result = "";
         org.w3c.dom.Node childNode = null;
         
@@ -93,7 +91,7 @@ public class XMLTool {
         return result.trim();
     }
 
-    protected boolean getAttributeAsBool(org.w3c.dom.Node xmlInput, String tag){
+    public boolean getAttributeAsBool(org.w3c.dom.Node xmlInput, String tag){
         boolean result = false;
         String value = getAttribute(xmlInput, tag);
         if ((value!=null)&&(!value.equals(""))){
@@ -114,7 +112,7 @@ public class XMLTool {
         return result;
     }
 
-    protected int getAttributeAsInt(org.w3c.dom.Node xmlInput, String tag){
+    public int getAttributeAsInt(org.w3c.dom.Node xmlInput, String tag){
         int result = -1;
         String value = getAttribute(xmlInput, tag);
         if ((value!=null)&&(!value.equals(""))){
@@ -133,7 +131,7 @@ public class XMLTool {
         return result;
     }
 
-    protected double getAttributeAsDouble(org.w3c.dom.Node xmlInput, String tag){
+    public double getAttributeAsDouble(org.w3c.dom.Node xmlInput, String tag){
         double result = -1;
         String value = getAttribute(xmlInput, tag);
         if ((value!=null)&&(!value.equals(""))){
@@ -152,12 +150,12 @@ public class XMLTool {
         return result;
     }
 
-    protected String getAttribute(org.w3c.dom.Node xmlInput, String tag){
+    public String getAttribute(org.w3c.dom.Node xmlInput, String tag){
         return ((org.w3c.dom.Element)xmlInput).getAttribute(tag);
     }
     
-    protected java.util.Vector getAttributes(org.w3c.dom.Node xmlInput){
-        java.util.Vector result = new java.util.Vector();
+    public java.util.Vector<XMLAttribute> getAttributes(org.w3c.dom.Node xmlInput){
+        java.util.Vector<XMLAttribute> result = new java.util.Vector();
         org.w3c.dom.NamedNodeMap nodes = ((org.w3c.dom.Element)xmlInput).getAttributes();
         org.w3c.dom.Node aktNode;
         XMLAttribute aktAttr;
@@ -181,10 +179,11 @@ public class XMLTool {
         
         return result;
     }
+
     /**
      *  Returns the Text of a Textnode
      **/
-    protected String getTextNode(org.w3c.dom.Node xmlInput){
+    public String getTextNode(org.w3c.dom.Node xmlInput){
         String result = "";
         try{
             result=xmlInput.getNodeValue();
@@ -208,7 +207,7 @@ public class XMLTool {
      * @param attribName searched for attrib name
      * @return the attribute
      */
-    public XMLAttribute getFirstAttributeByName(java.util.Vector attribs, String attribName) {
+    public XMLAttribute getFirstAttributeByName(java.util.Vector<XMLAttribute> attribs, String attribName) {
                 
         XMLAttribute aktAttrib = null;
         
@@ -231,9 +230,9 @@ public class XMLTool {
      * @param attribName the searchedfor attribute name
      * @return Vector of the found attributes with type XMLAttribute
      */
-    public java.util.Vector getAttribsByName(java.util.Vector attribs,  String attribName){
+    public java.util.Vector<XMLAttribute> getAttribsByName(java.util.Vector<XMLAttribute> attribs,  String attribName){
         java.util.Iterator iter = attribs.iterator();
-        java.util.Vector result = new java.util.Vector();
+        java.util.Vector<XMLAttribute> result = new java.util.Vector();
         XMLAttribute aktAttrib = null;
         
         while(iter.hasNext()){
@@ -245,17 +244,6 @@ public class XMLTool {
         return result;
     }
 
-    /**
-     * prints the message to system error
-     * @param source
-     * @param exp
-     */
-    protected void errorExit(String source, Exception exp){
-        Logger.getLogger(getClass().getName()).log(Level.SEVERE,
-                "Error :"+source,exp);
-        System.exit(-1);
-        
-    }
 
     /**
      * returns the first child of the searched for tag
@@ -263,7 +251,7 @@ public class XMLTool {
      * @param tagname
      * @return
      */
-    protected org.w3c.dom.Node getFirstChildWithTag( org.w3c.dom.Node parent, String tagname ){
+    public org.w3c.dom.Node getFirstChildWithTag( org.w3c.dom.Node parent, String tagname ){
 
         return getNextSiblingWithTag(parent.getFirstChild(), tagname);
     }
@@ -274,7 +262,7 @@ public class XMLTool {
      * @param tagname
      * @return
      */
-    protected org.w3c.dom.Node getNextSiblingWithTag( org.w3c.dom.Node sibling, String tagname ){
+    public org.w3c.dom.Node getNextSiblingWithTag( org.w3c.dom.Node sibling, String tagname ){
 
         if (sibling==null){
             return null;
