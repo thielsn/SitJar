@@ -33,7 +33,7 @@ public class WebServer implements HttpConstants, Runnable {
 
 
     /* Where worker threads stand idle */
-    private Vector threads = new Vector();
+    private Vector<WebWorker> threads = new Vector();
 
     /* the web server's virtual root */
     private File root = new File(".");
@@ -44,6 +44,7 @@ public class WebServer implements HttpConstants, Runnable {
     /* max # worker threads */
     private int workers = 5;
     private int port = 8080;
+    private boolean permitDirectoryListing = true;
     private boolean stopping = false;
 
 
@@ -65,7 +66,7 @@ public class WebServer implements HttpConstants, Runnable {
         try {
             log("init webserver");
             init();
-            ss = new ServerSocket(port);
+            ss = new ServerSocket(getPort());
             
         } catch (IOException ex) {
             Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -88,7 +89,7 @@ public class WebServer implements HttpConstants, Runnable {
                         (new Thread(ws, "additional worker")).start();
                     } else {
                         //use thread from thread pool
-                        w = (WebWorker) threads.elementAt(0);
+                        w =  threads.elementAt(0);
                         threads.removeElementAt(0);
                         w.setSocket(s);
                     }
@@ -129,6 +130,36 @@ public class WebServer implements HttpConstants, Runnable {
     public synchronized static WebServer getInstance() {
         return instance;
     }
+
+    /**
+     * @return the port
+     */
+    public int getPort() {
+        return port;
+    }
+
+    /**
+     * @param port the port to set
+     */
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    /**
+     * @return the permitDirectoryListing
+     */
+    public boolean isPermitDirectoryListing() {
+        return permitDirectoryListing;
+    }
+
+    /**
+     * @param permitDirectoryListing the permitDirectoryListing to set
+     */
+    public synchronized void setPermitDirectoryListing(boolean permitDirectoryListing) {
+        this.permitDirectoryListing = permitDirectoryListing;        
+    }
+
+    
 }
 
 

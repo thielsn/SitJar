@@ -24,8 +24,7 @@ import java.util.logging.Logger;
  */
 class WebWorker implements HttpConstants, Runnable {
 
-    private final static int BUF_SIZE = 2048;
-    private static final byte[] EOL = {(byte) '\r', (byte) '\n'};
+
 
     /* static map */
     private final static Hashtable<String, String> staticMap = createMimeMap();
@@ -35,7 +34,7 @@ class WebWorker implements HttpConstants, Runnable {
     private final Hashtable<String, String> mimeMap = new Hashtable(staticMap);
 
     /* buffer to use for requests */
-    private byte[] buf = new byte[BUF_SIZE];
+    private WebBuffer buf = new WebBuffer();
 
     /* Socket to client we're handling */
     private Socket socket = null;
@@ -43,6 +42,8 @@ class WebWorker implements HttpConstants, Runnable {
      * indicates whether the thread is ordered to stop
      */
     private boolean stopping = false;
+  
+
 
     public synchronized void setSocket(Socket s) {
         this.socket = s;
@@ -54,25 +55,22 @@ class WebWorker implements HttpConstants, Runnable {
     }
 
     @Override
-    public synchronized void run() {
+    public void run() {
 
         while (!stopping) {
-            if (socket == null) {
-                /* nothing to do */
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    /* should not happen */
-                    continue;
+            synchronized (this) {
+                if (socket == null) {
+                    /* nothing to do */
+                    try {
+                        wait(); //wait releases the monitor
+                    } catch (InterruptedException e) {
+                        continue;
+                    }
                 }
-            }
-
-            synchronized (this) { //while handling the call the socket needs to be locked
                 try {
                     handleClient();
                 } catch (Exception ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE,
-                            null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
 
                 socket = null;
@@ -82,47 +80,19 @@ class WebWorker implements HttpConstants, Runnable {
         }
     }
 
-    private int readBuffer(InputStream is) throws IOException {
-        /* zero out the buffer from last time */
-        for (int i = 0; i < BUF_SIZE; i++) {
-            buf[i] = 0;
-        }
+    
 
-        /* We only support HTTP GET/HEAD, and don't
-         * support any fancy HTTP options,
-         * so we're only interested really in
-         * the first line.
-         */
-        int readBytes = 0, r = 0;
+    private WebRequest getWebRequest(InputStream is) throws UnsupportedHTTPMethodException, IOException, MessageTooLargeException {
 
-        outerloop:
-        while (readBytes < BUF_SIZE) {
-            r = is.read(buf, readBytes, BUF_SIZE - readBytes);
-            if (r == -1) {
-                /* EOF */
-                return -1;
-            }
-            int i = readBytes;
-            readBytes += r;
-            for (; i < readBytes; i++) {
-                if (buf[i] == (byte) '\n' || buf[i] == (byte) '\r') {
-                    /* read one line */
-                    break outerloop;
-                }
-            }
-        }
-        return readBytes;
-
-    }
-
-    private WebRequest getTargetFile(InputStream is) throws UnsupportedHTTPMethodException, IOException {
-
-        int readBytes = readBuffer(is);
+        int readBytes = buf.readFromInputStream(is);
         if (readBytes == -1) {
             return null;
         }
+        if (readBytes==WebBuffer.BUF_SIZE){
+            throw new MessageTooLargeException();
+        }
 
-        String query = new String(buf, Charset.forName("US-ASCII"));
+        String query = buf.toString();
 
         if (query.startsWith("HEAD ")) {
             //FIXME we don't handle this call at the moment
@@ -138,26 +108,29 @@ class WebWorker implements HttpConstants, Runnable {
          */
         WebRequest result = new WebRequest();
         for (int i = "GET ".length(); i < readBytes; i++) {
-            if ((buf[i] == (byte) ' ')
-                    || (buf[i] == (byte) '?')) {
+            if ((buf.get(i) == (byte) ' ')
+                    || (buf.get(i) == (byte) '?')) {
 
                 //set fname
-                result.fname = (query.substring("GET ".length(), i))
-                        .replace('/', File.separatorChar);
+                result.fname = (query.substring("GET ".length(), i)).replace('/', File.separatorChar);
                 if (result.fname.startsWith(File.separator)) {
                     result.fname = result.fname.substring(1);
                 }
 
                 //set param
-                if (buf[i] == (byte) '?'){
-                    for (int j = i+1; j < readBytes; j++) {
-                        if (buf[j] == (byte) ' '){
-                            result.param = query.substring(i+1,j);
+                if (buf.get(i) == (byte) '?') {
+                    for (int j = i + 1; j < readBytes; j++) {
+                        if (buf.get(i) == (byte) ' ') {
+                            result.param = query.substring(i + 1, j);
                             break;
                         }
-                    }
-                }
-
+                        if (j==readBytes-1){
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                                "http URI parameter exeeded readbuffer? - readBytes="+readBytes
+                                + " BUF_SIZE="+WebBuffer.BUF_SIZE);
+                        }
+                    }                    
+                } 
                 break;
 
             }
@@ -181,13 +154,23 @@ class WebWorker implements HttpConstants, Runnable {
         try {
             WebRequest request = null;
             try {
-                 request = getTargetFile(is);
+                request = getWebRequest(is);
             } catch (UnsupportedHTTPMethodException ex) {
                 /* we don't support this method */
                 ps.print("HTTP/1.0 " + HTTP_BAD_METHOD
                         + " unsupported method type: ");
-                ps.write(buf, 0, 5);
-                ps.write(EOL);
+                buf.writeToPrintStream(ps, 0, 5);
+                ps.write(WebBuffer.EOL);
+                ps.flush();
+                socket.close();
+                return;
+            } catch (MessageTooLargeException ex) {
+                
+                String message = "HTTP/1.0 " + HTTP_ENTITY_TOO_LARGE
+                        + " Entity Too Large";
+                Logger.getLogger(WebWorker.class.getName()).log(Level.WARNING, message);
+                ps.print(message);
+                ps.write(WebBuffer.EOL);
                 ps.flush();
                 socket.close();
                 return;
@@ -203,7 +186,7 @@ class WebWorker implements HttpConstants, Runnable {
             //if we find a fitting service call the service
             ServiceEndpoint service = ServiceEndpoints.getInstance().getEndpoint(request.fname);
             if (service != null) {
-                Logger.getLogger(WebWorker.class.getName()).log(Level.FINE, 
+                Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
                         "found service");
 
                 printDynamicPage(service.getContentType(), service.handleCall(request), ps);
@@ -238,21 +221,21 @@ class WebWorker implements HttpConstants, Runnable {
 
 
         ps.print("HTTP/1.0 " + HTTP_OK + " OK");
-        ps.write(EOL);
+        ps.write(WebBuffer.EOL);
         ps.print("Server: SIT java");
-        ps.write(EOL);
+        ps.write(WebBuffer.EOL);
         ps.print("Date: " + (new Date()));
-        ps.write(EOL);
+        ps.write(WebBuffer.EOL);
 
         ps.print("Content-length: " + content.length());
-        ps.write(EOL);
+        ps.write(WebBuffer.EOL);
         ps.print("Last Modified: " + Calendar.getInstance().getTime());
-        ps.write(EOL);
+        ps.write(WebBuffer.EOL);
         ps.print("Content-type: " + contentType);
-        ps.write(EOL);
+        ps.write(WebBuffer.EOL);
         ps.print("Connection: close");
-        ps.write(EOL);
-        ps.write(EOL);
+        ps.write(WebBuffer.EOL);
+        ps.write(WebBuffer.EOL);
         ps.print(content);
 
 
@@ -265,12 +248,12 @@ class WebWorker implements HttpConstants, Runnable {
         if (!targetFile.exists()) {
             returnCode = HTTP_NOT_FOUND;
             ps.print("HTTP/1.0 " + HTTP_NOT_FOUND + " not found");
-            ps.write(EOL);
+            ps.write(WebBuffer.EOL);
             result = false;
         } else {
             returnCode = HTTP_OK;
             ps.print("HTTP/1.0 " + HTTP_OK + " OK");
-            ps.write(EOL);
+            ps.write(WebBuffer.EOL);
             result = true;
         }
         Logger.getLogger(WebWorker.class.getName()).log(Level.INFO,
@@ -279,16 +262,16 @@ class WebWorker implements HttpConstants, Runnable {
                     targetFile.getAbsolutePath(), returnCode});
 
         ps.print("Server: SIT java");
-        ps.write(EOL);
+        ps.write(WebBuffer.EOL);
         ps.print("Date: " + (new Date()));
-        ps.write(EOL);
+        ps.write(WebBuffer.EOL);
 
         if (result) {
             if (!targetFile.isDirectory()) {
                 ps.print("Content-length: " + targetFile.length());
-                ps.write(EOL);
+                ps.write(WebBuffer.EOL);
                 ps.print("Last Modified: " + (new Date(targetFile.lastModified())));
-                ps.write(EOL);
+                ps.write(WebBuffer.EOL);
                 String name = targetFile.getName();
                 int ind = name.lastIndexOf('.');
                 String contentType = null;
@@ -299,29 +282,40 @@ class WebWorker implements HttpConstants, Runnable {
                     contentType = "unknown/unknown";
                 }
                 ps.print("Content-type: " + contentType);
-                ps.write(EOL);
+                ps.write(WebBuffer.EOL);
             } else {
                 ps.print("Content-type: text/html");
-                ps.write(EOL);
+                ps.write(WebBuffer.EOL);
             }
         }
         return result;
     }
 
     private void send404(PrintStream ps) throws IOException {
-        ps.write(EOL);
-        ps.write(EOL);
-        ps.println("Not Found\n\n"
+        ps.write(WebBuffer.EOL);
+        ps.write(WebBuffer.EOL);
+        ps.println("<h1>Not Found</h1><br/><br/>\n\n"
                 + "The requested resource was not found.\n");
+    }
+
+    private void send403(PrintStream ps) throws IOException {
+        ps.write(WebBuffer.EOL);
+        ps.write(WebBuffer.EOL);
+        ps.println("<h1>Forbidden</h1><br/><br/>\n\n"
+                + "Access to the requested resource was denied.\n");
     }
 
     private void sendFile(File targetFile, PrintStream ps) throws IOException {
         InputStream is = null;
-        ps.write(EOL);
+        ps.write(WebBuffer.EOL);
 
         //handle directory
         if (targetFile.isDirectory()) {
-            listDirectory(targetFile, ps);
+            if (WebServer.getInstance().isPermitDirectoryListing()) {
+                listDirectory(targetFile, ps);
+            } else {
+                send403(ps);
+            }
             return;
 
             //handle file
@@ -330,8 +324,8 @@ class WebWorker implements HttpConstants, Runnable {
         }
         try {
             int n;
-            while ((n = is.read(buf)) > 0) {
-                ps.write(buf, 0, n);
+            while ((n = buf.readFromInputStream(is)) > 0) {
+                buf.writeToPrintStream(ps, 0, n);
             }
         } finally {
             is.close();
@@ -380,4 +374,6 @@ class WebWorker implements HttpConstants, Runnable {
         result.put(".java", "text/plain");
         return result;
     }
+
+  
 }

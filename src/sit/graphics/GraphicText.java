@@ -23,10 +23,14 @@ public class GraphicText {
     }
 
     public Dimension getTextDimension(Graphics g, Vector<String> text){
+        return getTextDimension(g, text.toArray(new String[text.size()]));
+    }
+
+    public Dimension getTextDimension(Graphics g, String[] text){
         FontMetrics fm = g.getFontMetrics();
 
         Dimension result = new Dimension(0,0);
-        result.height = text.size() * fm.getHeight();
+        result.height = text.length * fm.getHeight();
 
         for (String line : text){
             result.width = Math.max(result.width, fm.stringWidth(line));                       
