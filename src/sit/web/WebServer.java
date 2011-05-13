@@ -87,6 +87,7 @@ public class WebServer implements HttpConstants, Runnable {
                         WebWorker ws = new WebWorker();
                         ws.setSocket(s);
                         (new Thread(ws, "additional worker")).start();
+                        Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "started new WebWorker");
                     } else {
                         //use thread from thread pool
                         w =  threads.elementAt(0);

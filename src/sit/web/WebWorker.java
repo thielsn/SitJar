@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
@@ -35,6 +34,8 @@ class WebWorker implements HttpConstants, Runnable {
 
     /* buffer to use for requests */
     private WebBuffer buf = new WebBuffer();
+    
+    private HTTPHelper httphelp = new HTTPHelper();
 
     /* Socket to client we're handling */
     private Socket socket = null;
@@ -42,8 +43,6 @@ class WebWorker implements HttpConstants, Runnable {
      * indicates whether the thread is ordered to stop
      */
     private boolean stopping = false;
-  
-
 
     public synchronized void setSocket(Socket s) {
         this.socket = s;
@@ -52,6 +51,7 @@ class WebWorker implements HttpConstants, Runnable {
 
     public void stop() {
         this.stopping = true;
+        Logger.getLogger(WebWorker.class.getName()).log(Level.INFO, "stop WebWorker");
     }
 
     @Override
@@ -80,64 +80,11 @@ class WebWorker implements HttpConstants, Runnable {
         }
     }
 
-    
-
     private WebRequest getWebRequest(InputStream is) throws UnsupportedHTTPMethodException, IOException, MessageTooLargeException {
 
-        int readBytes = buf.readFromInputStream(is);
-        if (readBytes == -1) {
-            return null;
-        }
-        if (readBytes==WebBuffer.BUF_SIZE){
-            throw new MessageTooLargeException();
-        }
 
-        String query = buf.toString();
-
-        if (query.startsWith("HEAD ")) {
-            //FIXME we don't handle this call at the moment
-            return null;
-        } else if (!query.startsWith("GET ")) {
-            throw new UnsupportedHTTPMethodException();
-        }
-
-        /* find the file name, from:
-         * GET /foo/bar.html HTTP/1.0
-         * extract "/foo/bar.html"
-         * GET --> start at position 4
-         */
-        WebRequest result = new WebRequest();
-        for (int i = "GET ".length(); i < readBytes; i++) {
-            if ((buf.get(i) == (byte) ' ')
-                    || (buf.get(i) == (byte) '?')) {
-
-                //set fname
-                result.fname = (query.substring("GET ".length(), i)).replace('/', File.separatorChar);
-                if (result.fname.startsWith(File.separator)) {
-                    result.fname = result.fname.substring(1);
-                }
-
-                //set param
-                if (buf.get(i) == (byte) '?') {
-                    for (int j = i + 1; j < readBytes; j++) {
-                        if (buf.get(i) == (byte) ' ') {
-                            result.param = query.substring(i + 1, j);
-                            break;
-                        }
-                        if (j==readBytes-1){
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE,
-                                "http URI parameter exeeded readbuffer? - readBytes="+readBytes
-                                + " BUF_SIZE="+WebBuffer.BUF_SIZE);
-                        }
-                    }                    
-                } 
-                break;
-
-            }
-        }
-
-
-        return result;
+        return httphelp.getHeaderAndBody(is, buf).getWebRequest();
+        
     }
 
     private void handleClient() throws IOException {
@@ -165,7 +112,7 @@ class WebWorker implements HttpConstants, Runnable {
                 socket.close();
                 return;
             } catch (MessageTooLargeException ex) {
-                
+
                 String message = "HTTP/1.0 " + HTTP_ENTITY_TOO_LARGE
                         + " Entity Too Large";
                 Logger.getLogger(WebWorker.class.getName()).log(Level.WARNING, message);
@@ -181,13 +128,13 @@ class WebWorker implements HttpConstants, Runnable {
             }
 
             Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
-                    "request:{0}", request);
+                    "fname:{0}", request);
 
             //if we find a fitting service call the service
             ServiceEndpoint service = ServiceEndpoints.getInstance().getEndpoint(request.fname);
             if (service != null) {
-                Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
-                        "found service");
+                Logger.getLogger(WebWorker.class.getName()).log(Level.INFO,
+                        "found service:"+service.getEndpointName());
 
                 printDynamicPage(service.getContentType(), service.handleCall(request), ps);
             } else {
@@ -213,12 +160,9 @@ class WebWorker implements HttpConstants, Runnable {
         }
     }
 
-    private void printDynamicPage(String contentType,
-            String content, PrintStream ps) throws IOException {
+    private void printDynamicPage(String contentType, String content, PrintStream ps) throws IOException {
 
-        Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
-                "content:\n{0}", content);
-
+        Logger.getLogger(WebWorker.class.getName()).log(Level.FINE, "content:\n{0}", content);
 
         ps.print("HTTP/1.0 " + HTTP_OK + " OK");
         ps.write(WebBuffer.EOL);
@@ -374,6 +318,4 @@ class WebWorker implements HttpConstants, Runnable {
         result.put(".java", "text/plain");
         return result;
     }
-
-  
 }

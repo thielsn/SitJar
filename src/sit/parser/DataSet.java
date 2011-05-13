@@ -27,6 +27,13 @@ public abstract class DataSet {
     public abstract boolean processLine(String line);
 
     /**
+     * indicates that this dataset was the last one found in the file
+     * gives an oppurtunity to mark the dataset as completed which will
+     * cause to have it added to the list of recognized datasets
+     */
+    public abstract void reachedEndOfFile();
+
+    /**
      * @return the complete
      */
     public boolean isComplete() {

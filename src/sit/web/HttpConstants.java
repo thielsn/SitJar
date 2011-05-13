@@ -49,4 +49,14 @@ public interface HttpConstants {
     public static final int HTTP_UNAVAILABLE = 503;
     public static final int HTTP_GATEWAY_TIMEOUT = 504;
     public static final int HTTP_VERSION = 505;
+
+
+    public final static String HTTP_COMMAND_HEAD = "HEAD";
+    public final static String HTTP_COMMAND_GET = "GET";
+    public final static String HTTP_COMMAND_POST = "POST";
+
+    public final static String HTTP_HEADER_FIELD_CONTENT_LENGTH = "Content-Length:";
+
+    public final static String CRLF = "\r\n";
+    public final static String CRLFCRLF = CRLF + CRLF;
 }

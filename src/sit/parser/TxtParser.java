@@ -37,7 +37,10 @@ public class TxtParser <DATASET extends DataSet> implements Iterable<DATASET>{
         this.inBuffer = inputStream;
     }
 
-
+    /**
+     * produce new data set
+     * @return
+     */
     private DATASET getDSInstance(){
         try {
             return (DATASET) dsClass.newInstance();
@@ -66,11 +69,19 @@ public class TxtParser <DATASET extends DataSet> implements Iterable<DATASET>{
                     if (dataSet.isComplete()){
                         dataSets.add(dataSet);
                     }
-                    dataSet = getDSInstance();
+                    dataSet = getDSInstance(); //new DATASET()
                     dataSet.processLine(line);
                 }
                 
             }
+            //give the last dataset the chance to be completed
+            dataSet.reachedEndOfFile();
+            if (!dataSets.contains(dataSet)){ //in case this dataset was not yet added
+                if (dataSet.isComplete()){
+                    dataSets.add(dataSet);
+                }
+            }
+            //close file etc...
             reader.close();
             Logger.getLogger(this.getClass().getName()).log(Level.INFO,
                     "successfully processed " + dataSets.size()+" data sets");
