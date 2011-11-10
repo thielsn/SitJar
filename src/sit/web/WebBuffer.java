@@ -131,14 +131,14 @@ public class WebBuffer {
 //    }
     public boolean isMoreDataToRead() {
 //        if (readBytes==-1){
-//            Logger.getLogger(WebBuffer.class.getName()).log(Level.INFO, "readBytes==-1);");
+//            Logger.getLogger(WebBuffer.class.getName()).log(Level.FINE, "readBytes==-1);");
 //            return true;
 //        }
 //        if (readBytes==BUF_SIZE){
-//            Logger.getLogger(WebBuffer.class.getName()).log(Level.INFO, "readBytes==BUF_SIZE");
+//            Logger.getLogger(WebBuffer.class.getName()).log(Level.FINE, "readBytes==BUF_SIZE");
 //            return true;
 //        }
-//        Logger.getLogger(WebBuffer.class.getName()).log(Level.INFO, "readBytes="+readBytes);
+//        Logger.getLogger(WebBuffer.class.getName()).log(Level.FINE, "readBytes="+readBytes);
 //        return false;
         return !endOfStream;
     }

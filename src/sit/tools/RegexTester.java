@@ -11,8 +11,6 @@
 
 package sit.tools;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ResultTreeType;
-
 /**
  *
  * @author Simon Thiel <simon.thiel at gmx.de>

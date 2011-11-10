@@ -9,6 +9,7 @@
 
 package sit.sstl;
 
+import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Iterator;
 
@@ -17,31 +18,31 @@ import java.util.Iterator;
  *
  */
 public class HashTableSet<K,V extends ObjectWithKey<K>>
-    implements Iterable<V>{
+    implements Iterable<V>, Serializable{
 
     private Hashtable<K,V> set = new Hashtable();
 
-    public void clear(){
+    public synchronized void clear(){
         set.clear();
     }
 
-    public void add(V item){
+    public synchronized void add(V item){
         set.put(item.getKey(), item);
     }
 
-    public V remove(K id){
+    public synchronized V remove(K id){
         return set.remove(id);
     }
 
-    public Iterator<V> iterator(){
+    public synchronized Iterator<V> iterator(){
         return set.values().iterator();
     }
 
-    public V get(K id){
+    public synchronized V get(K id){
         return set.get(id);
     }
 
-    public int size(){
+    public synchronized int size(){
         return set.size();
     }
 

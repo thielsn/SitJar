@@ -5,8 +5,6 @@
  */
 
 package sit.cmnDataTypes;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -15,7 +13,7 @@ import java.util.logging.Logger;
  */
 public class CommonDataStructure extends sit.tools.xml.XMLTool {
    
-    
+
     /** Creates a new instance of CommonDataStructure */
     public CommonDataStructure() {
     }

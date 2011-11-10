@@ -59,7 +59,7 @@ public class HTTPHelper {
             checkMaxLenght(data);
 
         }
-        Logger.getLogger(HTTPHelper.class.getName()).log(Level.INFO, "httpCommand:"+result.getWebRequest().httpCommand);
+        Logger.getLogger(HTTPHelper.class.getName()).log(Level.FINE, "httpCommand:"+result.getWebRequest().httpCommand);
         if (result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_POST)) {
 
             //retrieve content length field
@@ -78,7 +78,7 @@ public class HTTPHelper {
                 checkMaxLenght(data);
             }
             result.getWebRequest().body = data.toString();
-            Logger.getLogger(HTTPHelper.class.getName()).log(Level.INFO, "read " + data.length() + " body data");
+            Logger.getLogger(HTTPHelper.class.getName()).log(Level.FINE, "read " + data.length() + " body data");
         }
         return result;
 

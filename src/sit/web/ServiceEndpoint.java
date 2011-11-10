@@ -8,7 +8,7 @@ import sit.sstl.ObjectWithKey;
  */
 public abstract class ServiceEndpoint implements ObjectWithKey<String>{
 
-    private String endpointName = "";
+    protected String endpointName = "";
 
     public ServiceEndpoint(String endpointName){
         this.endpointName = endpointName;

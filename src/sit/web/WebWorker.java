@@ -51,7 +51,7 @@ class WebWorker implements HttpConstants, Runnable {
 
     public void stop() {
         this.stopping = true;
-        Logger.getLogger(WebWorker.class.getName()).log(Level.INFO, "stop WebWorker");
+        Logger.getLogger(WebWorker.class.getName()).log(Level.FINE, "stop WebWorker");
     }
 
     @Override
@@ -127,7 +127,7 @@ class WebWorker implements HttpConstants, Runnable {
                 return;
             }
 
-            Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
+            Logger.getLogger(WebWorker.class.getName()).log(Level.INFO,
                     "fname:{0}", request);
 
             //if we find a fitting service call the service
@@ -138,6 +138,7 @@ class WebWorker implements HttpConstants, Runnable {
 
                 printDynamicPage(service.getContentType(), service.handleCall(request), ps);
             } else {
+
                 //look for a fitting file/directory
                 File targetFile = new File(WebServer.getInstance().getRoot(), request.fname);
                 if (targetFile.isDirectory()) {
@@ -153,7 +154,7 @@ class WebWorker implements HttpConstants, Runnable {
                 }
             }
             ps.flush();
-            Logger.getLogger(WebWorker.class.getName()).log(Level.FINE, "done.");
+            Logger.getLogger(WebWorker.class.getName()).log(Level.INFO, "done.");
 
         } finally {
             socket.close();
@@ -200,7 +201,7 @@ class WebWorker implements HttpConstants, Runnable {
             ps.write(WebBuffer.EOL);
             result = true;
         }
-        Logger.getLogger(WebWorker.class.getName()).log(Level.INFO,
+        Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
                 "From {0}: GET {1}-->{2}",
                 new Object[]{socket.getInetAddress().getHostAddress(),
                     targetFile.getAbsolutePath(), returnCode});
@@ -306,6 +307,7 @@ class WebWorker implements HttpConstants, Runnable {
         result.put(".gif", "image/gif");
         result.put(".jpg", "image/jpeg");
         result.put(".jpeg", "image/jpeg");
+        result.put(".png", "image/png");
         result.put(".htm", "text/html");
         result.put(".html", "text/html");
         result.put(".text", "text/plain");
@@ -316,6 +318,9 @@ class WebWorker implements HttpConstants, Runnable {
         result.put(".pl", "text/plain");
         result.put(".txt", "text/plain");
         result.put(".java", "text/plain");
+        result.put(".js", "application/javascript");
+        result.put(".css", "text/css");
+        
         return result;
     }
 }
