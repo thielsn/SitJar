@@ -24,21 +24,20 @@ public class HTTPHelper {
     }
 
     private boolean proceedToRead(WebBuffer buf, InputStream is, boolean finished) throws IOException {
-        if (finished) {
+        if (finished) {        
             return false;
         }
-        if (!buf.isMoreDataToRead()) {           
+        if (!buf.isMoreDataToRead()) {        
             return false;
         }
-        if (buf.readFromInputStream(is) > -1) {
+        if (buf.readFromInputStream(is) > -1) {            
             return true;
-        }
-
-        
+        }        
+        Logger.getLogger(HTTPHelper.class.getName()).log(Level.WARNING, "connection timed out!");
         return false;
     }
 
-    public HTTPMessage getHeaderAndBody(InputStream is, WebBuffer buf) throws IOException, MessageTooLargeException {
+    public HTTPMessage getHeaderAndBody(InputStream is, WebBuffer buf) throws IOException, MessageTooLargeException, HTTPParseException {
         HTTPMessage result = new HTTPMessage();
 
         StringBuilder data = new StringBuilder("");
@@ -59,6 +58,15 @@ public class HTTPHelper {
             checkMaxLenght(data);
 
         }
+
+        //check for missing header caused e.g. by timeout or malformed http call
+        if (!result.hasHeader()){
+            return null;
+        }
+        if (result.getWebRequest()==null){            
+            throw new HTTPParseException("WebRequest==null! - data:"+data.toString());
+        }
+
         Logger.getLogger(HTTPHelper.class.getName()).log(Level.FINE, "httpCommand:"+result.getWebRequest().httpCommand);
         if (result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_POST)) {
 

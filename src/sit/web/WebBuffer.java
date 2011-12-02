@@ -20,7 +20,7 @@ public class WebBuffer {
 
     public static final int BUF_SIZE = 2048;
     public static final byte[] EOL = {(byte) '\r', (byte) '\n'};
-    private static final int READ_TIME_OUT_MS = 500;
+    private static int READ_TIMEOUT_MS = 500; //FIXME adapt to WebServer.getInstance().getTimeOut();
     private static final int WAIT_TIME_OUT_MS = 5;
     /* buffer to use for requests */
     private byte[] buf = new byte[BUF_SIZE];
@@ -66,10 +66,8 @@ public class WebBuffer {
         readBytes = -1;
     }
 
+    //ATTENTION - this is also used to read files by WebWorker!!!!! HACK?
     public int readFromInputStream(InputStream is) throws IOException {
-
-//        readBytes = is.read(buf,0,BUF_SIZE);
-//        return readBytes;
 
         readBytes = 0;
         Long timeStamp = Calendar.getInstance().getTimeInMillis();
@@ -80,7 +78,7 @@ public class WebBuffer {
             } catch (InterruptedException ex) {
                 Logger.getLogger(WebBuffer.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (timeStamp + READ_TIME_OUT_MS < Calendar.getInstance().getTimeInMillis()) {
+            if (timeStamp + READ_TIMEOUT_MS < Calendar.getInstance().getTimeInMillis()) {                
                 readBytes = -1;
                 return readBytes;
             }
@@ -95,51 +93,14 @@ public class WebBuffer {
             buf[readBytes] = (byte) r;
             readBytes++;
         }
+//        System.out.println(">"+this.toString()+"<");
         return readBytes;
 
 
     }
 
-//    public int readFirstLineOfBuffer(InputStream is) throws IOException {
-//
-//
-//        /* We only support HTTP GET/HEAD, and don't
-//         * support any fancy HTTP options,
-//         * so we're only interested really in
-//         * the first line.
-//         */
-//        readBytes = 0;
-//        int r = 0;
-//
-//        outerloop:
-//        while (readBytes < BUF_SIZE) {
-//            r = is.read(buf, readBytes, BUF_SIZE - readBytes);
-//            if (r == -1) {
-//                /* EOF */
-//                return -1;
-//            }
-//            int i = readBytes;
-//            readBytes += r;
-//            for (; i < readBytes; i++) {
-//                if (buf[i] == (byte) '\n' || buf[i] == (byte) '\r') {
-//                    /* read one line */
-//                    break outerloop;
-//                }
-//            }
-//        }
-//        return readBytes;
-//    }
+
     public boolean isMoreDataToRead() {
-//        if (readBytes==-1){
-//            Logger.getLogger(WebBuffer.class.getName()).log(Level.FINE, "readBytes==-1);");
-//            return true;
-//        }
-//        if (readBytes==BUF_SIZE){
-//            Logger.getLogger(WebBuffer.class.getName()).log(Level.FINE, "readBytes==BUF_SIZE");
-//            return true;
-//        }
-//        Logger.getLogger(WebBuffer.class.getName()).log(Level.FINE, "readBytes="+readBytes);
-//        return false;
         return !endOfStream;
     }
 }

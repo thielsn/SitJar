@@ -67,6 +67,9 @@ public class WebServer implements HttpConstants, Runnable {
             log("init webserver");
             init();
             ss = new ServerSocket(getPort());
+            Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "Server is listening at port: "+port);
+            Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "Root is set to: "+root.getAbsolutePath());
+
             
         } catch (IOException ex) {
             Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -74,8 +77,7 @@ public class WebServer implements HttpConstants, Runnable {
         } catch (Exception ex) {
             Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
             stopping = true;
-        }
-        log("start webserver at:"+root.getAbsolutePath());
+        }        
         while (!stopping) {
             try {
                 Socket s = ss.accept(); //wait for incoming connection
@@ -101,6 +103,7 @@ public class WebServer implements HttpConstants, Runnable {
                 stopping = true;
             }
         }
+        Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "Server stopped.");
     }
 
     public synchronized void setRoot(File root){

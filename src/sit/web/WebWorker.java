@@ -80,11 +80,14 @@ class WebWorker implements HttpConstants, Runnable {
         }
     }
 
-    private WebRequest getWebRequest(InputStream is) throws UnsupportedHTTPMethodException, IOException, MessageTooLargeException {
+    private WebRequest getWebRequest(InputStream is) throws UnsupportedHTTPMethodException, IOException, MessageTooLargeException, HTTPParseException {
 
-
-        return httphelp.getHeaderAndBody(is, buf).getWebRequest();
+        HTTPMessage result = httphelp.getHeaderAndBody(is, buf);
         
+        if (result==null){
+            return null;
+        }
+        return result.getWebRequest();
     }
 
     private void handleClient() throws IOException {
@@ -121,19 +124,28 @@ class WebWorker implements HttpConstants, Runnable {
                 ps.flush();
                 socket.close();
                 return;
+            } catch (HTTPParseException ex) {
+                String message = "HTTP/1.0 " + HTTP_SERVER_ERROR
+                        + " Internal Server Error";
+                Logger.getLogger(WebWorker.class.getName()).log(Level.WARNING, message+"\n"+ex.getMessage());
+                ps.print(message+"\n"+ex.getMessage());
+                ps.write(WebBuffer.EOL);
+                ps.flush();
+                socket.close();
+                return;
             }
             if (request == null) {
                 socket.close();
                 return;
             }
 
-            Logger.getLogger(WebWorker.class.getName()).log(Level.INFO,
+            Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
                     "fname:{0}", request);
 
             //if we find a fitting service call the service
             ServiceEndpoint service = ServiceEndpoints.getInstance().getEndpoint(request.fname);
             if (service != null) {
-                Logger.getLogger(WebWorker.class.getName()).log(Level.INFO,
+                Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
                         "found service:"+service.getEndpointName());
 
                 printDynamicPage(service.getContentType(), service.handleCall(request), ps);
@@ -154,7 +166,7 @@ class WebWorker implements HttpConstants, Runnable {
                 }
             }
             ps.flush();
-            Logger.getLogger(WebWorker.class.getName()).log(Level.INFO, "done.");
+            //Logger.getLogger(WebWorker.class.getName()).log(Level.INFO, "done.");
 
         } finally {
             socket.close();

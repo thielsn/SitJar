@@ -6,6 +6,8 @@ package sit.web;
 
 import java.io.File;
 import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -56,6 +58,7 @@ public class HTTPMessage {
             return webRequest;
         }
         if (header == null) {
+            Logger.getLogger(HTTPMessage.class.getName()).log(Level.SEVERE, "header is null !!");
             return null;
         }
       
