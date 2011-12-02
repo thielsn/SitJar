@@ -290,18 +290,23 @@ class WebWorker implements HttpConstants, Runnable {
     }
 
     private void listDirectory(File dir, PrintStream ps) throws IOException {
-        ps.println("<TITLE>Directory listing</TITLE><P>\n");
-        ps.println("<A HREF=\"..\">Parent Directory</A><BR>\n");
+        
+        
+        ps.println("<html><head><title>Directory listing</title></head>\n");
+
+        ps.println("<body><h1>Directory listing</h1>\n");
+        ps.println("<p><a href=\"..\">[Parent directory]</a><br/>\n");
+
         String[] list = dir.list();
         for (int i = 0; list != null && i < list.length; i++) {
             File f = new File(dir, list[i]);
             if (f.isDirectory()) {
-                ps.println("<A HREF=\"" + list[i] + "/\">" + list[i] + "/</A><BR>");
+                ps.println("<a href=\"" + list[i] + "/\">" + list[i] + "/</a><br/>\n");
             } else {
-                ps.println("<A HREF=\"" + list[i] + "\">" + list[i] + "</A><BR>");
+                ps.println("<a href=\"" + list[i] + "\">" + list[i] + "</a><br/>\n");
             }
         }
-        ps.println("<P><HR><BR><I>" + (new Date()) + "</I>");
+        ps.println("<br/></p><p><hr></p><p><i>" + (new Date()) + "</i></p></body></html>");
     }
 
     private static java.util.Hashtable<String, String> createMimeMap() {
