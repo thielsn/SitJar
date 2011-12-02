@@ -298,7 +298,7 @@ class WebWorker implements HttpConstants, Runnable {
             if (f.isDirectory()) {
                 ps.println("<A HREF=\"" + list[i] + "/\">" + list[i] + "/</A><BR>");
             } else {
-                ps.println("<A HREF=\"" + list[i] + "\">" + list[i] + "</A><BR");
+                ps.println("<A HREF=\"" + list[i] + "\">" + list[i] + "</A><BR>");
             }
         }
         ps.println("<P><HR><BR><I>" + (new Date()) + "</I>");
