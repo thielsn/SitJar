@@ -1,6 +1,7 @@
 /*
  * PropsHelper.java
- *
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  * Created on 25. Maerz 2006, 22:51
  */
 

@@ -1,3 +1,8 @@
+/**
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
+ */
+
 package sit.web;
 
 import sit.sstl.ObjectWithKey;

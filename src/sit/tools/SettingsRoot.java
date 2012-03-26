@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  */
 
 package sit.tools;
@@ -12,10 +12,5 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement( namespace = "http://morganasoft.de/" )
 public abstract class SettingsRoot  {
-
     
-   
-
- 
-
 }

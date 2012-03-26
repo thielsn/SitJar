@@ -1,10 +1,13 @@
+/**
+ * @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
+ */
 package sit.web;
 
 /*
  * With some inspiration from
  * http://java.sun.com/developer/technicalArticles/Networking/Webserver/
  */
-
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -23,15 +26,13 @@ public class WebServer implements HttpConstants, Runnable {
     /**
      * private constructor to enforce singelton
      */
-    private WebServer(){
+    private WebServer() {
     }
 
     /* print to the log file */
     protected void log(String s) {
         Logger.getLogger(getClass().getName()).log(Level.FINE, s);
     }
-
-
     /* Where worker threads stand idle */
     private Vector<WebWorker> threads = new Vector();
 
@@ -47,8 +48,6 @@ public class WebServer implements HttpConstants, Runnable {
     private boolean permitDirectoryListing = true;
     private boolean stopping = false;
 
-
-
     private void init() throws Exception {
 
         /* start worker threads */
@@ -59,25 +58,23 @@ public class WebServer implements HttpConstants, Runnable {
         }
     }
 
-  
-
     public void run() {
         ServerSocket ss = null;
         try {
             log("init webserver");
             init();
             ss = new ServerSocket(getPort());
-            Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "Server is listening at port: "+port);
-            Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "Root is set to: "+root.getAbsolutePath());
+            Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "Server is listening at port: " + port);
+            Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "Root is set to: " + root.getAbsolutePath());
 
-            
+
         } catch (IOException ex) {
             Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
             stopping = true;
         } catch (Exception ex) {
             Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
             stopping = true;
-        }        
+        }
         while (!stopping) {
             try {
                 Socket s = ss.accept(); //wait for incoming connection
@@ -92,7 +89,7 @@ public class WebServer implements HttpConstants, Runnable {
                         Logger.getLogger(WebServer.class.getName()).log(Level.FINE, "started new WebWorker");
                     } else {
                         //use thread from thread pool
-                        w =  threads.elementAt(0);
+                        w = threads.elementAt(0);
                         threads.removeElementAt(0);
                         w.setSocket(s);
                     }
@@ -106,7 +103,7 @@ public class WebServer implements HttpConstants, Runnable {
         Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "Server stopped.");
     }
 
-    public synchronized void setRoot(File root){
+    public synchronized void setRoot(File root) {
         this.root = root;
     }
 
@@ -116,9 +113,9 @@ public class WebServer implements HttpConstants, Runnable {
      * @param worker
      */
     synchronized void addThreadToPool(WebWorker worker) {
-        if (threads.size()<workers){
+        if (threads.size() < workers) {
             threads.add(worker);
-        }else{
+        } else {
             worker.stop();
         }
     }
@@ -160,13 +157,6 @@ public class WebServer implements HttpConstants, Runnable {
      * @param permitDirectoryListing the permitDirectoryListing to set
      */
     public synchronized void setPermitDirectoryListing(boolean permitDirectoryListing) {
-        this.permitDirectoryListing = permitDirectoryListing;        
+        this.permitDirectoryListing = permitDirectoryListing;
     }
-
-    
 }
-
-
-
-
-

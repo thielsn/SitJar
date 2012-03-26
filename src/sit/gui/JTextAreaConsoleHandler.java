@@ -3,14 +3,13 @@
  *
  * 11-May-2010
  *
- * @author Simon Thiel <simon.thiel@iao.fraunhofer.de>
+ * @author Simon Thiel <simon.thiel@gmx.de>
+ *
+ * @version $Revision: $ 
+ *
  */
 
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package sit.gui;
 

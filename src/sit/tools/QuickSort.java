@@ -1,6 +1,7 @@
 /*
  * QuickSort.java
- *
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  * Created on 25. Januar 2005, 11:11
  */
 

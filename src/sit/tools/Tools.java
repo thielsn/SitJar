@@ -1,17 +1,19 @@
+/**
+ * 
+ * Beschreibung: Tools zur einfachen Handhabung von Dateien und Strings
+ * Copyright:     Copyright (c) 2001
+ * Organisation: 
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
+ */
+
 package sit.tools;
 
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * 
- * Beschreibung: Tools zur einfachen Handhabung von Dateien und Strings
- * Copyright:     Copyright (c) 2001
- * Organisation: 
- * @author Simon Thiel
- * @version 1.0
- */
+
 public class Tools {
 
     /**

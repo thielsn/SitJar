@@ -3,7 +3,9 @@
  *
  * 23-Apr-2010
  *
- * @author Simon Thiel <simon.thiel@iao.fraunhofer.de>
+ * @author Simon Thiel <simon.thiel@gmx.de>
+ *
+ * @version $Revision: $
  */
 package sit.graphics;
 
@@ -17,8 +19,6 @@ import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 
 /**

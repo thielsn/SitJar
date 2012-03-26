@@ -2,6 +2,8 @@
  * Element.java
  *
  * Created on 14. Februar 2006, 13:59
+ *
+ * @version $Revision: $
  */
 
 package sit.cmnDataTypes;

@@ -1,10 +1,18 @@
-package sit.io;
-
 /*
  * IOString.java
+ *
+ * convertion functions for convenient handling InputStreams and OutputStreams
+ * 
+ * @version $Revision: $ 
  */
 
-import java.io.*;
+
+package sit.io;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+
+
 
 public class IOString {
 

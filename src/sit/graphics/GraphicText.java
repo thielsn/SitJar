@@ -1,6 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Helper tool for rendering text on java.awt.Graphics
+ *
+ * @version $Revision: $
  */
 package sit.graphics;
 

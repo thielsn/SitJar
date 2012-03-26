@@ -1,10 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * RegexTester.java
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  *
  * Created on 16.05.2011, 10:26:45
  */

@@ -1,8 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  */
-
 package sit.tools;
 
 import java.io.File;
@@ -15,51 +14,48 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
  * @author thiel
  */
-public class SettingsFactory <T extends SettingsRoot> {
+public class SettingsFactory<T extends SettingsRoot> {
 
-   private  File settingFile = null;
+    private File settingFile = null;
 
-   public  String generateFileName(){
-        return System.getProperty("user.dir")+System.getProperty("file.separator")+"settings.xml";
+    public String generateFileName() {
+        return System.getProperty("user.dir") + System.getProperty("file.separator") + "settings.xml";
     }
 
-    public File getSettingsFileForWrite(){
-        if (settingFile!=null){
+    public File getSettingsFileForWrite() {
+        if (settingFile != null) {
             return settingFile;
         }
 
         settingFile = new File(generateFileName());
 
-        if (settingFile.isDirectory()){
+        if (settingFile.isDirectory()) {
             settingFile = null;
         }
 
         return settingFile;
     }
 
-
-    public File getSettingsFileForRead(){
-        if (settingFile!=null){
+    public File getSettingsFileForRead() {
+        if (settingFile != null) {
             return settingFile;
         }
 
         settingFile = new File(generateFileName());
         if ((!settingFile.exists())
-                || (!settingFile.canRead())){
+                || (!settingFile.canRead())) {
 
             settingFile = null;
         }
         return settingFile;
     }
 
-  public T loadSettings(Class<T> theClass) {
+    public T loadSettings(Class<T> theClass) {
         T result = null;
 
         if (getSettingsFileForRead() == null) {

@@ -2,6 +2,8 @@
  * ElementProcessor.java
  *
  * Created on 22. Februar 2006, 21:22
+ *
+ * @version $Revision: $
  */
 
 package sit.cmnDataTypes;

@@ -3,7 +3,8 @@
  *
  * 28-Apr-2010
  *
- * @author Simon Thiel <simon.thiel@iao.fraunhofer.de>
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  */
 
 

@@ -2,6 +2,8 @@
  * CommonDataStructure.java
  *
  * Created on 30. Oktober 2004, 18:27
+ *
+ * @version $Revision: $
  */
 
 package sit.cmnDataTypes;

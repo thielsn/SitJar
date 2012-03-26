@@ -1,8 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  */
-
 package sit.tools;
 
 import java.util.HashMap;
@@ -16,30 +15,28 @@ import java.util.Map;
  * @author Simon Thiel <simon.thiel at gmx.de>
  */
 public enum StringMapperEnum {
+
     ONE("Eins"),
     TWO("Zwei"),
-    THREE("Drei")
-    ;
+    THREE("Drei");
+    private static final Map<String, StringMapperEnum> lookup = new HashMap();
 
-     private static final Map<String, StringMapperEnum> lookup
-          = new HashMap();
+    static {
+        for (StringMapperEnum s : StringMapperEnum.values()) {
+            lookup.put(s.getString(), s);
+        }
+    }
+    private String myString;
 
-     static {
-          for(StringMapperEnum s : StringMapperEnum.values())
-               lookup.put(s.getString(), s);
-     }
+    private StringMapperEnum(String myString) {
+        this.myString = myString;
+    }
 
-     private String myString;
+    public String getString() {
+        return myString;
+    }
 
-     private StringMapperEnum(String myString) {
-          this.myString = myString;
-     }
-
-     public String  getString() { return myString; }
-
-     public static StringMapperEnum get(String myString) {
-          return lookup.get(myString); 
-     }
-    
-
+    public static StringMapperEnum get(String myString) {
+        return lookup.get(myString);
+    }
 }

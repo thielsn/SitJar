@@ -1,6 +1,8 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *
+ * Helper Tool to access some SQL databases - currently MSAccess and Postgres
+ *
+ * @version $Revision: $
  */
 package sit.db;
 

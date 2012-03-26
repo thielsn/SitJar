@@ -1,6 +1,7 @@
 /*
  * XMLTool.java
- *
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  * Created on 5. November 2004, 16:39
  */
 

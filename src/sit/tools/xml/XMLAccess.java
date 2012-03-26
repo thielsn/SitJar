@@ -1,6 +1,7 @@
 /*
  * XMLAccess.java
- *
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  * Created on 31. Oktober 2004, 12:08
  */
 

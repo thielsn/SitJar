@@ -1,11 +1,11 @@
 /*
  * XMLParser.java
- *
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  * Created on 17. Februar 2006, 11:57
  */
 
 package sit.tools.xml;
-import org.w3c.dom.Document;
 import sit.cmnDataTypes.Element;
 /**
  *

@@ -3,6 +3,9 @@
  * Version 1.01
  * Created on 3. November 2004, 14:30
  * Modified 11. April 2006
+ *
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  */
 
 package sit.tools.xml;

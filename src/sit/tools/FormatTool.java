@@ -1,8 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  */
-
 package sit.tools;
 
 import java.text.DecimalFormat;
@@ -14,28 +13,24 @@ import java.text.DecimalFormatSymbols;
  */
 public class FormatTool {
 
-
-    public static String getFormD(double d){
+    public static String getFormD(double d) {
         return getFormD(d, 2);
     }
 
-    public static String getFormD(double d, int numOfDecimalPlace){
+    public static String getFormD(double d, int numOfDecimalPlace) {
         return getFormD(d, numOfDecimalPlace, '.');
     }
 
-
-
-    public static String getFormD(double d, int numOfDecimalPlace, char decimalSeparator){
+    public static String getFormD(double d, int numOfDecimalPlace, char decimalSeparator) {
         DecimalFormatSymbols usedFormatSymbols =
-        new DecimalFormatSymbols();
+                new DecimalFormatSymbols();
         usedFormatSymbols.setDecimalSeparator(decimalSeparator);
 
         StringBuilder pattern = new StringBuilder("#.");
-        for (int i=0; i<numOfDecimalPlace; i++){
+        for (int i = 0; i < numOfDecimalPlace; i++) {
             pattern.append("#");
         }
 
-        return (new DecimalFormat(pattern.toString(),usedFormatSymbols).format(d));
+        return (new DecimalFormat(pattern.toString(), usedFormatSymbols).format(d));
     }
-
 }

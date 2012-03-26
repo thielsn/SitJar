@@ -3,8 +3,8 @@
  *
  * Created on 10. Mai 2007, 21:55
  *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
+ * @author Simon Thiel <simon.thiel at gmx.de>
+ * @version $Revision: $
  */
 
 package sit.sound;

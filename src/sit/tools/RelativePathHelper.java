@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  @author Simon Thiel <simon.thiel at gmx.de>
+ *  @version $Revision: $
  */
 package sit.tools;
 
@@ -15,76 +15,74 @@ import java.util.logging.Logger;
  */
 public class RelativePathHelper {
 
-
-    public String getWorkingDir(){
-        return System.getProperty("user.dir")+File.separator;
+    public String getWorkingDir() {
+        return System.getProperty("user.dir") + File.separator;
     }
 
-    public String getPathRelativeToWorkingDir(String targetDir){
+    public String getPathRelativeToWorkingDir(String targetDir) {
         String cwd = getWorkingDir();
         String result = getRelativePath(cwd, targetDir);
 
         Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
-                "source:"+cwd+" target:"+targetDir+" result:"+result);
+                "source:" + cwd + " target:" + targetDir + " result:" + result);
 
         return result;
     }
 
-
-    private boolean isWindowsPath(String path){
+    private boolean isWindowsPath(String path) {
         return path.contains("\\");
     }
 
-    private String getSeparator(String path){
-        if (isWindowsPath(path)){
+    private String getSeparator(String path) {
+        if (isWindowsPath(path)) {
             return "\\";
         }//else
         return "/";
     }
 
-    private String getSeparatorAsRegex(String path){
-        if (isWindowsPath(path)){
+    private String getSeparatorAsRegex(String path) {
+        if (isWindowsPath(path)) {
             return "\\\\";
         }//else
         return "/";
     }
 
-    private String[] getSegmentedPath(String path){
-        
+    private String[] getSegmentedPath(String path) {
+
         return path.split(getSeparatorAsRegex(path));
     }
 
-    public String resolveDottedPath(String dottedPath) throws IllegalPathException{
+    public String resolveDottedPath(String dottedPath) throws IllegalPathException {
 
 
         String[] paths = getSegmentedPath(dottedPath);
         Vector<String> segments = new Vector();
-        for (int i = 0;i<paths.length; i++ ){
+        for (int i = 0; i < paths.length; i++) {
             String element = paths[i];
 
-            if (element.equals("..")){
-                if (segments.size()>0){
-                    segments.removeElementAt(segments.size()-1);
-                }else{
+            if (element.equals("..")) {
+                if (segments.size() > 0) {
+                    segments.removeElementAt(segments.size() - 1);
+                } else {
                     throw new IllegalPathException("Path starting with \"..\" cannot be resolved, or too many segments with \"..\"!");
                 }
-            }else{
+            } else {
                 segments.add(element);
             }
         }
 
         String sep = getSeparator(dottedPath);
         StringBuilder resultStr = new StringBuilder();
-        for (String element : segments){
+        for (String element : segments) {
             resultStr.append(element).append(sep);
         }
 
         //care about first and last separator
-        if (dottedPath.startsWith(sep)){
+        if (dottedPath.startsWith(sep)) {
             resultStr.insert(0, sep);
         }
-        if (!dottedPath.endsWith(sep)){ //we've added to many separators            
-            resultStr.delete(resultStr.length()-1, resultStr.length());            
+        if (!dottedPath.endsWith(sep)) { //we've added to many separators
+            resultStr.delete(resultStr.length() - 1, resultStr.length());
         }
 
         return resultStr.toString();
@@ -119,7 +117,7 @@ public class RelativePathHelper {
         }
 
         boolean windows = false;
-        if (targetDir.contains("\\")||sourceDir.contains("\\")){
+        if (targetDir.contains("\\") || sourceDir.contains("\\")) {
             windows = true;
             Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO, "is windows");
         }
@@ -129,7 +127,7 @@ public class RelativePathHelper {
         StringBuilder sTargetDir = new StringBuilder(targetDir);
         StringBuilder sSourceDir = new StringBuilder(sourceDir);
 
-        
+
 
         // firstly save the filename so only the dir is left
         int iStart = sTargetDir.lastIndexOf("/") + 1;
@@ -175,22 +173,22 @@ public class RelativePathHelper {
         // now we add the file back to the string
         sResult.append(sFileName);
         String result = sResult.toString();
-        if (windows){
+        if (windows) {
             result = result.replaceAll("/", "\\\\");
         }
 
         return result;
     }
 
-    public String test(String source, String target, String correctPath){
-        try{
+    public String test(String source, String target, String correctPath) {
+        try {
             String result = getRelativePath(source, target);
-            return "source:"+source
-                    +" target:"+target
-                    +" result:"+ result
-                    +" test:"+ ((result.equals(correctPath))?"success":"fail");
-        }catch (IllegalArgumentException ex){
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "source:"+source+" target:"+target, ex);            
+            return "source:" + source
+                    + " target:" + target
+                    + " result:" + result
+                    + " test:" + ((result.equals(correctPath)) ? "success" : "fail");
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "source:" + source + " target:" + target, ex);
         }
         return "";
     }
@@ -202,23 +200,21 @@ public class RelativePathHelper {
         RelativePathHelper rph = new RelativePathHelper();
 
         Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
-                        rph.test("C:\\jogurt\\muesli\\", "C:\\milch\\muesli\\", "..\\..\\milch\\muesli\\"));
-        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO, 
-                        rph.test("/home/max/moritz/", "home/max/moritz/", "home/max/moritz/"));
-        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO, 
-                         rph.test("/home/../home/max/moritz/", "/home/max/moritz/", "/home/max/moritz/"));
-        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO, 
-                        rph.test("/home/max/moritz/", "/home/max/lempke/", "../lempke/"));
-        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO, 
-                        rph.test("C:\\muesli\\", "C:\\Programme\\Java\\", "..\\Programme\\Java\\"));
-        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO, 
-                        rph.test("http://mywebhome.com/home.html", "http://mywebhome.com/unterseite/test.html", "unterseite/test.html"));
-        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO, 
-                        rph.test("http://mywebhome.com/unterseite/test.html", "http://mywebhome.com/home.html", "../home.html"));
-        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO, 
-                        rph.test("http://mywebhome.com/home.html", "http://myOTHERwebhome.com/unterseite/test.html", ""));
-        
+                rph.test("C:\\jogurt\\muesli\\", "C:\\milch\\muesli\\", "..\\..\\milch\\muesli\\"));
+        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
+                rph.test("/home/max/moritz/", "home/max/moritz/", "home/max/moritz/"));
+        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
+                rph.test("/home/../home/max/moritz/", "/home/max/moritz/", "/home/max/moritz/"));
+        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
+                rph.test("/home/max/moritz/", "/home/max/lempke/", "../lempke/"));
+        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
+                rph.test("C:\\muesli\\", "C:\\Programme\\Java\\", "..\\Programme\\Java\\"));
+        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
+                rph.test("http://mywebhome.com/home.html", "http://mywebhome.com/unterseite/test.html", "unterseite/test.html"));
+        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
+                rph.test("http://mywebhome.com/unterseite/test.html", "http://mywebhome.com/home.html", "../home.html"));
+        Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
+                rph.test("http://mywebhome.com/home.html", "http://myOTHERwebhome.com/unterseite/test.html", ""));
+
     }
-
-
 }

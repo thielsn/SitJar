@@ -3,6 +3,8 @@
  * ElementTool.java
  *
  * Created on 17. Februar 2006, 09:58
+ *
+ * @version $Revision: $
  */
 
 package sit.cmnDataTypes;
