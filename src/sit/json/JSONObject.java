@@ -134,8 +134,10 @@ public class JSONObject {
     public String toJson() {
 
         if (isLeaf()) {
-            if (type == JSON_TYPE_QUOTED_VALUE) {
+            if ((value != null) && (type == JSON_TYPE_QUOTED_VALUE)) {
+
                 return "\"" + value + "\"";
+
             } else {
                 return value;
             }
