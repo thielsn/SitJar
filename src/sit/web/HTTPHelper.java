@@ -4,14 +4,10 @@
  */
 package sit.web;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sit.sstl.Pair;
 
 /**
  *
@@ -61,6 +57,8 @@ public class HTTPHelper {
 
         //check for missing header caused e.g. by timeout or malformed http call
         if (!result.hasHeader()){
+            Logger.getLogger(HTTPHelper.class.getName()).log(Level.FINE, "missing header received data (" + data.length() + "):"+data.toString()
+                    +"\nread bytes:"+buf.getReadBytes());
             return null;
         }
         if (result.getWebRequest()==null){            

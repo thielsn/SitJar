@@ -67,4 +67,14 @@ public class ServiceEndpoints {
     public synchronized static ServiceEndpoints getInstance() {
         return instance;
     }
+
+    @Override
+    public synchronized String toString(){
+
+        String result = "";
+        for (ServiceEndpoint entry : endpoints){
+            result += entry.getKey() + " - " +entry.getEndpointName()+"\n";
+        }
+        return result;
+    }
 }

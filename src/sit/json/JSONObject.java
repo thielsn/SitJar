@@ -19,8 +19,8 @@ public class JSONObject {
     public final static int JSON_TYPE_COLLECTION = 1;
     public final static int JSON_TYPE_QUOTED_VALUE = 2;
     public final static int JSON_TYPE_UNQUOTED_VALUE = 3;
-    Hashtable<String, JSONObject> children = new Hashtable();
-    Vector<JSONObject> items = new Vector();
+    private Hashtable<String, JSONObject> children = null;
+    private Vector<JSONObject> items = null;
     private String key;
     private String value = null;
     private int type = JSON_TYPE_OBJECT;
@@ -69,9 +69,19 @@ public class JSONObject {
         return this.items;
     }
 
+    public int getItemsSize(){
+        if (this.items==null){
+            return -1;
+        }
+        return this.items.size();
+    }
+
     public JSONObject addChild(JSONObject child) {
         type = JSON_TYPE_OBJECT;
         //System.out.println("["+key+"] adding child:<"+child.getKey()+">");
+        if (children==null){ //lazy instantiation
+            children = new Hashtable();
+        }
         return this.children.put(child.getKey(), child);
     }
 
@@ -107,9 +117,11 @@ public class JSONObject {
                 throw new JSONPathAccessException("Unable to proceed path when trying to parse index of collection at collection:" + getKey() + " next element would have been:" + keySequence[0]);
             } catch (IndexOutOfBoundsException ex) {
                 throw new JSONPathAccessException("Index out of bounds at collection:" + getKey() + " for index:" + keySequence[0]);
+            } catch (NullPointerException ex){
+                throw new JSONPathAccessException("Collection:" + getKey() + " was not instantiated!");
             }
         }//else its an object
-        if (!children.containsKey(keySequence[0])) {
+        if ((children==null) || !children.containsKey(keySequence[0])) {
             throw new JSONPathAccessException("Unable to proceed path from:" + getKey() + " no subobject found with key:" + keySequence[0]);
         }
         return children.get(keySequence[0]).getChild(Arrays.copyOfRange(keySequence, 1, keySequence.length));
@@ -118,6 +130,9 @@ public class JSONObject {
     public void addItem(JSONObject item) {
         this.type = JSON_TYPE_COLLECTION;
         //System.out.println("["+key+"] adding item:<"+item.getKey()+">");
+        if (items==null){
+            items = new Vector(); // lazy initialization
+        }
         this.items.add(item);
     }
 
@@ -142,6 +157,9 @@ public class JSONObject {
                 return value;
             }
         } else if (isCollection()) {
+            if (items==null){
+                return "[]";
+            }
             String result = "[";
             for (JSONObject object : items) {
                 result += "" + object.toJson() + ",";
@@ -152,7 +170,11 @@ public class JSONObject {
             }
             return result + "]";
 
+
         } //else its assumed to be an object
+        if (children==null){
+            return "{}";
+        }
         String result = "{";
         for (Entry<String, JSONObject> child : children.entrySet()) {
             result += "\"" + child.getKey() + "\":" + child.getValue().toJson() + ", ";
