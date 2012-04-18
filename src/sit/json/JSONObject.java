@@ -66,6 +66,9 @@ public class JSONObject {
     }
 
     public Vector<JSONObject> getItems() {
+         if (items==null){
+            items = new Vector(); // lazy initialization
+        }
         return this.items;
     }
 

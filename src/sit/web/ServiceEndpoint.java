@@ -15,9 +15,27 @@ public abstract class ServiceEndpoint implements ObjectWithKey<String>{
 
     protected String endpointName = "";
 
+    /**
+     * in case an endpoint is flagged as catchAll == true, an endpoint a/b
+     * will be found for all a/b/[c/d/e/....]
+     */
+    protected boolean catchAll = false;
+
     public ServiceEndpoint(String endpointName){
         this.endpointName = endpointName;
     }
+
+    public ServiceEndpoint(String endpointName, boolean catchAll){
+        this.endpointName = endpointName;
+        this.catchAll = catchAll;
+
+    }
+
+    public boolean isCatchAll() {
+        return catchAll;
+    }
+
+    
 
     /**
      * @return the endpointName

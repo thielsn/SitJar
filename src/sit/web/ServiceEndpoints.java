@@ -19,8 +19,33 @@ public class ServiceEndpoints {
      */
     private static final ServiceEndpoints instance = new ServiceEndpoints();
     private HashTableSet<String, ServiceEndpoint> endpoints = new HashTableSet();
+    /**
+     * in case at least one endpoint with isCatchAll == true is added this field is set
+     * to true. This will make the getEndpoint less efficient, since also catchAll
+     * endpoints are to be checked. Its recommended to keep the number of catchAll endpoints
+     * limited.
+     */
+    private boolean hasCatchAllEndpoints = false;
 
     private ServiceEndpoints() {
+    }
+
+    private ServiceEndpoint findCatchAllEndpoint(String fname) {
+        String subPath = fname;
+        int slashIndex;
+        while ((slashIndex = subPath.lastIndexOf("/"))>0){
+            String myEndpoint  = subPath.substring(0,slashIndex);
+            ServiceEndpoint result = endpoints.get(myEndpoint);
+            if (result==null){
+                result = endpoints.get(myEndpoint+"/");
+            }
+            if (result!=null){
+                return result;
+            }//else
+            subPath = subPath.substring(0, slashIndex);
+        }
+        return null;
+
     }
 
     private ServiceEndpoint findEndpoint(String endpointName) {
@@ -28,6 +53,9 @@ public class ServiceEndpoints {
         if (result == null) {
             String myFname = endpointName.replaceAll("\\\\", "/");//for some strange reasons / seems to be transfered into \ //TODO - for windows only?
             result = endpoints.get(myFname);
+            if (hasCatchAllEndpoints && (result == null)) { //check as well for catch all - if no more specific endpoint was found
+                result = findCatchAllEndpoint(myFname);
+            }
         }
         return result;
     }
@@ -58,6 +86,9 @@ public class ServiceEndpoints {
 
     public synchronized void addEndpoint(ServiceEndpoint endpoint) {
         endpoints.add(endpoint);
+        if (endpoint.isCatchAll()) {
+            hasCatchAllEndpoints = true;
+        }
     }
 
     public synchronized void removeEndpoint(String endpointName) {
@@ -69,11 +100,11 @@ public class ServiceEndpoints {
     }
 
     @Override
-    public synchronized String toString(){
+    public synchronized String toString() {
 
         String result = "";
-        for (ServiceEndpoint entry : endpoints){
-            result += entry.getKey() + " - " +entry.getEndpointName()+"\n";
+        for (ServiceEndpoint entry : endpoints) {
+            result += entry.getKey() + " - " + entry.getEndpointName() + "\n";
         }
         return result;
     }

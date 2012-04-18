@@ -21,12 +21,12 @@ public class WebRequest {
 
     @Override
     public String toString() {
-        String result = fname;
+        String result = httpCommand+" "+ fname;
         if (param != null) {
             result += "?"+ param;
         }
         if (body != null){
-            result += "\n----\n"+body;
+            result += "\nBody:\n"+body+"\n----\n";
         }
         return result;
     }

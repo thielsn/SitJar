@@ -50,7 +50,7 @@ public class ServiceEndpointHelper {
     }
 
 
-    public  String xmlize(String rootTag, Vector<Pair<String, String>> nv){
+    public String xmlize(String rootTag, Vector<Pair<String, String>> nv){
         String result ="<"+rootTag+">";
 
         for (Pair<String, String> field : nv){
@@ -60,5 +60,27 @@ public class ServiceEndpointHelper {
         }
 
         return result+"</"+rootTag+">";
+    }
+
+    /**
+     * returns subPath [c/d/e/...] from path a/b/[c/d/e/...] with basePath a/b/
+     * @param path
+     * @param basePath
+     * @return
+     */
+    public String getSubPath(String path, String basePath){
+        if (!path.startsWith(basePath)){
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                    "path:"+path+" is not starting with basePath:"+basePath);
+            return null;
+        }
+        if (path.length()==basePath.length()){ //they are equal
+            return "";
+        }
+        return path.substring(basePath.length());
+    }
+
+    public String replaceBackSlashes(String source){
+        return source.replaceAll("\\\\", "/");
     }
 }
