@@ -61,7 +61,7 @@ public class JSONParser {
             escapeFlag = (testForChr(text,curC,'\\'));
             curC++;
         }
-        result.value = text.substring(start,curC);
+        result.value = JSONTextHelper.decodeText(text.substring(start,curC));
         if (result.hasQuotes){
             curC++;
             curC = ignoreWhiteSpace(text, curC);

@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map.Entry;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -66,14 +68,14 @@ public class JSONObject {
     }
 
     public Vector<JSONObject> getItems() {
-         if (items==null){
+        if (items == null) {
             items = new Vector(); // lazy initialization
         }
         return this.items;
     }
 
-    public int getItemsSize(){
-        if (this.items==null){
+    public int getItemsSize() {
+        if (this.items == null) {
             return -1;
         }
         return this.items.size();
@@ -82,7 +84,7 @@ public class JSONObject {
     public JSONObject addChild(JSONObject child) {
         type = JSON_TYPE_OBJECT;
         //System.out.println("["+key+"] adding child:<"+child.getKey()+">");
-        if (children==null){ //lazy instantiation
+        if (children == null) { //lazy instantiation
             children = new Hashtable();
         }
         return this.children.put(child.getKey(), child);
@@ -120,11 +122,11 @@ public class JSONObject {
                 throw new JSONPathAccessException("Unable to proceed path when trying to parse index of collection at collection:" + getKey() + " next element would have been:" + keySequence[0]);
             } catch (IndexOutOfBoundsException ex) {
                 throw new JSONPathAccessException("Index out of bounds at collection:" + getKey() + " for index:" + keySequence[0]);
-            } catch (NullPointerException ex){
+            } catch (NullPointerException ex) {
                 throw new JSONPathAccessException("Collection:" + getKey() + " was not instantiated!");
             }
         }//else its an object
-        if ((children==null) || !children.containsKey(keySequence[0])) {
+        if ((children == null) || !children.containsKey(keySequence[0])) {
             throw new JSONPathAccessException("Unable to proceed path from:" + getKey() + " no subobject found with key:" + keySequence[0]);
         }
         return children.get(keySequence[0]).getChild(Arrays.copyOfRange(keySequence, 1, keySequence.length));
@@ -133,7 +135,7 @@ public class JSONObject {
     public void addItem(JSONObject item) {
         this.type = JSON_TYPE_COLLECTION;
         //System.out.println("["+key+"] adding item:<"+item.getKey()+">");
-        if (items==null){
+        if (items == null) {
             items = new Vector(); // lazy initialization
         }
         this.items.add(item);
@@ -149,33 +151,20 @@ public class JSONObject {
         this.value = value;
     }
 
-    private String getJSONEncodedValue(String myValue){
-        StringBuilder result = new StringBuilder();
-        for (int i=0; i<myValue.length();i++){
-            char myChr = myValue.charAt(i);
-            if (myChr=='\\'){
-                result.append("\\\\");
-            }else if (myChr=='\"'){
-                result.append("\\\"");
-            }else{
-                result.append(myChr);
-            }
-        }
-        return result.toString();
-    }
-    
+   
+
     public String toJson() {
 
         if (isLeaf()) {
             if ((value != null) && (type == JSON_TYPE_QUOTED_VALUE)) {
 
-                return "\"" + getJSONEncodedValue(value) + "\"";
+                return "\"" + JSONTextHelper.encodeText(value) + "\"";
 
             } else {
                 return value;
             }
         } else if (isCollection()) {
-            if (items==null){
+            if (items == null) {
                 return "[]";
             }
             String result = "[";
@@ -190,7 +179,7 @@ public class JSONObject {
 
 
         } //else its assumed to be an object
-        if (children==null){
+        if (children == null) {
             return "{}";
         }
         String result = "{";
@@ -217,7 +206,7 @@ public class JSONObject {
         boolean lineForwardFlag = true;
 
         for (int i = 0; i < json.length(); i++) {
-            
+
 
             char chr = json.charAt(i);
 
@@ -255,9 +244,10 @@ public class JSONObject {
     }
 
     /**
-     * Warning only set the key in case your sure what you're doing
-     * - this can spoil the integrity of the JSON-tree -
-     * e.g. the key might be used by super-objects to reference to this object
+     * Warning only set the key in case your sure what you're doing - this can
+     * spoil the integrity of the JSON-tree - e.g. the key might be used by
+     * super-objects to reference to this object
+     *
      * @param key
      */
     public void setKey(String key) {
