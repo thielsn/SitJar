@@ -34,6 +34,7 @@ public class SITEnumMap<T extends Enum<T>, Q> extends EnumMap<T, Q> {
         return null;
     }
 
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
@@ -43,4 +44,6 @@ public class SITEnumMap<T extends Enum<T>, Q> extends EnumMap<T, Q> {
         return result.toString();
 
     }
+
+
 }

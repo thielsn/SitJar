@@ -149,12 +149,27 @@ public class JSONObject {
         this.value = value;
     }
 
+    private String getJSONEncodedValue(String myValue){
+        StringBuilder result = new StringBuilder();
+        for (int i=0; i<myValue.length();i++){
+            char myChr = myValue.charAt(i);
+            if (myChr=='\\'){
+                result.append("\\\\");
+            }else if (myChr=='\"'){
+                result.append("\\\"");
+            }else{
+                result.append(myChr);
+            }
+        }
+        return result.toString();
+    }
+    
     public String toJson() {
 
         if (isLeaf()) {
             if ((value != null) && (type == JSON_TYPE_QUOTED_VALUE)) {
 
-                return "\"" + value + "\"";
+                return "\"" + getJSONEncodedValue(value) + "\"";
 
             } else {
                 return value;

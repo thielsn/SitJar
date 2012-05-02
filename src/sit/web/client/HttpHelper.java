@@ -7,6 +7,7 @@ package sit.web.client;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -26,6 +27,28 @@ import javax.net.ssl.X509TrustManager;
  */
 public class HttpHelper {
 
+    public static String encodeString(String myString) {
+        if (myString == null) {
+            throw new NullPointerException("encodeString: myString == null!");
+        }
+        try {
+            return java.net.URLEncoder.encode(myString, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new AssertionError("UTF-8 not supported");
+        }
+    }
+    
+    public static String decodeString(String myString) {
+        if (myString == null) {
+            throw new NullPointerException("decodeString: myString == null!");
+        }
+        try {
+            return java.net.URLDecoder.decode(myString, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new AssertionError("UTF-8 not supported");
+        }
+    }
+    
     // Create a trust manager that does not validate certificate chains
     private TrustManager[] trustAllCerts = new TrustManager[]{
         new X509TrustManager() {
@@ -58,6 +81,7 @@ public class HttpHelper {
         }
 
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+
             @Override
             public boolean verify(String string, SSLSession ssls) {
                 return true;
@@ -77,17 +101,17 @@ public class HttpHelper {
     public JSONResponse doJSONRequest(String method, String host, int port, String path, String jsonData,
             boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException {
 
-            return (JSONResponse) doHTTPRequest(method, host, port, path, jsonData, isHTTPS, unamePword64, true);
+        return (JSONResponse) doHTTPRequest(method, host, port, path, jsonData, isHTTPS, unamePword64, true);
     }
 
-     public HTTPResponse doHTTPRequest(String method, String host, int port, String path, String payload,
+    public HTTPResponse doHTTPRequest(String method, String host, int port, String path, String payload,
             boolean isHTTPS, String unamePword64, boolean isJSON) throws MalformedURLException, ProtocolException, IOException {
 
 
 
         URL url = getURL(host, port, path, isHTTPS);
 
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "trying to connect "+ method+" to "+url+" https:"+isHTTPS);
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "trying to connect " + method + " to " + url + " https:" + isHTTPS);
 
         HttpURLConnection connection;
         if (isHTTPS) {
@@ -119,9 +143,9 @@ public class HttpHelper {
         }
 
         HTTPResponse response;
-        if (isJSON){
+        if (isJSON) {
             response = new JSONResponse(method + " " + url.toString(), payload);
-        }else{
+        } else {
             response = new HTTPResponse(method + " " + url.toString(), payload);
         }
 
@@ -129,7 +153,7 @@ public class HttpHelper {
         response.message = connection.getResponseMessage();
 
         Logger.getLogger(HttpHelper.class.getName()).log(Level.FINE, "received response: "
-                +response.message+" with code: "+response.code);
+                + response.message + " with code: " + response.code);
 
         if (response.code != 500) {
 

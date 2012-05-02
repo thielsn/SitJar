@@ -54,6 +54,8 @@ public interface HttpConstants {
     public final static String HTTP_COMMAND_HEAD = "HEAD";
     public final static String HTTP_COMMAND_GET = "GET";
     public final static String HTTP_COMMAND_POST = "POST";
+    public final static String HTTP_COMMAND_PUT = "PUT";
+    public final static String HTTP_COMMAND_DELETE = "DELETE";
 
     public final static String HTTP_HEADER_FIELD_CONTENT_LENGTH = "Content-Length:";
 

@@ -163,10 +163,12 @@ public class DefaultProps extends Properties {
         return result;
     }
 
+    @Override
     public int hashCode() {
         return header.hashCode();
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;

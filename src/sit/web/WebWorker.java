@@ -35,7 +35,7 @@ class WebWorker implements HttpConstants, Runnable {
     /* buffer to use for requests */
     private WebBuffer buf = new WebBuffer();
     
-    private HTTPHelper httphelp = new HTTPHelper();
+    private HTTPParser httphelp = new HTTPParser();
 
     /* Socket to client we're handling */
     private Socket socket = null;

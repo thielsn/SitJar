@@ -2,7 +2,7 @@
  *  @author Simon Thiel <simon.thiel at gmx.de>
  *  @version $Revision: $
  */
-package sit.tools;
+package sit.io;
 
 import java.io.File;
 import java.util.Vector;

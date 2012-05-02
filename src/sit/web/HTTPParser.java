@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  *
  * @author Simon Thiel <simon.thiel at gmx.de>
  */
-public class HTTPHelper {
+public class HTTPParser {
 
     public int getCRLFCRLFindex(StringBuilder data) {
         return data.indexOf(HttpConstants.CRLFCRLF);
@@ -29,7 +29,7 @@ public class HTTPHelper {
         if (buf.readFromInputStream(is) > -1) {            
             return true;
         }        
-        Logger.getLogger(HTTPHelper.class.getName()).log(Level.WARNING, "connection timed out!");
+        Logger.getLogger(HTTPParser.class.getName()).log(Level.WARNING, "connection timed out!");
         return false;
     }
 
@@ -57,7 +57,7 @@ public class HTTPHelper {
 
         //check for missing header caused e.g. by timeout or malformed http call
         if (!result.hasHeader()){
-            Logger.getLogger(HTTPHelper.class.getName()).log(Level.FINE, "missing header received data (" + data.length() + "):"+data.toString()
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "missing header received data (" + data.length() + "):"+data.toString()
                     +"\nread bytes:"+buf.getReadBytes());
             return null;
         }
@@ -65,7 +65,7 @@ public class HTTPHelper {
             throw new HTTPParseException("WebRequest==null! - data:"+data.toString());
         }
 
-        Logger.getLogger(HTTPHelper.class.getName()).log(Level.FINE, "httpCommand:"+result.getWebRequest().httpCommand);
+        Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "httpCommand:"+result.getWebRequest().httpCommand);
         if (result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_POST)) {
 
             //retrieve content length field
@@ -84,7 +84,7 @@ public class HTTPHelper {
                 checkMaxLenght(data);
             }
             result.getWebRequest().body = data.toString();
-            Logger.getLogger(HTTPHelper.class.getName()).log(Level.FINE, "read " + data.length() + " body data");
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "read " + data.length() + " body data");
         }
         return result;
 
