@@ -44,11 +44,14 @@ public class HTTPParser {
 
             data.append(buf.toString());
             int myIndex = getCRLFCRLFindex(data);
-            if (myIndex != -1) {
+            if (myIndex != -1) {                                //true in case CRLFCRLF was finaly retrieved and is in data 
+                                                                // (this can only be called once since after this result.hasHeader()==finished==true)
                 result.setHeader(data.substring(0, myIndex));
                 //remaining part is reserved for the body
                 if (data.length() > myIndex + HttpConstants.CRLFCRLF.length()) {
-                    data=new StringBuilder(data.substring(myIndex + HttpConstants.CRLFCRLF.length()));
+                    data = new StringBuilder(data.substring(myIndex + HttpConstants.CRLFCRLF.length())); //remove headerpart from data, but keep additional data read
+                }else{
+                    data = new StringBuilder();
                 }
             }
             checkMaxLenght(data);
@@ -66,7 +69,7 @@ public class HTTPParser {
         }
 
         Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "httpCommand:"+result.getWebRequest().httpCommand);
-        if (result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_POST)) {
+        if (result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_POST) || result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_PUT)) {
 
             //retrieve content length field
             String contentLenghtStr = result.getWebRequest().headerItems.get(HttpConstants.HTTP_HEADER_FIELD_CONTENT_LENGTH);
@@ -85,6 +88,7 @@ public class HTTPParser {
             }
             result.getWebRequest().body = data.toString();
             Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "read " + data.length() + " body data");
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINER, "body data:\n"+result.getWebRequest().body);
         }
         return result;
 
