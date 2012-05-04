@@ -281,6 +281,9 @@ public class JSONObject implements Iterable<Map.Entry<String, JSONObject>> {
     }
 
     public Iterator<Entry<String, JSONObject>> iterator() {
+        if (children == null) { //lazy instantiation
+            children = new LinkedHashMap();
+        }
         return children.entrySet().iterator();
     }
 }
