@@ -9,11 +9,11 @@ import sit.json.JSONParser;
 import sit.json.JSONPathAccessException;
 
 /**
- *
+ * TODO move this to the di.me project where it belongs to!!!!
  * @author simon
  */
 public class JSONResponse extends HTTPResponse {
-    public JSONObject replyObject= null;
+    public JSONObject entryObject= null;
     public Vector<JSONObject> replyObjects = null;
 
     private JSONParser parser = new JSONParser();
@@ -28,7 +28,7 @@ public class JSONResponse extends HTTPResponse {
 
     public void parseJSONResponse() {
         try {
-            replyObject = parser.parseJSON(reply);
+            entryObject = parser.parseJSON(reply);
         
         } catch (JSONParseException ex) {
 
@@ -38,7 +38,7 @@ public class JSONResponse extends HTTPResponse {
         }
 
         try {
-            JSONObject status = replyObject.getChild(statusPath);
+            JSONObject status = entryObject.getChild(statusPath);
             if (!status.getValue().equalsIgnoreCase("OK")){
                 isErrorMessage = true;
                 return;
@@ -52,21 +52,21 @@ public class JSONResponse extends HTTPResponse {
 
 
          try {
-            replyObject.getChild(dataPath);
+            entryObject.getChild(dataPath);
         } catch (JSONPathAccessException ex) {
             noDataFound = true;
             return;
         }
 
         try {
-            replyObject.getChild(entryPath);
+            entryObject.getChild(entryPath);
         } catch (JSONPathAccessException ex) {
             noDataEntryFound = true;
             return;
         }
       
         try {
-            replyObjects = replyObject.getChild(entryPath).getItems();
+            replyObjects = entryObject.getChild(entryPath).getItems();
         } catch (JSONPathAccessException ex) {
             Logger.getLogger(JSONResponse.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -5,7 +5,11 @@
 package sit.json;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -15,14 +19,13 @@ import java.util.logging.Logger;
  *
  * @author simon
  */
-public class JSONObject {
+public class JSONObject implements Iterable<Map.Entry<String, JSONObject>> {
 
     public final static int JSON_TYPE_OBJECT = 0;
     public final static int JSON_TYPE_COLLECTION = 1;
     public final static int JSON_TYPE_QUOTED_VALUE = 2;
     public final static int JSON_TYPE_UNQUOTED_VALUE = 3;
-    private Hashtable<String, JSONObject> children = null;
-    private Vector<JSONObject> items = null;
+    private LinkedHashMap<String, JSONObject> children = null;  // in case of object type JSONObject children containing the sub-objects/values in case of collection children contains <[i],<JSONObject>> with i:0..(n-1)
     private String key;
     private String value = null;
     private int type = JSON_TYPE_OBJECT;
@@ -38,7 +41,7 @@ public class JSONObject {
     }
 
     public void setType(int type) {
-        this.type = type;
+        saveTypeSwitch(type);
     }
 
     public boolean isLeaf() {
@@ -68,24 +71,48 @@ public class JSONObject {
     }
 
     public Vector<JSONObject> getItems() {
-        if (items == null) {
-            items = new Vector(); // lazy initialization
+        if (children == null) { //lazy instantiation
+            children = new LinkedHashMap();
         }
-        return this.items;
+        return new Vector(this.children.values());
     }
 
+    /**
+     * in case the JSONObject is a collection returns number of items in the
+     * collection otherwise -1
+     *
+     * @return
+     */
     public int getItemsSize() {
-        if (this.items == null) {
+        if (type != JSON_TYPE_COLLECTION) {
             return -1;
         }
-        return this.items.size();
+        return this.children.size();
+    }
+
+    private void saveTypeSwitch(int newType) {
+        if (this.type == newType) {
+            return;
+        }//ok type was switched
+        if (children != null) {
+            children.clear();
+            Logger.getLogger(getClass().getName()).log(Level.WARNING,
+                    "switch of JSON-Object Type with existing child items:(old/new)\n" + this.type + "/" + newType);
+        }
+        if (value != null) {
+            Logger.getLogger(getClass().getName()).log(Level.WARNING,
+                    "switch of JSON-Object Type with existing value:(oldType/newType/value)\n"
+                    + "" + this.type + "/" + newType + "/" + this.value);
+            this.value = null;
+        }
+        this.type = newType;
     }
 
     public JSONObject addChild(JSONObject child) {
-        type = JSON_TYPE_OBJECT;
-        //System.out.println("["+key+"] adding child:<"+child.getKey()+">");
+        saveTypeSwitch(JSON_TYPE_OBJECT);
+
         if (children == null) { //lazy instantiation
-            children = new Hashtable();
+            children = new LinkedHashMap();
         }
         return this.children.put(child.getKey(), child);
     }
@@ -107,7 +134,7 @@ public class JSONObject {
     }
 
     public JSONObject getChild(String[] keySequence) throws JSONPathAccessException {
-//        System.out.println("getChild for sequence:"+arrayToString(keySequence));
+
         if (keySequence.length < 1) {
             return this;
         }
@@ -117,7 +144,7 @@ public class JSONObject {
         if (isCollection()) {
             try {
                 int index = Integer.parseInt(keySequence[0]);
-                return items.get(index).getChild(Arrays.copyOfRange(keySequence, 1, keySequence.length));
+                return children.get("" + index).getChild(Arrays.copyOfRange(keySequence, 1, keySequence.length));
             } catch (NumberFormatException ex) {
                 throw new JSONPathAccessException("Unable to proceed path when trying to parse index of collection at collection:" + getKey() + " next element would have been:" + keySequence[0]);
             } catch (IndexOutOfBoundsException ex) {
@@ -133,25 +160,24 @@ public class JSONObject {
     }
 
     public void addItem(JSONObject item) {
-        this.type = JSON_TYPE_COLLECTION;
-        //System.out.println("["+key+"] adding item:<"+item.getKey()+">");
-        if (items == null) {
-            items = new Vector(); // lazy initialization
+        saveTypeSwitch(JSON_TYPE_COLLECTION);
+        if (children == null) { //lazy instantiation
+            children = new LinkedHashMap();
         }
-        this.items.add(item);
+        String itemKey = "" + children.size();
+        item.setKey(itemKey);
+        this.children.put(itemKey, item);
     }
 
-    public void setValue(String value, boolean hasQuotes) {
+    public final void setValue(String value, boolean hasQuotes) {
         if (hasQuotes) {
-            this.type = JSON_TYPE_QUOTED_VALUE;
+            saveTypeSwitch(JSON_TYPE_QUOTED_VALUE);
         } else {
-            this.type = JSON_TYPE_UNQUOTED_VALUE;
+            saveTypeSwitch(JSON_TYPE_UNQUOTED_VALUE);
         }
         //System.out.println("["+key+"] setting value:<"+value+">");
         this.value = value;
     }
-
-   
 
     public String toJson() {
 
@@ -164,15 +190,15 @@ public class JSONObject {
                 return value;
             }
         } else if (isCollection()) {
-            if (items == null) {
+            if (children == null) {
                 return "[]";
             }
             String result = "[";
-            for (JSONObject object : items) {
+            for (JSONObject object : children.values()) {
                 result += "" + object.toJson() + ",";
             }
             //remove the last comma if we had any entries
-            if (!items.isEmpty()) {
+            if (!children.isEmpty()) {
                 result = result.substring(0, result.length() - 1);
             }
             return result + "]";
@@ -252,5 +278,9 @@ public class JSONObject {
      */
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public Iterator<Entry<String, JSONObject>> iterator() {
+        return children.entrySet().iterator();
     }
 }
