@@ -1,6 +1,9 @@
-/**
+/*
+ *  Description of StrictSITEnumMap
+ * 
  *  @author Simon Thiel <simon.thiel at gmx.de>
  *  @version $Revision: $
+ *  @date 07.05.2012
  */
 package sit.sstl;
 
@@ -8,20 +11,16 @@ import java.util.EnumMap;
 
 /**
  *
- * @author Simon Thiel <simon.thiel at gmx.de>
+ * @author Simon Thiel <simon.thiel at gmx.de> 
  */
-public class SITEnumMap<T extends Enum<T>, Q> extends EnumMap<T, Q> {
+public class StrictSITEnumMap<T extends Enum<T>, Q extends StrictSITEnumContainer> extends EnumMap<T, Q>  {
 
-    public SITEnumMap(Class type, final Enum[] keys, final Q[] values) {
-
+    
+     public StrictSITEnumMap(Class type, final Q[] values) {
         super(type);
-        if (keys.length != values.length){
-            throw new RuntimeException("keys.length != values.length: (keys/values)"+keys.length+"/"+values.length);
-        }
-
-
-        for (int i = 0; i < keys.length; i++) {
-            this.put((T) keys[i], values[i]);
+        
+        for (int i = 0; i < values.length; i++) {
+            this.put((T) values[i].getEnumType(), values[i]);
         }
 
     }
@@ -47,5 +46,6 @@ public class SITEnumMap<T extends Enum<T>, Q> extends EnumMap<T, Q> {
 
     }
 
-
+    
+    
 }
