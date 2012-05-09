@@ -44,9 +44,50 @@ public class HttpHelper {
         }
     }
     
+<<<<<<< HEAD
 
     public static URL getURL(String host, int port, String path, boolean isHTTPS)
             throws MalformedURLException {
+=======
+    // Create a trust manager that does not validate certificate chains
+    private TrustManager[] trustAllCerts = new TrustManager[]{
+        new X509TrustManager() {
+
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            public void checkClientTrusted(
+                    java.security.cert.X509Certificate[] certs, String authType) {
+            }
+
+            public void checkServerTrusted(
+                    java.security.cert.X509Certificate[] certs, String authType) {
+            }
+        }
+    };
+
+    public HttpHelper() {
+        // Install the all-trusting trust manager
+        try {
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception ex) {
+            Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+
+            public boolean verify(String string, SSLSession ssls) {
+                return true;
+            }
+        });
+        HttpsURLConnection.setFollowRedirects(true);
+    }
+
+    private URL getURL(String host, int port, String path, boolean isHTTPS) throws MalformedURLException {
+>>>>>>> light version of sitjar
 
         String myUrl = isHTTPS ? "https" : "http";
         myUrl += "://" + host + ":" + port + path;
