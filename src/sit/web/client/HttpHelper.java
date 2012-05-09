@@ -141,7 +141,6 @@ public class HttpHelper {
     public HTTPResponse doHTTPRequest(String method, String host, int port, String path, byte[] payload, String contentType,
             boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException {
 
-<<<<<<< HEAD
         if (payload == null) { //make sure payload is initialized
             payload = new byte[0];
         }
@@ -155,19 +154,6 @@ public class HttpHelper {
             connection = (HttpsURLConnection) url.openConnection();
         } else {
             connection = (HttpURLConnection) url.openConnection();
-=======
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-
-            public void checkClientTrusted(
-                    java.security.cert.X509Certificate[] certs, String authType) {
-            }
-
-            public void checkServerTrusted(
-                    java.security.cert.X509Certificate[] certs, String authType) {
-            }
->>>>>>> light version of sitjar
         }
 
         connection.setRequestMethod(method);
@@ -185,19 +171,10 @@ public class HttpHelper {
             connection.setDoOutput(true);
             FilterOutputStream output = new FilterOutputStream(connection.getOutputStream());
 
-<<<<<<< HEAD
             // write out the data
             output.write(payload);
             output.close();
         }
-=======
-            public boolean verify(String string, SSLSession ssls) {
-                return true;
-            }
-        });
-        HttpsURLConnection.setFollowRedirects(true);
-    }
->>>>>>> light version of sitjar
 
         HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload, HttpConstants.DEFAULT_CHARSET); //TODO forward charset ot this method
 
