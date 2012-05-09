@@ -4,6 +4,7 @@
  */
 package sit.json;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -144,7 +145,7 @@ public class JSONObject implements Iterable<Map.Entry<String, JSONObject>> {
         if (isCollection()) {
             try {
                 int index = Integer.parseInt(keySequence[0]);
-                return children.get("" + index).getChild(Arrays.copyOfRange(keySequence, 1, keySequence.length));
+                return children.get("" + index).getChild(copyOfRange(keySequence, 1, keySequence.length));
             } catch (NumberFormatException ex) {
                 throw new JSONPathAccessException("Unable to proceed path when trying to parse index of collection at collection:" + getKey() + " next element would have been:" + keySequence[0]);
             } catch (IndexOutOfBoundsException ex) {
@@ -156,8 +157,104 @@ public class JSONObject implements Iterable<Map.Entry<String, JSONObject>> {
         if ((children == null) || !children.containsKey(keySequence[0])) {
             throw new JSONPathAccessException("Unable to proceed path from:" + getKey() + " no subobject found with key:" + keySequence[0]);
         }
-        return children.get(keySequence[0]).getChild(Arrays.copyOfRange(keySequence, 1, keySequence.length));
+        return children.get(keySequence[0]).getChild(copyOfRange(keySequence, 1, keySequence.length));
     }
+    
+    
+    /***********************************************
+     * Workaround for usage with Android2.2 / Java < 6
+     * Offers all different copyOfRange Methods for convenience use 
+     * 
+     * Method Source from http://hg.openjdk.java.net/jdk7/jdk7/jdk/raw-file/bfd7abda8f79/src/share/classes/java/util/Arrays.java
+     */
+    public static <T> T[] copyOfRange(T[] original, int from, int to) {
+                 return copyOfRange(original, from, to, (Class<T[]>) original.getClass());
+    }
+    public static <T,U> T[] copyOfRange(U[] original, int from, int to, Class<? extends T[]> newType) {
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        T[] copy = ((Object)newType == (Object)Object[].class)
+            ? (T[]) new Object[newLength]
+            : (T[]) Array.newInstance(newType.getComponentType(), newLength);
+        System.arraycopy(original, from, copy, 0,
+                         Math.min(original.length - from, newLength));
+        return copy;
+    }
+    public static byte[] copyOfRange(byte[] original, int from, int to) {
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        byte[] copy = new byte[newLength];
+        System.arraycopy(original, from, copy, 0,
+                         Math.min(original.length - from, newLength));
+        return copy;
+    }
+    public static short[] copyOfRange(short[] original, int from, int to) {
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        short[] copy = new short[newLength];
+        System.arraycopy(original, from, copy, 0,
+                         Math.min(original.length - from, newLength));
+        return copy;
+    }
+    public static int[] copyOfRange(int[] original, int from, int to) {
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        int[] copy = new int[newLength];
+        System.arraycopy(original, from, copy, 0,
+                         Math.min(original.length - from, newLength));
+        return copy;
+    }
+    public static long[] copyOfRange(long[] original, int from, int to) {
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        long[] copy = new long[newLength];
+        System.arraycopy(original, from, copy, 0,
+                         Math.min(original.length - from, newLength));
+        return copy;
+    }
+    public static char[] copyOfRange(char[] original, int from, int to) {
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        char[] copy = new char[newLength];
+        System.arraycopy(original, from, copy, 0,
+                         Math.min(original.length - from, newLength));
+        return copy;
+    }
+    public static float[] copyOfRange(float[] original, int from, int to) {
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        float[] copy = new float[newLength];
+        System.arraycopy(original, from, copy, 0,
+                         Math.min(original.length - from, newLength));
+        return copy;
+    }
+    public static double[] copyOfRange(double[] original, int from, int to) {
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        double[] copy = new double[newLength];
+        System.arraycopy(original, from, copy, 0,
+                         Math.min(original.length - from, newLength));
+        return copy;
+    }
+    public static boolean[] copyOfRange(boolean[] original, int from, int to) {
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        boolean[] copy = new boolean[newLength];
+        System.arraycopy(original, from, copy, 0,
+                         Math.min(original.length - from, newLength));
+        return copy;
+    }
+    
+  //***********************************************
 
     public void addItem(JSONObject item) {
         saveTypeSwitch(JSON_TYPE_COLLECTION);
