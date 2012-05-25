@@ -108,7 +108,9 @@ public class HttpHelper {
     public HTTPResponse doHTTPRequest(String method, String host, int port, String path, String payload,
             boolean isHTTPS, String unamePword64, boolean isJSON) throws MalformedURLException, ProtocolException, IOException {
 
-
+        if (payload==null){ //make sure payload is initialized
+            payload = "";
+        }
 
         URL url = getURL(host, port, path, isHTTPS);
 

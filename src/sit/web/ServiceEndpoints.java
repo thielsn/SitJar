@@ -6,7 +6,7 @@ package sit.web;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sit.sstl.HashTableSet;
+import sit.sstl.HashMapSet;
 
 /**
  *
@@ -18,7 +18,7 @@ public class ServiceEndpoints {
      * Singleton instance
      */
     private static final ServiceEndpoints instance = new ServiceEndpoints();
-    private HashTableSet<String, ServiceEndpoint> endpoints = new HashTableSet();
+    private HashMapSet<String, ServiceEndpoint> endpoints = new HashMapSet();
     /**
      * in case at least one endpoint with isCatchAll == true is added this field is set
      * to true. This will make the getEndpoint less efficient, since also catchAll

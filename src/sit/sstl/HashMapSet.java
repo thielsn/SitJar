@@ -1,5 +1,5 @@
 /**
- * HashTableSet.java
+ * HashMapSet.java
  *
  * 28-Apr-2010
  *
@@ -11,17 +11,17 @@
 package sit.sstl;
 
 import java.io.Serializable;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * class HashTableSet
+ * class HashMapSet
  *
  */
-public class HashTableSet<K,V extends ObjectWithKey<K>>
+public class HashMapSet<K,V extends ObjectWithKey<K>>
     implements Iterable<V>, Serializable{
 
-    private Hashtable<K,V> set = new Hashtable();
+    private HashMap<K,V> set = new HashMap();
 
     public synchronized void clear(){
         set.clear();

@@ -5,7 +5,7 @@
  * Created on 5. November 2004, 16:39
  */
 
-package sit.tools.xml;
+package sit.xml;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

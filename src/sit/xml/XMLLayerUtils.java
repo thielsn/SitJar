@@ -4,7 +4,7 @@
  *  @version $Revision: $
  * Created on 1. September 2004, 11:23
  */
-package sit.tools.xml;
+package sit.xml;
 
 /**
  *

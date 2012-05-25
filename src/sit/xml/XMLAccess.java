@@ -5,7 +5,7 @@
  * Created on 31. Oktober 2004, 12:08
  */
 
-package sit.tools.xml;
+package sit.xml;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.xml.sax.SAXException;

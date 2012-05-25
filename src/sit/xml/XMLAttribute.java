@@ -8,7 +8,7 @@
  *  @version $Revision: $
  */
 
-package sit.tools.xml;
+package sit.xml;
 
 /**
  *
