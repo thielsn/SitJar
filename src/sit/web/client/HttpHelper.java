@@ -99,14 +99,10 @@ public class HttpHelper {
         return new URL(myUrl);
     }
 
-    public JSONResponse doJSONRequest(String method, String host, int port, String path, String jsonData,
-            boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException {
 
-        return (JSONResponse) doHTTPRequest(method, host, port, path, jsonData, isHTTPS, unamePword64, true);
-    }
 
     public HTTPResponse doHTTPRequest(String method, String host, int port, String path, String payload,
-            boolean isHTTPS, String unamePword64, boolean isJSON) throws MalformedURLException, ProtocolException, IOException {
+            boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException {
 
         if (payload==null){ //make sure payload is initialized
             payload = "";
@@ -145,12 +141,8 @@ public class HttpHelper {
             output.close();
         }
 
-        HTTPResponse response;
-        if (isJSON) {
-            response = new JSONResponse(method + " " + url.toString(), payload);
-        } else {
-            response = new HTTPResponse(method + " " + url.toString(), payload);
-        }
+        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload);
+        
 
         response.code = connection.getResponseCode();
         response.message = connection.getResponseMessage();
@@ -173,4 +165,6 @@ public class HttpHelper {
         }
         return response;
     }
+    
+    
 }
