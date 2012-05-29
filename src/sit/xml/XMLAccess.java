@@ -6,9 +6,14 @@
  */
 
 package sit.xml;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.EmptyStackException;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.xml.sax.SAXException;
+import sit.io.FileHelper;
 
 
 /**
@@ -48,22 +53,70 @@ public class XMLAccess {
         return document;
     }
     
-    public XMLLayerUtils readXMLInput(XMLLayerUtils startLevel, String nodeRoot, String xmlInput)
+    private org.w3c.dom.Node getNextRootNode(Stack<org.w3c.dom.Node> nodeStack){
+        try{
+            org.w3c.dom.Node curRootNode = nodeStack.peek().getFirstChild();
+            if (curRootNode!=null){
+                nodeStack.push(curRootNode);
+                return curRootNode;
+            }else{
+                
+                while (curRootNode==null){ //curRootNode == null because of else part
+                    nodeStack.pop();
+                    curRootNode = nodeStack.peek().getNextSibling();                   
+                }
+                nodeStack.push(curRootNode);
+                return getNextRootNode(nodeStack);
+            }
+            
+            }catch(EmptyStackException ex){
+
+            }
+        return null;
+    }
+    
+    public org.w3c.dom.Node findFirstNodeWithTagname(org.w3c.dom.Node rootNode, String tagName){
+        
+        Stack<org.w3c.dom.Node> nodeStack = new Stack();
+        nodeStack.push(rootNode);
+        
+        org.w3c.dom.Node curNode = rootNode;
+        
+        while(curNode != null){
+  
+            if (curNode.getNodeName().equals(tagName)){
+                return curNode;
+            }
+            curNode = curNode.getNextSibling();
+            if (curNode==null){ //try on next level
+                curNode = getNextRootNode(nodeStack);
+            }
+        }
+        return null;
+    }
+    
+    public XMLLayerUtils readXMLInput(XMLLayerUtils xmlElement, String rootTag, String xmlInput)
             throws SAXException{
 
-        org.w3c.dom.Node aktNode = parseXML(xmlInput);
+        org.w3c.dom.Node rootNode = parseXML(xmlInput);
         
-        while(aktNode != null){
-  
-            if (aktNode.getNodeName().equals(nodeRoot)){
-                startLevel.readXMLInput(aktNode);
-                break; //stop after the first found element
-            }
-            aktNode = aktNode.getNextSibling();
-            
+        org.w3c.dom.Node startNode = findFirstNodeWithTagname(rootNode, rootTag);
+        if (startNode!=null){
+                xmlElement.readXMLInput(startNode);
         }
      
-        return startLevel;
+        return xmlElement;
+    }
+    
+    public Element readXMLElementInputFromFile(String rootTag, String fileName) throws SAXException, FileNotFoundException, IOException {
+        FileHelper fh = new FileHelper();
+        return readXMLElementInput(rootTag, fh.readFromTextFile(fileName));
+    }
+    
+     public Element readXMLElementInput(String rootTag, String xmlInput) throws SAXException{
+        
+        Element result = new Element(null,rootTag);
+        return (Element) readXMLInput(result, rootTag, xmlInput);
     }
     
     public String toXML(XMLLayerUtils startLevel){
@@ -78,5 +131,7 @@ public class XMLAccess {
     public static XMLAccess getInstance(){
         return singleton;
     }
+
+    
     
 }

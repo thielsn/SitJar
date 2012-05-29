@@ -57,12 +57,15 @@ public class XMLAttribute {
         this.value = value;
     }
     
+    @Override
     public String toString(){
-        if (tag==null) 
+        if (tag==null) {
             throw new NullPointerException("Attribute:name==null\n");
+        }
             
-        if (value==null) 
-            return tag + "=\"\"";        
+        if (value==null) {
+            return tag + "=\"\"";
+        }        
         
         return tag + "=\""+value.trim()+"\"";
     }
