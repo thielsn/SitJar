@@ -6,7 +6,7 @@
  *  @date 26.03.2012
  */
 
-package src.sit.parser;
+package sit.parser;
 
 /**
  *
