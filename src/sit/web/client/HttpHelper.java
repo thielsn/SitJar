@@ -110,7 +110,7 @@ public class HttpHelper {
 
         URL url = getURL(host, port, path, isHTTPS);
 
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "trying to connect " + method + " to " + url + " https:" + isHTTPS);
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.FINE, "trying to connect " + method + " to " + url + " https:" + isHTTPS);
 
         HttpURLConnection connection;
         if (isHTTPS) {

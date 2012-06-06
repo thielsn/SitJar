@@ -55,6 +55,11 @@ public abstract class ServiceEndpoint implements ObjectWithKey<String>{
         return endpointName;
     }
 
+    /**
+     * reentrant function returning the content for the request
+     * @param request
+     * @return 
+     */
     public abstract String handleCall(WebRequest request);
 
     public String getContentType() {

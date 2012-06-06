@@ -27,12 +27,7 @@ public class StrictSITEnumMap<T extends Enum<T>, Q extends StrictSITEnumContaine
 
     public T lookUp(Q value) {
 
-        for (Entry<T, Q> entry : entrySet()) {
-            if (entry.getValue().equals(value)) {
-                return entry.getKey();
-            }
-        }
-        return null;
+        return (T) value.getEnumType();
     }
 
 

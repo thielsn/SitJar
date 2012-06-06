@@ -35,6 +35,14 @@ public class HashMapSet<K,V extends ObjectWithKey<K>>
         return set.remove(id);
     }
 
+    public synchronized boolean contains(V object){
+        return set.containsKey(object.getKey());
+    }
+    
+    public synchronized boolean contains(K key){
+        return set.containsKey(key);
+    }
+    
     public synchronized Iterator<V> iterator(){
         return set.values().iterator();
     }
