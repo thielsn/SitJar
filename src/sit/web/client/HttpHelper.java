@@ -78,7 +78,7 @@ public class HttpHelper {
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         } catch (Exception ex) {
-            Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
 
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {

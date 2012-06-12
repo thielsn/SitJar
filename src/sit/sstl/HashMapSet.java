@@ -50,10 +50,14 @@ public class HashMapSet<K,V extends ObjectWithKey<K>>
     public synchronized V get(K id){
         return set.get(id);
     }
+    
+    public synchronized V get(V object){
+        return set.get(object.getKey());
+    }
 
     public synchronized int size(){
         return set.size();
     }
 
-
+   
 }
