@@ -72,9 +72,17 @@ public class HttpHelper {
     };
 
     public HttpHelper() {
+        init("TLS"); //or "SSL"
+    }
+    
+    public HttpHelper(String sslContext) {
+        init(sslContext);
+    }
+    
+    private void init(String sslContext){
         // Install the all-trusting trust manager
         try {
-            SSLContext sc = SSLContext.getInstance("SSL");
+            SSLContext sc = SSLContext.getInstance(sslContext);
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         } catch (Exception ex) {
