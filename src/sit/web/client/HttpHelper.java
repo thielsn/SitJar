@@ -14,12 +14,7 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 /**
  *
@@ -48,6 +43,7 @@ public class HttpHelper {
             throw new AssertionError("UTF-8 not supported");
         }
     }
+    
 
     public static URL getURL(String host, int port, String path, boolean isHTTPS)
             throws MalformedURLException {
