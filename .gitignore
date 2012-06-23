@@ -1,5 +1,4 @@
-nbproject/private/private.properties
-nbproject/private/private.xml
-nbproject/project.properties
-build/
-dist/
+/build/
+/dist/
+/nbproject/private
+/test/sit/simplewebserver/.svn/

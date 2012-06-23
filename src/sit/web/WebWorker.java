@@ -12,8 +12,11 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,21 +26,16 @@ import java.util.logging.Logger;
  */
 class WebWorker implements HttpConstants, Runnable {
 
-
-
-    /* static map */
-    private final static Hashtable<String, String> staticMap = createMimeMap();
-    /**
-     * private copy of mimeMap
-     */
-    private final Hashtable<String, String> mimeMap = new Hashtable(staticMap);
-
-    /* buffer to use for requests */
-    private WebBuffer buf = new WebBuffer();
     
+    /*
+     * buffer to use for requests
+     */
+    private WebBuffer buf = new WebBuffer();
     private HTTPParser httphelp = new HTTPParser();
 
-    /* Socket to client we're handling */
+    /*
+     * Socket to client we're handling
+     */
     private Socket socket = null;
     /**
      * indicates whether the thread is ordered to stop
@@ -60,7 +58,9 @@ class WebWorker implements HttpConstants, Runnable {
         while (!stopping) {
             synchronized (this) {
                 if (socket == null) {
-                    /* nothing to do */
+                    /*
+                     * nothing to do
+                     */
                     try {
                         wait(); //wait releases the monitor
                     } catch (InterruptedException e) {
@@ -83,8 +83,8 @@ class WebWorker implements HttpConstants, Runnable {
     private WebRequest getWebRequest(InputStream is) throws UnsupportedHTTPMethodException, IOException, MessageTooLargeException, HTTPParseException {
 
         HTTPMessage result = httphelp.getHeaderAndBody(is, buf);
-        
-        if (result==null){
+
+        if (result == null) {
             return null;
         }
         return result.getWebRequest();
@@ -94,9 +94,10 @@ class WebWorker implements HttpConstants, Runnable {
 
         InputStream is = new BufferedInputStream(socket.getInputStream());
         PrintStream ps = new PrintStream(socket.getOutputStream());
-        /* we will only block in read for this many milliseconds
-         * before we fail with java.io.InterruptedIOException,
-         * at which point we will abandon the connection.
+        /*
+         * we will only block in read for this many milliseconds before we fail
+         * with java.io.InterruptedIOException, at which point we will abandon
+         * the connection.
          */
 
         socket.setSoTimeout(WebServer.getInstance().getTimeOut());
@@ -106,7 +107,9 @@ class WebWorker implements HttpConstants, Runnable {
             try {
                 request = getWebRequest(is);
             } catch (UnsupportedHTTPMethodException ex) {
-                /* we don't support this method */
+                /*
+                 * we don't support this method
+                 */
                 ps.print("HTTP/1.0 " + HTTP_BAD_METHOD
                         + " unsupported method type: ");
                 buf.writeToPrintStream(ps, 0, 5);
@@ -127,8 +130,8 @@ class WebWorker implements HttpConstants, Runnable {
             } catch (HTTPParseException ex) {
                 String message = "HTTP/1.0 " + HTTP_SERVER_ERROR
                         + " Internal Server Error";
-                Logger.getLogger(WebWorker.class.getName()).log(Level.WARNING, message+"\n"+ex.getMessage());
-                ps.print(message+"\n"+ex.getMessage());
+                Logger.getLogger(WebWorker.class.getName()).log(Level.WARNING, message + "\n" + ex.getMessage());
+                ps.print(message + "\n" + ex.getMessage());
                 ps.write(WebBuffer.EOL);
                 ps.flush();
                 socket.close();
@@ -146,7 +149,7 @@ class WebWorker implements HttpConstants, Runnable {
             ServiceEndpoint service = ServiceEndpoints.getInstance().getEndpoint(request.fname);
             if (service != null) {
                 Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
-                        "found service:"+service.getEndpointName());
+                        "found service:" + service.getEndpointName());
 
                 printDynamicPage(service.getContentType(), service.handleCall(request), ps);
             } else {
@@ -173,7 +176,8 @@ class WebWorker implements HttpConstants, Runnable {
         }
     }
 
-    private void printDynamicPage(String contentType, String content, PrintStream ps) throws IOException {
+    private void printDynamicPage(String contentType, String content, PrintStream ps)
+            throws IOException {
 
         Logger.getLogger(WebWorker.class.getName()).log(Level.FINE, "content:\n{0}", content);
 
@@ -229,15 +233,9 @@ class WebWorker implements HttpConstants, Runnable {
                 ps.write(WebBuffer.EOL);
                 ps.print("Last Modified: " + (new Date(targetFile.lastModified())));
                 ps.write(WebBuffer.EOL);
-                String name = targetFile.getName();
-                int ind = name.lastIndexOf('.');
-                String contentType = null;
-                if (ind > 0) {
-                    contentType = mimeMap.get(name.substring(ind));
-                }
-                if (contentType == null) {
-                    contentType = "unknown/unknown";
-                }
+                
+                String contentType = MimeTypes.getMimeTypeFromFileName(targetFile.getName());
+                
                 ps.print("Content-type: " + contentType);
                 ps.write(WebBuffer.EOL);
             } else {
@@ -290,54 +288,27 @@ class WebWorker implements HttpConstants, Runnable {
     }
 
     private void listDirectory(File dir, PrintStream ps) throws IOException {
-        
-        
+
+
         ps.println("<html><head><title>Directory listing</title></head>\n");
 
         ps.println("<body><h1>Directory listing</h1>\n");
         ps.println("<p><a href=\"..\">[Parent directory]</a><br/>\n");
-
-        String[] list = dir.list();
+        
+        String myPath  = (dir.getPath().length()>0) ? dir.getPath().substring(1) :  "";
+        
+        File[] list = dir.listFiles();
         for (int i = 0; list != null && i < list.length; i++) {
-            File f = new File(dir, list[i]);
+            File f = list[i];
             if (f.isDirectory()) {
-                ps.println("<a href=\"" + list[i] + "/\">" + list[i] + "/</a><br/>\n");
+                ps.println("<a href=\"/" + myPath + "/" + f.getName() + "/\">" + f.getName() + "/</a><br/>\n");
             } else {
-                ps.println("<a href=\"" + list[i] + "\">" + list[i] + "</a><br/>\n");
+                ps.println("<a href=\"/" + myPath + "/" + f.getName() + "\">" + f.getName()+ "</a><br/>\n");
             }
         }
         ps.println("<br/></p><p><hr></p><p><i>" + (new Date()) + "</i></p></body></html>");
     }
 
-    private static java.util.Hashtable<String, String> createMimeMap() {
-        Hashtable<String, String> result = new Hashtable();
-        result.put("", "content/unknown");
-        result.put(".uu", "application/octet-stream");
-        result.put(".exe", "application/octet-stream");
-        result.put(".ps", "application/postscript");
-        result.put(".zip", "application/zip");
-        result.put(".sh", "application/x-shar");
-        result.put(".tar", "application/x-tar");
-        result.put(".snd", "audio/basic");
-        result.put(".au", "audio/basic");
-        result.put(".wav", "audio/x-wav");
-        result.put(".gif", "image/gif");
-        result.put(".jpg", "image/jpeg");
-        result.put(".jpeg", "image/jpeg");
-        result.put(".png", "image/png");
-        result.put(".htm", "text/html");
-        result.put(".html", "text/html");
-        result.put(".text", "text/plain");
-        result.put(".c", "text/plain");
-        result.put(".cc", "text/plain");
-        result.put(".c++", "text/plain");
-        result.put(".h", "text/plain");
-        result.put(".pl", "text/plain");
-        result.put(".txt", "text/plain");
-        result.put(".java", "text/plain");
-        result.put(".js", "application/javascript");
-        result.put(".css", "text/css");
-        
-        return result;
-    }
+
+    
 }

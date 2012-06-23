@@ -4,7 +4,6 @@
  */
 package sit.web.client;
 
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -15,12 +14,7 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 /**
  *
@@ -38,7 +32,7 @@ public class HttpHelper {
             throw new AssertionError("UTF-8 not supported");
         }
     }
-    
+
     public static String decodeString(String myString) {
         if (myString == null) {
             throw new NullPointerException("decodeString: myString == null!");
@@ -50,56 +44,9 @@ public class HttpHelper {
         }
     }
     
-    // Create a trust manager that does not validate certificate chains
-    private TrustManager[] trustAllCerts = new TrustManager[]{
-        new X509TrustManager() {
 
-            @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-
-            @Override
-            public void checkClientTrusted(
-                    java.security.cert.X509Certificate[] certs, String authType) {
-            }
-
-            @Override
-            public void checkServerTrusted(
-                    java.security.cert.X509Certificate[] certs, String authType) {
-            }
-        }
-    };
-
-    public HttpHelper() {
-        init("TLS"); //or "SSL"
-    }
-    
-    public HttpHelper(String sslContext) {
-        init(sslContext);
-    }
-    
-    private void init(String sslContext){
-        // Install the all-trusting trust manager
-        try {
-            SSLContext sc = SSLContext.getInstance(sslContext);
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        } catch (Exception ex) {
-            Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-        }
-
-        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-
-            @Override
-            public boolean verify(String string, SSLSession ssls) {
-                return true;
-            }
-        });
-        HttpsURLConnection.setFollowRedirects(true);
-    }
-
-    private URL getURL(String host, int port, String path, boolean isHTTPS) throws MalformedURLException {
+    public static URL getURL(String host, int port, String path, boolean isHTTPS)
+            throws MalformedURLException {
 
         String myUrl = isHTTPS ? "https" : "http";
         myUrl += "://" + host + ":" + port + path;
@@ -107,12 +54,18 @@ public class HttpHelper {
         return new URL(myUrl);
     }
 
+    public HttpHelper() {
+        HTTPUrlConnectionHelper.initAllTrustingManager("TLS"); //or "SSL"
+    }
 
+    public HttpHelper(String sslContext) {
+        HTTPUrlConnectionHelper.initAllTrustingManager(sslContext);
+    }
 
     public HTTPResponse doHTTPRequest(String method, String host, int port, String path, String payload,
             boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException {
 
-        if (payload==null){ //make sure payload is initialized
+        if (payload == null) { //make sure payload is initialized
             payload = "";
         }
 
@@ -131,7 +84,8 @@ public class HttpHelper {
         connection.setRequestMethod(method);
         connection.setRequestProperty("Host", host);
         connection.setRequestProperty("Content-Type", "application/json");
-        connection.setRequestProperty("Content-length", String.valueOf(payload.length()));
+        connection.setRequestProperty("Content-length", String.valueOf(payload.
+                length()));
 
         if (isHTTPS) {
             connection.setRequestProperty("Authorization", "Basic " + unamePword64);
@@ -142,7 +96,8 @@ public class HttpHelper {
         if (payload.length() > 0) {
             // open up the output stream of the connection
             connection.setDoOutput(true);
-            DataOutputStream output = new DataOutputStream(connection.getOutputStream());
+            DataOutputStream output = new DataOutputStream(connection.
+                    getOutputStream());
 
             // write out the data
             output.writeBytes(payload);
@@ -150,7 +105,7 @@ public class HttpHelper {
         }
 
         HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload);
-        
+
 
         response.code = connection.getResponseCode();
         response.message = connection.getResponseMessage();
@@ -161,7 +116,8 @@ public class HttpHelper {
         if (response.code != 500) {
 
             // get ready to read the response from the cgi script
-            DataInputStream input = new DataInputStream(connection.getInputStream());
+            DataInputStream input = new DataInputStream(connection.
+                    getInputStream());
 
 
             // read in each character until end-of-stream is detected
@@ -173,6 +129,4 @@ public class HttpHelper {
         }
         return response;
     }
-    
-    
 }

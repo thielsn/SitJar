@@ -5,6 +5,8 @@
 
 package sit.web;
 
+import java.util.HashMap;
+
 /**
  *
  * @author thiel
@@ -61,4 +63,7 @@ public interface HttpConstants {
 
     public final static String CRLF = "\r\n";
     public final static String CRLFCRLF = CRLF + CRLF;
+    
+    
+   
 }
