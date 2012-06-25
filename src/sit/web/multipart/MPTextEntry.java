@@ -14,14 +14,23 @@ import java.io.OutputStream;
  */
 public class MPTextEntry extends MultipartEntry {
 
-    public MPTextEntry(TYPES type, String mimetype, String name) {
+    protected String payload;
+    
+    public MPTextEntry(TYPES type, String mimetype, String name, String payload) {
         super(type, mimetype, name);
+        this.payload = payload;
     }
     
 
     @Override
-    public void writeTo(OutputStream out) throws IOException {
-        
+    protected void writePartContentTo(OutputStream out) throws IOException {
+        DataOutputStream output = new DataOutputStream(out);
+        output.writeBytes(payload);
+    }
+
+    @Override
+    public long getContentLengthOfContent() {
+        return payload.length();
     }
     
 }

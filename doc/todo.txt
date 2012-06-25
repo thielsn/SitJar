@@ -1,1 +1,2 @@
-Refactor WebBuffer: printstream is not actually used (change interfaces for FilterOutputStream )
+* Refactor WebBuffer: printstream is not actually used (change interfaces for FilterOutputStream )
+* Correct Handling of Multipart messages (and other binary content) on the server - currently everything is handled as UTF-8

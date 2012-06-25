@@ -1,6 +1,7 @@
 package sit.simplewebserver;
 
 import java.io.File;
+import sit.web.ServiceEndpoints;
 import sit.web.WebServer;
 
 /**
@@ -17,6 +18,9 @@ public class Main {
         WebServer.getInstance().setRoot(new File("/"));
         WebServer.getInstance().setPermitDirectoryListing(true);
         WebServer.getInstance().setPort(8080);
+        
+        ServiceEndpoints.getInstance().addEndpoint(new TestService("testservice", true));
+        
         Thread webThread = new Thread(WebServer.getInstance());
         webThread.start();
         

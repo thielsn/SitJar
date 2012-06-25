@@ -7,6 +7,7 @@ package sit.web.multipart;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import sit.web.HttpConstants;
 
 /**
  *
@@ -69,6 +70,13 @@ public abstract class MultipartEntry {
             throw new RuntimeException("unsupported type:" + type);
         }
     }
+    
+    public abstract long getContentLengthOfContent();
+    
+    public long getContentLength(){
+        
+        return getContentLengthOfContent() + getHeader().length();
+    }
 
     public String getHeader() {
         StringBuilder result = new StringBuilder(CONTENT_DISPOSITION_TAG);
@@ -79,24 +87,29 @@ public abstract class MultipartEntry {
         if (filename != null) {
             result.append("filename=\"").append(filename).append("\"; ");
         }
-        result.append("\n").append(CONTENT_TYPE_TAG).append(contentType).append("\n");
+        result.append(HttpConstants.CRLF).append(CONTENT_TYPE_TAG).append(contentType).append(HttpConstants.CRLF);
 
         if ((type == TYPES.BINARY) || (contentType.equals(MIME_APPLICATION_OCTETSTREAM))) {
-            result.append(CONTENT_TRANSFER_ENCODING_TAG).append("\n");
+            result.append(CONTENT_TRANSFER_ENCODING_TAG).append(HttpConstants.CRLF);
         }
-        result.append("\n");
+        result.append(HttpConstants.CRLF);
 
 
         return result.toString();
     }
+    
+    
 
-    public void writeTo(OutputStream out) throws IOException {
+    //the length of each item 
+    public void writeTo(OutputStream out, String boundary) throws IOException {
         DataOutputStream output = new DataOutputStream(out);
-
+               
         // write out the data
+        output.writeBytes(boundary+HttpConstants.CRLF);
         output.writeBytes(getHeader());
 
         writePartContentTo(out);
+        output.writeBytes(HttpConstants.CRLF);
     }
 
     protected abstract void writePartContentTo(OutputStream out) throws IOException;

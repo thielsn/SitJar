@@ -11,12 +11,14 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sit.web.HttpConstants;
 
 /**
  *
  * @author simon
  */
 public class MultipartContainer {
+    public static final String FINAL_BORDER = "--"+HttpConstants.CRLF;
     
     /*
     POST /path/to/script.php HTTP/1.0
@@ -26,7 +28,8 @@ public class MultipartContainer {
 
 --AaB03x */
     
-    private String contentType = "multipart/form-data; boundary=----------------"+UUID.randomUUID().toString();
+    private String boundary = "----------------"+UUID.randomUUID().toString();
+    private String contentType = "multipart/form-data; boundary="+boundary;
     private Vector<MultipartEntry> parts = new Vector();
     
     /**
@@ -48,16 +51,32 @@ public class MultipartContainer {
     }
 
     public long getContentLength() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        long result = 0;
+        int boundaryLength = boundary.length()+HttpConstants.CRLF.length();
+        for (MultipartEntry entry : parts){
+            result+=boundaryLength;
+            result+=entry.getContentLength();
+        }
+        result+=boundaryLength+FINAL_BORDER.length();
+        
+        return result;
     }
 
     public void write(OutputStream output) {
-        for (MultipartEntry entry : parts){
-            try {
-                entry.writeTo(output);
-            } catch (IOException ex) {
-                Logger.getLogger(MultipartContainer.class.getName()).log(Level.SEVERE, null, ex);
+        try {
+            for (MultipartEntry entry : parts){
+                try {
+                    entry.writeTo(output, boundary);
+                } catch (IOException ex) {
+                    Logger.getLogger(MultipartContainer.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+             DataOutputStream dout = new DataOutputStream(output);
+                   
+            // write out the data
+            dout.writeBytes(boundary+FINAL_BORDER);
+        } catch (IOException ex) {
+            Logger.getLogger(MultipartContainer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

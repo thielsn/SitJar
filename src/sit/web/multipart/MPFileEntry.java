@@ -29,7 +29,7 @@ public class MPFileEntry extends MultipartEntry {
     }
 
     @Override
-    public void writeTo(OutputStream out) throws IOException {
+    protected void writePartContentTo(OutputStream out) throws IOException {
         FileInputStream is = new FileInputStream(file);
         WebBuffer buf = new WebBuffer();
         PrintStream pOs = new PrintStream(out);
@@ -41,5 +41,10 @@ public class MPFileEntry extends MultipartEntry {
         } finally {
             is.close();
         }
+    }
+
+    @Override
+    public long getContentLengthOfContent() {
+        return file.length();
     }
 }
