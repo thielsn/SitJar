@@ -5,6 +5,7 @@
 package sit.web;
 
 import java.util.Hashtable;
+import java.util.Map.Entry;
 
 /**
  *
@@ -24,6 +25,13 @@ public class WebRequest {
         String result = httpCommand+" "+ fname;
         if (param != null) {
             result += "?"+ param;
+        }        
+        if (headerItems != null){
+            result += "\nHeader:\n";
+            for (Entry<String,String> headerEntry: headerItems.entrySet()){
+                result += headerEntry.getKey()+": "+headerEntry.getValue()+"\n";
+            }            
+            result += "\n";
         }
         if (body != null){
             result += "\nBody:\n"+body+"\n----\n";

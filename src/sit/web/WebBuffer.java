@@ -36,16 +36,16 @@ public class WebBuffer {
      * Writes <code>len</code> bytes from the specified byte array starting at
      * offset <code>off</code> to the given stream.
      *
-     * @param  buf   A byte array
+     * @param ps 
      * @param  off   Offset from which to start taking bytes
      * @param  len   Number of bytes to write
      */
-    public void writeToPrintStream(PrintStream ps, int off, int len) {
+    public void writeToOutStream(PrintStream ps, int off, int len) {
 
         ps.write(buf, off, len);
     }
 
-    public void writeToPrintStream(PrintStream ps) {
+    public void writeToOutStream(PrintStream ps) {
         ps.write(buf, 0, readBytes);
     }
 

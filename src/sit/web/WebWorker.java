@@ -12,11 +12,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -112,7 +108,7 @@ class WebWorker implements HttpConstants, Runnable {
                  */
                 ps.print("HTTP/1.0 " + HTTP_BAD_METHOD
                         + " unsupported method type: ");
-                buf.writeToPrintStream(ps, 0, 5);
+                buf.writeToOutStream(ps, 0, 5);
                 ps.write(WebBuffer.EOL);
                 ps.flush();
                 socket.close();
@@ -143,7 +139,7 @@ class WebWorker implements HttpConstants, Runnable {
             }
 
             Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
-                    "fname:{0}", request);
+                    "request:{0}", request.toString());
 
             //if we find a fitting service call the service
             ServiceEndpoint service = ServiceEndpoints.getInstance().getEndpoint(request.fname);
@@ -280,7 +276,7 @@ class WebWorker implements HttpConstants, Runnable {
         try {
             int n;
             while ((n = buf.readFromInputStream(is)) > 0) {
-                buf.writeToPrintStream(ps, 0, n);
+                buf.writeToOutStream(ps, 0, n);
             }
         } finally {
             is.close();
