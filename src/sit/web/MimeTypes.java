@@ -4,7 +4,7 @@
  *  @author Simon Thiel
  *  @version $Revision: $
  *  @date 22.06.2012
- */
+ */ 
 package sit.web;
 
 import java.util.Collections;
