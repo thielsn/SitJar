@@ -222,7 +222,7 @@ public class HttpHelper {
 
         connection.setRequestMethod(method);
         connection.setRequestProperty("Host", host);
-        connection.setRequestProperty("Content-Type", mpc.getContentType());
+        connection.setRequestProperty("Content-Type", mpc.getContentType()); //content-type of multipart message must not have a charset field
         connection.setRequestProperty("Content-Length", ""+length);
 
         if (isHTTPS) {

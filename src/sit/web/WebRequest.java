@@ -29,13 +29,15 @@ public class WebRequest {
     public Hashtable<String, String> headerItems = null;
 
     public static class ContentType {
+        
 
         public String mimeType = HttpConstants.DEFAULT_MIME_TYPE; //init with default mimetype
         public Charset charSet = HttpConstants.DEFAULT_CHARSET;
+        public String boundary = null; //only for multipart content types
 
         public void parseContentType(String contentTypePayload) {
 
-            String[] contentTypeFields = contentTypePayload.split(";");
+            String[] contentTypeFields = contentTypePayload.split(HttpConstants.SUB_FIELD_SEPARATOR);
             
             if (contentTypeFields.length==0){
                 return;
@@ -48,15 +50,23 @@ public class WebRequest {
                 String myValue = HTTPParseHelper.getValueIfExists(HttpConstants.CHARSET_CONTENT_TYPE_TAG, contentTypeFields[1]); 
                 if (myValue != null) {
                     try {
-                        this.charSet = Charset.forName(myValue);
+                        this.charSet = Charset.forName(myValue.trim());
                     } catch (IllegalCharsetNameException ex) {
                         Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "charset :" + myValue + " illegal! Using " + charSet.name() + " instead!");
                     } catch (UnsupportedCharsetException ex) {
                         Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "charset :" + myValue + " not supported! Using " + charSet.name() + " instead!");
                     }
                 }
+                myValue = HTTPParseHelper.getValueIfExists(HttpConstants.BOUNDARY_CONTENT_TYPE_PREFIX, contentTypeFields[1]); 
+                if (myValue != null) {
+                    boundary = myValue.trim();
+                }
                  
             }
+        }
+
+        public boolean isMultiPart() {
+            return boundary!=null;
         }
     }
 

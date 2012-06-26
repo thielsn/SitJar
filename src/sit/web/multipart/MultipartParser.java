@@ -75,7 +75,7 @@ public class MultipartParser {
 
             HashMap<String, String> dispoFields = HTTPParseHelper.parseAndFillFittingValues(
                     new String[]{HttpConstants.NAME_DISPOSITION_TAG,
-                        HttpConstants.FILENAME_DISPOSITION_TAG}, disposition.split(";"));
+                        HttpConstants.FILENAME_DISPOSITION_TAG}, disposition.split(HttpConstants.SUB_FIELD_SEPARATOR));
 
             name = dispoFields.get(HttpConstants.NAME_DISPOSITION_TAG);
             fileName = dispoFields.get(HttpConstants.FILENAME_DISPOSITION_TAG);

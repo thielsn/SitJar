@@ -29,7 +29,7 @@ public class MultipartTest {
      */
     public static void main(String[] args) {
         try {
-            File myFile = new File("resource/picknick.jpg");
+            File myFile = new File("resources/picknick.jpg");
             
             MultipartContainer mpc = new MultipartContainer();
             mpc.addPart(new MPTextEntry(TYPES.TEXT, "text/plain", "filename", myFile.getName()));

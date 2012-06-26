@@ -7,6 +7,7 @@ package sit.web.multipart;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Iterator;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -17,14 +18,30 @@ import sit.web.HttpConstants;
  *
  * @author simon
  */
-public class MultipartContainer {
+public class MultipartContainer implements Iterable<MultipartEntry> {
     public static final String FINAL_BORDER = "--"+HttpConstants.CRLF;
+    public static final String MULTIPART_CONTENT_TYPE_FORMDATA_BOUNDARY = HttpConstants.MULTIPART_MIME_TYPE
+            +HttpConstants.SUB_FIELD_SEPARATOR+HttpConstants.BOUNDARY_CONTENT_TYPE_PREFIX;
+    
     
 
     
-    private String boundary = "----------------"+UUID.randomUUID().toString();
-    private String contentType = "multipart/form-data; boundary="+boundary;
+    private final String boundary;
+    private final String contentType; //content-type of multipart message must not have a charset field
     private Vector<MultipartEntry> parts = new Vector();
+
+    public MultipartContainer() {
+         boundary = "----------------"+UUID.randomUUID().toString();
+         contentType = MULTIPART_CONTENT_TYPE_FORMDATA_BOUNDARY+boundary;
+    }
+
+    public MultipartContainer(String boundary) {
+        this.boundary = boundary;
+        contentType = MULTIPART_CONTENT_TYPE_FORMDATA_BOUNDARY+boundary;
+    }
+    
+    
+    
     
     /**
      * @return the contentType
@@ -33,12 +50,6 @@ public class MultipartContainer {
         return contentType;
     }
 
-    /**
-     * @param contentType the contentType to set
-     */
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
 
     public void addPart(MultipartEntry multiPartEntry) {
         parts.add(multiPartEntry);
@@ -72,6 +83,10 @@ public class MultipartContainer {
         } catch (IOException ex) {
             Logger.getLogger(MultipartContainer.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public Iterator<MultipartEntry> iterator() {
+        return parts.iterator();
     }
 
     

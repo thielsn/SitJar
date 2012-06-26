@@ -63,6 +63,14 @@ public class MPFileEntry extends MultipartEntry {
 
     @Override
     public long getContentLengthOfContent() {
+        if (fileContent!=null){
+            return fileContent.length;
+        }
         return file.length();
     }
+    
+    public byte[] getFileContent(){
+        return fileContent;
+    }
+    
 }

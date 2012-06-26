@@ -78,4 +78,12 @@ public abstract class MultipartEntry {
     }
 
     protected abstract void writePartContentTo(OutputStream out) throws IOException;
+
+    public TYPES getType() {
+        return type;
+    }
+
+    public String getFileName() {
+        return filename;
+    }
 }

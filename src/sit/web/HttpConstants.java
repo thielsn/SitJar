@@ -71,10 +71,12 @@ public interface HttpConstants {
     //public static final Charset DEFAULT_CHARSET = Charset.forName("US-ASCII");
     
     public static final String DEFAULT_MIME_TYPE = "text/html";
+    public static final String MULTIPART_MIME_TYPE = "multipart/form-data";
     
-    public static final String CHARSET_CONTENT_TYPE_TAG = "charset=";
     public static final String MIME_APPLICATION_OCTETSTREAM = "application/octet-stream";
    
+    public static final String SUB_FIELD_SEPARATOR = "; ";
+    
     public static final String CONTENT_DISPOSITION_TAG = "Content-Disposition: form-data; ";
     public static final String FILENAME_DISPOSITION_TAG = "filename=\"";
     public static final String NAME_DISPOSITION_TAG = "name=\"";
@@ -82,5 +84,9 @@ public interface HttpConstants {
     public static final String CONTENT_LENGTH_TAG = "Content-Length: ";
     
     public static final String CONTENT_TYPE_TAG = "Content-Type: ";
+    public static final String CHARSET_CONTENT_TYPE_TAG = "charset=";
+    public static final String BOUNDARY_CONTENT_TYPE_PREFIX = "boundary=";    
+    
+    
     public static final String CONTENT_TRANSFER_ENCODING_BINARY_TAG = "Content-Transfer-Encoding: binary";
 }
