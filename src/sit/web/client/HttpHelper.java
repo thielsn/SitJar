@@ -115,7 +115,7 @@ public class HttpHelper {
     public HTTPResponse doHTTPRequest(String method, String host, int port, String path, String payload, String mimeType, Charset charSet,
             boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException {
         
-        if (mimeType==null || mimeType.isEmpty()){
+        if (mimeType==null || mimeType.length()==0){
             mimeType = MimeTypes.getMimeType(""); //get unknown mime type if mimetype not set
         }
         String contentType = mimeType;
