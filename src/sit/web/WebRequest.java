@@ -7,13 +7,11 @@ package sit.web;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sit.web.multipart.MultipartParser;
-import sit.web.multipart.TYPES;
 
 /**
  *
