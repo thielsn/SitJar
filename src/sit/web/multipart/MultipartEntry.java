@@ -55,7 +55,7 @@ public abstract class MultipartEntry {
         result.append(HttpConstants.CRLF).append(HttpConstants.CONTENT_TYPE_TAG).append(contentType).append(HttpConstants.CRLF);
 
         if ((type == TYPES.BINARY) || (contentType.equals(HttpConstants.MIME_APPLICATION_OCTETSTREAM))) {
-            result.append(HttpConstants.CONTENT_TRANSFER_ENCODING_TAG).append(HttpConstants.CRLF);
+            result.append(HttpConstants.CONTENT_TRANSFER_ENCODING_BINARY_TAG).append(HttpConstants.CRLF);
         }
         result.append(HttpConstants.CRLF);
 

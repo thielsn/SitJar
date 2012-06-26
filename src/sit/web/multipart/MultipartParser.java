@@ -9,10 +9,16 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sit.sstl.ByteBuilder;
+import sit.web.HTTPMessage;
+import sit.web.HTTPParseHelper;
 import sit.web.HttpConstants;
+import sit.web.WebRequest;
+import sit.web.WebRequest.ContentType;
 
 /**
  *
@@ -41,85 +47,69 @@ public class MultipartParser {
         return result;
     }
 
-    private static String extractValueIfFits(String field, String tag) {
-        if (field.toLowerCase().startsWith(tag.toLowerCase())) {
-            return field.substring(tag.length(), field.indexOf("\"", tag.length()));
-        }
-        return null;
-    }
-
     private static MultipartEntry parsePart(Charset charSet, byte[] subSequence) {
+
         ByteBuilder content = new ByteBuilder(subSequence);
         String name = null;
-        String mimeType = null;
         String fileName = null;
         TYPES type = TYPES.UNKNOWN;
+        ContentType contentType = new WebRequest.ContentType();
+        contentType.charSet = charSet;
 
         int endOfHeader = content.indexOf(HttpConstants.CRLFCRLF_BYTE);
         if (endOfHeader == -1) { //header not found or last entry ...
             Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "header not found in " + new String(subSequence, charSet));
             return null;
         }
-
+        //TODO  re-use HTTPMessage parser for parsing the headers !!!
         String header = new String(content.subSequence(0, endOfHeader), charSet);
 
-        for (String headerLine : header.split(HttpConstants.CRLF)) {
-            if (headerLine.toLowerCase().startsWith(HttpConstants.CONTENT_DISPOSITION_TAG.toLowerCase())) {
-                String disposition = headerLine.substring(HttpConstants.CONTENT_DISPOSITION_TAG.length(), headerLine.length());
-                for (String dispoField : disposition.split(";")) {
-                    String myValue = extractValueIfFits(dispoField, HttpConstants.NAME_DISPOSITION_TAG); //TODO ugly code !!!
-                    if (myValue!=null){
-                        name = myValue;
-                    }
-                    myValue = extractValueIfFits(dispoField, HttpConstants.FILENAME_DISPOSITION_TAG); //TODO ugly code !!!
-                    if (myValue!=null){
-                        fileName = myValue;
-                    }
-                }
-            }else if (headerLine.toLowerCase().startsWith(HttpConstants.CONTENT_TRANSFER_ENCODING_TAG.toLowerCase())) {
+        HashMap<String, String> headerFields = HTTPParseHelper.parseAndFillFittingValues(
+                new String[]{HttpConstants.CONTENT_DISPOSITION_TAG,
+                    HttpConstants.CONTENT_TRANSFER_ENCODING_BINARY_TAG,
+                    HttpConstants.CONTENT_TYPE_TAG}, header.split(HttpConstants.CRLF));
+
+        if (headerFields.containsKey(HttpConstants.CONTENT_DISPOSITION_TAG)) {
+
+            String disposition = headerFields.get(HttpConstants.CONTENT_DISPOSITION_TAG).substring(HttpConstants.CONTENT_DISPOSITION_TAG.length());
+
+            HashMap<String, String> dispoFields = HTTPParseHelper.parseAndFillFittingValues(
+                    new String[]{HttpConstants.NAME_DISPOSITION_TAG,
+                        HttpConstants.FILENAME_DISPOSITION_TAG}, disposition.split(";"));
+
+            name = dispoFields.get(HttpConstants.NAME_DISPOSITION_TAG);
+            fileName = dispoFields.get(HttpConstants.FILENAME_DISPOSITION_TAG);
+
+
+        }
+        if (headerFields.containsKey(HttpConstants.CONTENT_TRANSFER_ENCODING_BINARY_TAG)) {
+            type = TYPES.BINARY;
+        }
+        if (headerFields.containsKey(HttpConstants.CONTENT_TYPE_TAG)) {
+
+            String contentTypePayload = headerFields.get(HttpConstants.CONTENT_TYPE_TAG).substring(HttpConstants.CONTENT_TYPE_TAG.length());
+            
+            contentType.parseContentType(contentTypePayload);
+            if (contentType.mimeType.equalsIgnoreCase(HttpConstants.MIME_APPLICATION_OCTETSTREAM)) {
                 type = TYPES.BINARY;
-            }else if (headerLine.toLowerCase().startsWith(HttpConstants.CONTENT_TYPE_TAG.toLowerCase())) {
-                String contentType = headerLine.substring(HttpConstants.CONTENT_TYPE_TAG.length(), headerLine.length());
-                String [] contentTypeFields = contentType.split(";");
-                    
-                for (int i=0; i< contentTypeFields.length; i++){
-                    if (i==0){ //first type is the mime-type
-                        mimeType = contentTypeFields[i].trim();
-                        type = TYPES.MIME;
-                        if (mimeType.equalsIgnoreCase(HttpConstants.MIME_APPLICATION_OCTETSTREAM)){
-                            type = TYPES.BINARY;
-                        }
-                    }else{
-                        if (contentTypeFields[i].startsWith(HttpConstants.CHARSET_CONTENT_TYPE_TAG)){
-                             
-                            String myValue = extractValueIfFits(contentTypeFields[i], HttpConstants.CHARSET_CONTENT_TYPE_TAG); //TODO ugly code !!!
-                            if (myValue!=null){
-                                try{
-                                    charSet = Charset.forName(myValue);
-                                }catch (IllegalCharsetNameException ex){
-                                    Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "charset :"+myValue+" illegal! Using "+charSet.name()+" instead!");
-                                }catch (UnsupportedCharsetException ex){
-                                    Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "charset :"+myValue+" not supported! Using "+charSet.name()+" instead!");                                 
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                 
+            } else if (!contentType.mimeType.equalsIgnoreCase(HttpConstants.DEFAULT_MIME_TYPE)) {
+                type = TYPES.MIME;
             }
+            charSet = contentType.charSet; //possibly been changed by content-type setting...
             
         }
-        
+
+
+
 
         MultipartEntry result = null;
-        if (type.equals(TYPES.BINARY)){
-            result = new MPFileEntry(type, mimeType, name, fileName, content.subSequence(endOfHeader+HttpConstants.CRLFCRLF_BYTE.length));
-        }else{
-            result = new MPTextEntry(type, mimeType, name, new String(content.subSequence(endOfHeader+HttpConstants.CRLFCRLF_BYTE.length), charSet));
+        if (type.equals(TYPES.BINARY)) {
+            result = new MPFileEntry(type, contentType.mimeType, name, fileName, content.subSequence(endOfHeader + HttpConstants.CRLFCRLF_BYTE.length));
+        } else {
+            result = new MPTextEntry(type, contentType.mimeType, name, new String(content.subSequence(endOfHeader + HttpConstants.CRLFCRLF_BYTE.length), charSet));
         }
         return result;
-                
+
 
 
     }

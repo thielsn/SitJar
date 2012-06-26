@@ -16,7 +16,7 @@ import sit.sstl.Pair;
  */
 public class ServiceEndpointHelper {
 
-    public String decode(String urlString) throws UnsupportedEncodingException{
+    public static String decode(String urlString) throws UnsupportedEncodingException{
         String result = java.net.URLDecoder.decode(urlString, "UTF-8");
         result = result.replaceAll("%20", " ");
         result = result.replaceAll("%2C", ",");
@@ -27,12 +27,12 @@ public class ServiceEndpointHelper {
         return result;
     }
     
-    public ServiceComponents extractNameValues(String request) throws UnsupportedEncodingException {
+    public static ServiceComponents extractNameValues(String request) throws UnsupportedEncodingException {
 
         ServiceComponents result = new ServiceComponents();
 
         if (request == null){
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "request == null !");
+            Logger.getLogger(ServiceEndpointHelper.class.getName()).log(Level.SEVERE, "request == null !");
             return result;
         }
 
@@ -50,7 +50,7 @@ public class ServiceEndpointHelper {
     }
 
 
-    public String xmlize(String rootTag, Vector<Pair<String, String>> nv){
+    public static String xmlize(String rootTag, Vector<Pair<String, String>> nv){
         String result ="<"+rootTag+">";
 
         for (Pair<String, String> field : nv){
@@ -68,9 +68,9 @@ public class ServiceEndpointHelper {
      * @param basePath
      * @return
      */
-    public String getSubPath(String path, String basePath){
+    public static String getSubPath(String path, String basePath){
         if (!path.startsWith(basePath)){
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+            Logger.getLogger(ServiceEndpointHelper.class.getName()).log(Level.SEVERE,
                     "path:"+path+" is not starting with basePath:"+basePath);
             return null;
         }
@@ -80,7 +80,7 @@ public class ServiceEndpointHelper {
         return path.substring(basePath.length());
     }
 
-    public String replaceBackSlashes(String source){
+    public static String replaceBackSlashes(String source){
         return source.replaceAll("\\\\", "/");
     }
 }

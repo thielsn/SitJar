@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sit.io.FileHelper;
+import sit.web.HttpConstants;
 import sit.web.ServiceEndpoint;
 import sit.web.WebRequest;
+import sit.web.multipart.MultipartParser;
 
 /**
  *
@@ -27,6 +29,9 @@ public class TestService extends ServiceEndpoint{
         try {
             Logger.getLogger(TestService.class.getName()).log(Level.INFO, "reveived call:\n"+request);
             new FileHelper().writeToFile("request_body", request.body);
+            request.headerItems.get(HttpConstants.CONTENT_TYPE_TAG)
+            MultipartParser.parse(endpointName, null, payload)
+            
             return "OK";
         } catch (IOException ex) {
             Logger.getLogger(TestService.class.getName()).log(Level.SEVERE, null, ex);

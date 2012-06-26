@@ -21,6 +21,7 @@ import java.util.logging.Logger;
  * @author thiel
  */
 class WebWorker implements HttpConstants, Runnable {
+    
 
     
     /*
@@ -137,9 +138,14 @@ class WebWorker implements HttpConstants, Runnable {
                 socket.close();
                 return;
             }
-
-            Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
-                    "request:{0}", request.toString());
+            
+            Logger logger = Logger.getLogger(WebWorker.class.getName());
+            if (logger.getLevel()==Level.FINE){
+                logger.log(Level.FINE,"request:{0}", request.toBriefString());
+            }else if(logger.getLevel()==Level.FINER){
+                logger.log(Level.FINE,"request:{0}", request.toString());
+            }
+            
 
             //if we find a fitting service call the service
             ServiceEndpoint service = ServiceEndpoints.getInstance().getEndpoint(request.fname);
@@ -178,21 +184,21 @@ class WebWorker implements HttpConstants, Runnable {
         Logger.getLogger(WebWorker.class.getName()).log(Level.FINE, "content:\n{0}", content);
 
         ps.print("HTTP/1.0 " + HTTP_OK + " OK");
-        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(CRLF_BYTE);
         ps.print("Server: SIT java");
-        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(CRLF_BYTE);
         ps.print("Date: " + (new Date()));
-        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(CRLF_BYTE);
 
-        ps.print("Content-length: " + content.length());
-        ps.write(HttpConstants.CRLF_BYTE);
+        ps.print(CONTENT_LENGTH_TAG + content.length());
+        ps.write(CRLF_BYTE);
         ps.print("Last Modified: " + Calendar.getInstance().getTime());
-        ps.write(HttpConstants.CRLF_BYTE);
-        ps.print("Content-type: " + contentType);
-        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(CRLF_BYTE);
+        ps.print(CONTENT_TYPE_TAG + contentType);
+        ps.write(CRLF_BYTE);
         ps.print("Connection: close");
-        ps.write(HttpConstants.CRLF_BYTE);
-        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(CRLF_BYTE);
+        ps.write(CRLF_BYTE);
         ps.print(content);
 
 
@@ -226,39 +232,39 @@ class WebWorker implements HttpConstants, Runnable {
         if (result) {
             if (!targetFile.isDirectory()) {
                 ps.print("Content-length: " + targetFile.length());
-                ps.write(HttpConstants.CRLF_BYTE);
+                ps.write(CRLF_BYTE);
                 ps.print("Last Modified: " + (new Date(targetFile.lastModified())));
-                ps.write(HttpConstants.CRLF_BYTE);
+                ps.write(CRLF_BYTE);
                 
                 String contentType = MimeTypes.getMimeTypeFromFileName(targetFile.getName());
                 
-                ps.print("Content-type: " + contentType);
-                ps.write(HttpConstants.CRLF_BYTE);
+                ps.print(CONTENT_TYPE_TAG + contentType);
+                ps.write(CRLF_BYTE);
             } else {
-                ps.print("Content-type: text/html");
-                ps.write(HttpConstants.CRLF_BYTE);
+                ps.print(CONTENT_TYPE_TAG + DEFAULT_MIME_TYPE);
+                ps.write(CRLF_BYTE);
             }
         }
         return result;
     }
 
     private void send404(PrintStream ps) throws IOException {
-        ps.write(HttpConstants.CRLF_BYTE);
-        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(CRLF_BYTE);
+        ps.write(CRLF_BYTE);
         ps.println("<h1>Not Found</h1><br/><br/>\n\n"
                 + "The requested resource was not found.\n");
     }
 
     private void send403(PrintStream ps) throws IOException {
-        ps.write(HttpConstants.CRLF_BYTE);
-        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(CRLF_BYTE);
+        ps.write(CRLF_BYTE);
         ps.println("<h1>Forbidden</h1><br/><br/>\n\n"
                 + "Access to the requested resource was denied.\n");
     }
 
     private void sendFile(File targetFile, PrintStream ps) throws IOException {
         InputStream is = null;
-        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(CRLF_BYTE);
 
         //handle directory
         if (targetFile.isDirectory()) {
@@ -291,7 +297,8 @@ class WebWorker implements HttpConstants, Runnable {
         ps.println("<body><h1>Directory listing</h1>\n");
         ps.println("<p><a href=\"..\">[Parent directory]</a><br/>\n");
         
-        String myPath  = (dir.getPath().length()>0) ? dir.getPath().substring(1) :  "";
+        String myPath  = ServiceEndpointHelper.replaceBackSlashes(
+                (dir.getPath().length()>0) ? dir.getPath().substring(1) :  "");
         
         File[] list = dir.listFiles();
         for (int i = 0; list != null && i < list.length; i++) {

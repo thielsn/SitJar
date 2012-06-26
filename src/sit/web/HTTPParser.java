@@ -15,7 +15,8 @@ import sit.sstl.ByteBuilder;
  * @author Simon Thiel <simon.thiel at gmx.de>
  */
 public class HTTPParser {
-
+    
+    
     public int getCRLFCRLFindex(ByteBuilder data) {
         return data.indexOf(HttpConstants.CRLFCRLF_BYTE);
     }

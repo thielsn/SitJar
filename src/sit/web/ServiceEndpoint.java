@@ -12,6 +12,7 @@ import sit.sstl.ObjectWithKey;
  * @author thiel
  */
 public abstract class ServiceEndpoint implements ObjectWithKey<String>{
+    
 
     protected String endpointName = "";
 
@@ -63,7 +64,7 @@ public abstract class ServiceEndpoint implements ObjectWithKey<String>{
     public abstract String handleCall(WebRequest request);
 
     public String getContentType() {
-        return "text/html";
+        return HttpConstants.DEFAULT_MIME_TYPE;
     }
 
 }

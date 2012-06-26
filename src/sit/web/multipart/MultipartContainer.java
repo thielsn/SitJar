@@ -20,13 +20,7 @@ import sit.web.HttpConstants;
 public class MultipartContainer {
     public static final String FINAL_BORDER = "--"+HttpConstants.CRLF;
     
-    /*
-    POST /path/to/script.php HTTP/1.0
-    Host: example.com
-    Content-type: multipart/form-data, boundary=AaB03x
-    Content-Length: $requestlen
 
---AaB03x */
     
     private String boundary = "----------------"+UUID.randomUUID().toString();
     private String contentType = "multipart/form-data; boundary="+boundary;

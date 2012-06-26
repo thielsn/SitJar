@@ -5,7 +5,6 @@
 package sit.web.client;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -156,7 +155,7 @@ public class HttpHelper {
         connection.setRequestMethod(method);
         connection.setRequestProperty("Host", host);
         connection.setRequestProperty("Content-Type", contentType);
-        connection.setRequestProperty("Content-length", String.valueOf(payload.length));
+        connection.setRequestProperty("Content-Length", String.valueOf(payload.length));
 
         if (isHTTPS) {
             connection.setRequestProperty("Authorization", "Basic " + unamePword64);
@@ -224,7 +223,7 @@ public class HttpHelper {
         connection.setRequestMethod(method);
         connection.setRequestProperty("Host", host);
         connection.setRequestProperty("Content-Type", mpc.getContentType());
-        connection.setRequestProperty("Content-length", ""+length);
+        connection.setRequestProperty("Content-Length", ""+length);
 
         if (isHTTPS) {
             connection.setRequestProperty("Authorization", "Basic " + unamePword64);

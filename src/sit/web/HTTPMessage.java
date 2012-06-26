@@ -5,9 +5,16 @@
 package sit.web;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sit.web.multipart.MultipartParser;
+import sit.web.multipart.TYPES;
 
 /**
  *
@@ -23,9 +30,6 @@ public class HTTPMessage {
     public void setHeader(String header) {
         this.header = header;
     }
-
-
-
 
     private WebRequest parseHTTPHeader(String header){
         
@@ -82,10 +86,18 @@ public class HTTPMessage {
             webRequest.fname = webRequest.fname.substring(1);
         }
 
+        //parse contentType
+        String contentTypeEntry = webRequest.headerItems.get(HttpConstants.CONTENT_TYPE_TAG.trim());  //TODO introduce real handling of Request properties trim is here only required to remove the trailing space :-(
+        if (contentTypeEntry!=null){
+           webRequest.contentType.parseContentType(contentTypeEntry);
+        }
+        
         return webRequest;
     }
 
     boolean hasHeader() {
         return header!=null;
     }
+    
+  
 }
