@@ -70,11 +70,12 @@ public abstract class MultipartEntry {
         DataOutputStream output = new DataOutputStream(out);
                
         // write out the data
-        output.writeBytes(boundary+HttpConstants.CRLF);
+        output.writeBytes(boundary);
+        output.write(HttpConstants.CRLF_BYTE);
         output.writeBytes(getHeader());
 
         writePartContentTo(out);
-        output.writeBytes(HttpConstants.CRLF);
+        output.write(HttpConstants.CRLF_BYTE);
     }
 
     protected abstract void writePartContentTo(OutputStream out) throws IOException;

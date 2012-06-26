@@ -57,7 +57,7 @@ public class MultipartContainer implements Iterable<MultipartEntry> {
 
     public long getContentLength() {
         long result = 0;
-        int boundaryLength = boundary.length()+HttpConstants.CRLF.length();
+        int boundaryLength = boundary.length()+HttpConstants.CRLF_BYTE.length;
         for (MultipartEntry entry : parts){
             result+=boundaryLength;
             result+=entry.getContentLength();
