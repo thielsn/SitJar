@@ -106,6 +106,9 @@ public class WebRequest {
     }
 
     public String getBodyAsString() {
-        return new String(body, contentType.charSet);
+        if (!contentType.charSet.equals(Charset.defaultCharset())){
+            throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+contentType.charSet);
+        }
+        return new String(body);
     }
 }

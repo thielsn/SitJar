@@ -38,7 +38,10 @@ public class HTTPResponse {
     
 
    public String getPayloadAsString(){
-       return new String(payload, charset);
+       if (!charset.equals(Charset.defaultCharset())){
+            throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+charset);
+       }
+       return new String(payload);
    }
 
     @Override

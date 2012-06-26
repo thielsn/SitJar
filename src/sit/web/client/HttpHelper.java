@@ -122,8 +122,10 @@ public class HttpHelper {
         if (charSet!=null){
             contentType += HttpConstants.SUB_FIELD_SEPARATOR+HttpConstants.CHARSET_CONTENT_TYPE_TAG+charSet.name(); //text/html; charset=utf-8
         }
-        
-        return doHTTPRequest(method, host, port, path, payload.getBytes(charSet.name()) ,contentType, isHTTPS, unamePword64);
+        if (!charSet.equals(Charset.defaultCharset())){
+            throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+charSet);
+        }
+        return doHTTPRequest(method, host, port, path, payload.getBytes() ,contentType, isHTTPS, unamePword64);
     
 }
     

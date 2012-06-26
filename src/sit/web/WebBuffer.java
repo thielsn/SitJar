@@ -51,7 +51,7 @@ public class WebBuffer {
 
     @Override
     public String toString() {
-        return new String(buf, 0, readBytes, HttpConstants.DEFAULT_CHARSET);
+        return new String(buf, 0, readBytes);
     }
 
     public int getReadBytes() {

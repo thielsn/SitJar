@@ -48,7 +48,7 @@ public class HTTPParser {
             int myIndex = getCRLFCRLFindex(data);
             if (myIndex != -1) {                                //true in case CRLFCRLF was finaly retrieved and is in data 
                                                                 // (this can only be called once since after this result.hasHeader()==finished==true)
-                result.setHeader(new String(data.subSequence(0, myIndex), HttpConstants.DEFAULT_CHARSET));
+                result.setHeader(new String(data.subSequence(0, myIndex)));
                 //remaining part is reserved for the body
                 if (data.size() > myIndex + HttpConstants.CRLFCRLF_BYTE.length) {
                     data = new ByteBuilder(data.subSequence(myIndex + HttpConstants.CRLFCRLF_BYTE.length)); //remove headerpart from data, but keep additional data read

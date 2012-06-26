@@ -31,17 +31,20 @@ public class MultipartParser {
 
         MultipartContainer result = new MultipartContainer();
 
-        byte[] boundary = boundaryStr.getBytes(charSet.name());
+        if (!charSet.equals(Charset.defaultCharset())) {
+            throw new RuntimeException("other charsets than " + Charset.defaultCharset() + " not allowed in this implementation! charset:" + charSet);
+        }
+        byte[] boundary = boundaryStr.getBytes();
         ByteBuilder content = new ByteBuilder(payload);
 
 
-        int oldIndex = boundary.length+HttpConstants.CRLF_BYTE.length;
+        int oldIndex = boundary.length + HttpConstants.CRLF_BYTE.length;
 
         int index;
         while (-1 != (index = content.indexOf(oldIndex, boundary))) {
 
             result.addPart(parsePart(charSet, content.subSequence(oldIndex, index)));
-            oldIndex = index + boundary.length+HttpConstants.CRLF_BYTE.length;
+            oldIndex = index + boundary.length + HttpConstants.CRLF_BYTE.length;
         }
 
 
@@ -63,7 +66,10 @@ public class MultipartParser {
             return null;
         }
         //TODO  re-use HTTPMessage parser for parsing the headers !!!
-        String header = new String(content.subSequence(0, endOfHeader), charSet);
+        if (!charSet.equals(Charset.defaultCharset())) {
+            throw new RuntimeException("other charsets than " + Charset.defaultCharset() + " not allowed in this implementation! charset:" + charSet);
+        }
+        String header = new String(content.subSequence(0, endOfHeader));
 
         HashMap<String, String> headerFields = HTTPParseHelper.parseAndFillFittingValues(
                 new String[]{HttpConstants.CONTENT_DISPOSITION_TAG,
@@ -107,7 +113,11 @@ public class MultipartParser {
         if (type.equals(TYPES.BINARY)) {
             result = new MPFileEntry(type, contentType.mimeType, name, fileName, content.subSequence(endOfHeader + HttpConstants.CRLFCRLF_BYTE.length));
         } else {
-            result = new MPTextEntry(type, contentType.mimeType, name, new String(content.subSequence(endOfHeader + HttpConstants.CRLFCRLF_BYTE.length), charSet));
+            if (!charSet.equals(Charset.defaultCharset())) {
+                throw new RuntimeException("other charsets than " + Charset.defaultCharset() + " not allowed in this implementation! charset:" + charSet);
+            }
+            result = new MPTextEntry(type, contentType.mimeType, name,
+                    new String(content.subSequence(endOfHeader + HttpConstants.CRLFCRLF_BYTE.length)));
         }
         return result;
 
