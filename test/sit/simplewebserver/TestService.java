@@ -13,7 +13,6 @@ import sit.web.HttpConstants;
 import sit.web.ServiceEndpoint;
 import sit.web.WebRequest;
 import sit.web.multipart.MPFileEntry;
-import sit.web.multipart.MultiPartService;
 import sit.web.multipart.MultipartContainer;
 import sit.web.multipart.MultipartEntry;
 import sit.web.multipart.MultipartParser;
@@ -31,7 +30,7 @@ public class TestService extends ServiceEndpoint{
 
     
     @Override
-    public String handleCall(WebRequest request) {
+    public byte[] handleCall(WebRequest request) {
         try {
             Logger.getLogger(TestService.class.getName()).log(Level.INFO, "reveived call:\n"+request);
             new FileHelper().writeToFile("request_body", request.body);
@@ -51,10 +50,10 @@ public class TestService extends ServiceEndpoint{
             }
             
             
-            return "OK";
+            return "OK".getBytes();
         } catch (IOException ex) {
             Logger.getLogger(TestService.class.getName()).log(Level.SEVERE, null, ex);
-            return ex.getMessage();
+            return ex.getMessage().getBytes();
         }
         
     }

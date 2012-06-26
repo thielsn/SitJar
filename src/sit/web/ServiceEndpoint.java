@@ -5,6 +5,7 @@
 
 package sit.web;
 
+import java.nio.charset.Charset;
 import sit.sstl.ObjectWithKey;
 
 /**
@@ -61,10 +62,46 @@ public abstract class ServiceEndpoint implements ObjectWithKey<String>{
      * @param request
      * @return 
      */
-    public abstract String handleCall(WebRequest request);
+    public abstract byte[] handleCall(WebRequest request);
 
-    public String getContentType() {
+    /**
+     * override this for returning different mime-type (is granted to get called after handle call by the web-server)
+     * @return 
+     */
+    public String getMimeType() {
         return HttpConstants.DEFAULT_MIME_TYPE;
+    }
+    
+    /**
+     * to be overridden by extending classes
+     * specifies Charset to be used for reply set to null in case no charset field should be sent 
+     * 
+     * @return 
+     */
+    public Charset getCharSet() {
+        return Charset.defaultCharset();
+    }
+    
+    
+    /**
+     * returns full set content type as required by HTTP-header field Content-Type
+     * previous inherited implementations of getContentType should now override <code>getMimeType()</code>
+     * @return 
+     */
+    private String getContentType() {
+        String result = getMimeType();
+        if (getCharSet()!=null){
+            result += HttpConstants.SUB_FIELD_SEPARATOR+HttpConstants.CHARSET_CONTENT_TYPE_TAG+getCharSet().name();
+         }
+        return result;
+    }
+    
+    /**
+     * replaces getContentType to enforce changes in the overriding classes (previously getContentType only returned the mimetype)
+     * @return 
+     */
+    protected String getContentTypeAsString(){
+       return getContentType(); 
     }
 
 }

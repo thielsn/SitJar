@@ -7,10 +7,12 @@ package sit.web;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
@@ -21,9 +23,7 @@ import java.util.logging.Logger;
  * @author thiel
  */
 class WebWorker implements HttpConstants, Runnable {
-    
 
-    
     /*
      * buffer to use for requests
      */
@@ -138,14 +138,14 @@ class WebWorker implements HttpConstants, Runnable {
                 socket.close();
                 return;
             }
-            
+
             Logger logger = Logger.getLogger(WebWorker.class.getName());
-            if (logger.getLevel()==Level.FINE){
-                logger.log(Level.FINE,"request:{0}", request.toBriefString());
-            }else if(logger.getLevel()==Level.FINER){
-                logger.log(Level.FINE,"request:{0}", request.toString());
+            if (logger.getLevel() == Level.FINE) {
+                logger.log(Level.FINE, "request:{0}", request.toBriefString());
+            } else if (logger.getLevel() == Level.FINER) {
+                logger.log(Level.FINE, "request:{0}", request.toString());
             }
-            
+
 
             //if we find a fitting service call the service
             ServiceEndpoint service = ServiceEndpoints.getInstance().getEndpoint(request.fname);
@@ -153,7 +153,7 @@ class WebWorker implements HttpConstants, Runnable {
                 Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
                         "found service:" + service.getEndpointName());
 
-                printDynamicPage(service.getContentType(), service.handleCall(request), ps);
+                printDynamicPage(service.getContentTypeAsString(), service.getCharSet(), service.handleCall(request), ps);
             } else {
 
                 //look for a fitting file/directory
@@ -178,28 +178,32 @@ class WebWorker implements HttpConstants, Runnable {
         }
     }
 
-    private void printDynamicPage(String contentType, String content, PrintStream ps)
+    private void printDynamicPage(String contentType, Charset charSet, byte[] content, FilterOutputStream output)
             throws IOException {
+
+        if (charSet == null) {
+            charSet = DEFAULT_CHARSET;
+        }
 
         Logger.getLogger(WebWorker.class.getName()).log(Level.FINE, "content:\n{0}", content);
 
-        ps.print("HTTP/1.0 " + HTTP_OK + " OK");
-        ps.write(CRLF_BYTE);
-        ps.print("Server: SIT java");
-        ps.write(CRLF_BYTE);
-        ps.print("Date: " + (new Date()));
-        ps.write(CRLF_BYTE);
+        output.write(("HTTP/1.0 " + HTTP_OK + " OK").getBytes(charSet));
+        output.write(CRLF_BYTE);
+        output.write(("Server: SIT java").getBytes(charSet));
+        output.write(CRLF_BYTE);
+        output.write(("Date: " + (new Date())).getBytes(charSet));
+        output.write(CRLF_BYTE);
 
-        ps.print(CONTENT_LENGTH_TAG + content.length());
-        ps.write(CRLF_BYTE);
-        ps.print("Last Modified: " + Calendar.getInstance().getTime());
-        ps.write(CRLF_BYTE);
-        ps.print(CONTENT_TYPE_TAG + contentType);
-        ps.write(CRLF_BYTE);
-        ps.print("Connection: close");
-        ps.write(CRLF_BYTE);
-        ps.write(CRLF_BYTE);
-        ps.print(content);
+        output.write((CONTENT_LENGTH_TAG + content.length).getBytes(charSet));
+        output.write(CRLF_BYTE);
+        output.write(("Last Modified: " + Calendar.getInstance().getTime()).getBytes(charSet));
+        output.write(CRLF_BYTE);
+        output.write((CONTENT_TYPE_TAG + contentType).getBytes(charSet));
+        output.write(CRLF_BYTE);
+        output.write(("Connection: close").getBytes(charSet));
+        output.write(CRLF_BYTE);
+        output.write(CRLF_BYTE);
+        output.write(content);
 
 
     }
@@ -235,9 +239,9 @@ class WebWorker implements HttpConstants, Runnable {
                 ps.write(CRLF_BYTE);
                 ps.print("Last Modified: " + (new Date(targetFile.lastModified())));
                 ps.write(CRLF_BYTE);
-                
+
                 String contentType = MimeTypes.getMimeTypeFromFileName(targetFile.getName());
-                
+
                 ps.print(CONTENT_TYPE_TAG + contentType);
                 ps.write(CRLF_BYTE);
             } else {
@@ -296,22 +300,19 @@ class WebWorker implements HttpConstants, Runnable {
 
         ps.println("<body><h1>Directory listing</h1>\n");
         ps.println("<p><a href=\"..\">[Parent directory]</a><br/>\n");
-        
-        String myPath  = ServiceEndpointHelper.replaceBackSlashes(
-                (dir.getPath().length()>0) ? dir.getPath().substring(1) :  "");
-        
+
+        String myPath = ServiceEndpointHelper.replaceBackSlashes(
+                (dir.getPath().length() > 0) ? dir.getPath().substring(1) : "");
+
         File[] list = dir.listFiles();
         for (int i = 0; list != null && i < list.length; i++) {
             File f = list[i];
             if (f.isDirectory()) {
                 ps.println("<a href=\"/" + myPath + "/" + f.getName() + "/\">" + f.getName() + "/</a><br/>\n");
             } else {
-                ps.println("<a href=\"/" + myPath + "/" + f.getName() + "\">" + f.getName()+ "</a><br/>\n");
+                ps.println("<a href=\"/" + myPath + "/" + f.getName() + "\">" + f.getName() + "</a><br/>\n");
             }
         }
         ps.println("<br/></p><p><hr></p><p><i>" + (new Date()) + "</i></p></body></html>");
     }
-
-
-    
 }

@@ -5,8 +5,6 @@
 package sit.json;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,6 +19,8 @@ import java.util.logging.Logger;
  */
 public class JSONObject implements Iterable<Map.Entry<String, JSONObject>> {
 
+    public static String JSON_MIME_TYPE = "application/json";
+    
     public final static int JSON_TYPE_OBJECT = 0;
     public final static int JSON_TYPE_COLLECTION = 1;
     public final static int JSON_TYPE_QUOTED_VALUE = 2;

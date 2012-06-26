@@ -190,6 +190,7 @@ public class MimeTypes {
         myMimeTypes.put(".jpg", "image/jpeg");
         myMimeTypes.put(".jps", "image/x-jps");
         myMimeTypes.put(".js", "text/javascript"); // JavaScript-File
+        myMimeTypes.put(".json", "application/json"); // Json        
         myMimeTypes.put(".jut", "image/jutvision");
         myMimeTypes.put(".kar", "audio/midi");
         myMimeTypes.put(".ksh", "application/x-ksh");

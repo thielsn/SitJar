@@ -37,12 +37,14 @@ public class HTTPResponse {
 
     
 
-   
+   public String getPayloadAsString(){
+       return new String(payload, charset);
+   }
 
     @Override
     public String toString() {
         String result = "call:" + call;
-        result += "\npayload:\n" + new String(payload, charset) + "\ncode:" + code + "\nmessage:\n" + message + "\nreply:\n" + reply;
+        result += "\npayload:\n" + getPayloadAsString() + "\ncode:" + code + "\nmessage:\n" + message + "\nreply:\n" + reply;
         return result;
     }
 
