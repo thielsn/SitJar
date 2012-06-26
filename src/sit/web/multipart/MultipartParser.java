@@ -6,6 +6,7 @@ package sit.web.multipart;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
@@ -26,11 +27,11 @@ import sit.web.WebRequest.ContentType;
  */
 public class MultipartParser {
 
-    public static MultipartContainer parse(String boundaryStr, Charset charSet, byte[] payload) {
+    public static MultipartContainer parse(String boundaryStr, Charset charSet, byte[] payload) throws UnsupportedEncodingException {
 
         MultipartContainer result = new MultipartContainer();
 
-        byte[] boundary = boundaryStr.getBytes(charSet);
+        byte[] boundary = boundaryStr.getBytes(charSet.name());
         ByteBuilder content = new ByteBuilder(payload);
 
 

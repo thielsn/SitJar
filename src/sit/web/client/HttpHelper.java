@@ -123,7 +123,7 @@ public class HttpHelper {
             contentType += HttpConstants.SUB_FIELD_SEPARATOR+HttpConstants.CHARSET_CONTENT_TYPE_TAG+charSet.name(); //text/html; charset=utf-8
         }
         
-        return doHTTPRequest(method, host, port, path, payload.getBytes(charSet) ,contentType, isHTTPS, unamePword64);
+        return doHTTPRequest(method, host, port, path, payload.getBytes(charSet.name()) ,contentType, isHTTPS, unamePword64);
     
 }
     
