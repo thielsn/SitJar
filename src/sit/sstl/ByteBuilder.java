@@ -38,20 +38,25 @@ import java.util.List;
  */
 public class ByteBuilder {
 
-    public static final int CHUNK_SIZE = 4096;
+    
+    public static final int DEFAULT_CHUNK_SIZE = 4096;    
+    private final int chunkSize;
 
     private class SequenceFinder {
 
         private byte[] searchSeq;
         private int nextByteToFindIndex = 0;
         private int index = 0;
+        private int startSearchIndex;
 
-        SequenceFinder(byte[] searchSeq) {
+        SequenceFinder(byte[] searchSeq, int startSearchIndex) {
             this.searchSeq = searchSeq;
+            this.startSearchIndex = startSearchIndex;
         }
 
         boolean handleNextByte(byte myByte) {
-            if (myByte == searchSeq[nextByteToFindIndex]) {
+            if ((index >= startSearchIndex)
+                    && (myByte == searchSeq[nextByteToFindIndex])) {
                 nextByteToFindIndex++;
                 if (nextByteToFindIndex == searchSeq.length) {
                     return true;
@@ -79,9 +84,11 @@ public class ByteBuilder {
     private byte[] response = null;
 
     public ByteBuilder() {
+        chunkSize = DEFAULT_CHUNK_SIZE;
     }
 
     public ByteBuilder(byte[] bytes) {
+        chunkSize = bytes.length;
         append(bytes);
     }
 
@@ -108,15 +115,15 @@ public class ByteBuilder {
         response = null; //tell the toByteArray() to reconstruct the final response when called (dirty flag)
 
         if (bytesList.isEmpty()) {
-            newBytes = new byte[CHUNK_SIZE];
+            newBytes = new byte[chunkSize];
             bytesList.add(newBytes);
             fillIndex = 0;
         } else {
             newBytes = bytesList.get(bytesList.size() - 1);
         }
         for (int i = 0; i < bytesToAppend; i++) {
-            if (fillIndex == CHUNK_SIZE) { //create and add new byte array
-                newBytes = new byte[CHUNK_SIZE];
+            if (fillIndex == chunkSize) { //create and add new byte array
+                newBytes = new byte[chunkSize];
                 bytesList.add(newBytes);
                 fillIndex = 0;
             }
@@ -139,9 +146,9 @@ public class ByteBuilder {
         }
         response = null; //tell the toByteArray() to reconstruct the final response when called
 
-        while (remainingBytes >= CHUNK_SIZE) {
+        while (remainingBytes >= chunkSize) {
             bytesList.remove(0);
-            remainingBytes -= CHUNK_SIZE;
+            remainingBytes -= chunkSize;
         }
         startIndex = remainingBytes;
 
@@ -154,7 +161,7 @@ public class ByteBuilder {
         if (bytesList.isEmpty()) {
             return 0;
         }
-        return (bytesList.size() * CHUNK_SIZE) - (CHUNK_SIZE - fillIndex) - startIndex;
+        return (bytesList.size() * chunkSize) - (chunkSize - fillIndex) - startIndex;
     }
 
     public byte[] toByteArray() {
@@ -168,11 +175,11 @@ public class ByteBuilder {
             for (int i = 0; i < bytesList.size() - 1; i++) {
                 byte[] curBytes = bytesList.get(i);
                 if (i == 0) {
-                    for (int j = startIndex; j < CHUNK_SIZE; j++) {
+                    for (int j = startIndex; j < chunkSize; j++) {
                         response[index++] = curBytes[j];
                     }
                 } else {
-                    for (int j = 0; j < CHUNK_SIZE; j++) {
+                    for (int j = 0; j < chunkSize; j++) {
                         response[index++] = curBytes[j];
                     }
                 }
@@ -200,22 +207,38 @@ public class ByteBuilder {
      * @throws NullPointerException - if sequence is null.
      */
     public int indexOf(byte[] sequence) {
+        return indexOf(0, sequence);
+    }
+
+    /**
+     * Returns the index within this ByteArray of the first occurrence of the
+     * specified ByteArray.
+     *
+     * @param sequence
+     * @param startSearchIndex starting to search from (inclusive)
+     * startSearchIndex
+     * @return if the argument occurs as a sequence within this object, then the
+     * index of the byte of the first such subsequence is returned; if it does
+     * not occur or in case sequence.length>size(), -1 is returned.
+     * @throws NullPointerException - if sequence is null.
+     */
+    public int indexOf(int startSearchIndex, byte[] sequence) {
 
         if (sequence.length > size()) {
             return -1;
         }
-        SequenceFinder sq = new SequenceFinder(sequence);
+        SequenceFinder sq = new SequenceFinder(sequence, startSearchIndex);
 
         for (int i = 0; i < bytesList.size() - 1; i++) { //traverse the full chunks
             byte[] curBytes = bytesList.get(i);
             if (i == 0) { // skip startIndex bytes at the first chunk
-                for (int j = startIndex; j < CHUNK_SIZE; j++) {
+                for (int j = startIndex; j < chunkSize; j++) {
                     if (sq.handleNextByte(curBytes[j])) {
                         return sq.getResult();
                     }
                 }
             } else {
-                for (int j = 0; j < CHUNK_SIZE; j++) {
+                for (int j = 0; j < chunkSize; j++) {
                     if (sq.handleNextByte(curBytes[j])) {
                         return sq.getResult();
                     }
@@ -233,13 +256,14 @@ public class ByteBuilder {
 
     /**
      *
-     * @param startIndex return subsequence starting at startIndex inclusive until the end of the ByteList          
+     * @param startIndex return subsequence starting at startIndex inclusive
+     * until the end of the ByteList
      * @return
      */
     public byte[] subSequence(int startIndex) {
         return subSequence(startIndex, size());
     }
-    
+
     /**
      *
      * @param startIndex return subsequence starting at startIndex inclusive
@@ -255,14 +279,14 @@ public class ByteBuilder {
         for (int i = 0; i < bytesList.size() - 1; i++) { //traverse the full chunks
             byte[] curBytes = bytesList.get(i);
             if (i == 0) { // skip startIndex bytes at the first chunk
-                for (int j = startIndex; j < CHUNK_SIZE; j++) {
+                for (int j = startIndex; j < chunkSize; j++) {
                     if (index >= startIndex && index < endIndex) {
                         result[resIndex++] = curBytes[j];
                     }
                     index++;
                 }
             } else {
-                for (int j = 0; j < CHUNK_SIZE; j++) {
+                for (int j = 0; j < chunkSize; j++) {
                     if (index >= startIndex && index < endIndex) {
                         result[resIndex++] = curBytes[j];
                     }

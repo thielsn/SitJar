@@ -23,6 +23,30 @@ public class WebRequest {
 
     public Hashtable<String,String> headerItems = null;
 
+    
+    
+    
+    
+    public String toBriefString() {
+        String result = httpCommand+" "+ fname;
+        if (param != null) {
+            result += "?"+ param;
+        }        
+        if (headerItems != null){
+            result += "\nHeader:\n";
+            for (Entry<String,String> headerEntry: headerItems.entrySet()){
+                result += headerEntry.getKey()+": "+headerEntry.getValue()+"\n";
+            }            
+            result += "\n";
+        }
+        if (body != null){
+            result += "\nBody: ("+body.length+" bytes)";
+        }
+        return result;
+    }
+    
+    
+    
     @Override
     public String toString() {
         String result = httpCommand+" "+ fname;
@@ -37,16 +61,11 @@ public class WebRequest {
             result += "\n";
         }
         if (body != null){
-            result += "\nBody:\n"+body+"\n----\n";
+            result += "\nBody:\n"+getBodyAsString()+"\n----\n";
         }
         return result;
     }
-    public String getBodyAsString(){
-        try {
-            return new String(body,"utf8");
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(WebRequest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+    public String getBodyAsString(){       
+        return new String(body,HttpConstants.DEFAULT_CHARSET);       
     }
 }

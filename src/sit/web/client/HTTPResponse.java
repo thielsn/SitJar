@@ -19,11 +19,11 @@ public class HTTPResponse {
     public String message = "";
     /** http response code from the call */
     public int code = -1;    
-    public final String payload;
+    public final byte[] payload;
     public String reply = "";
 
 
-    public HTTPResponse(String call, String payload) {
+    public HTTPResponse(String call, byte[] payload) {
 
         this.call = call;
         this.payload = payload;

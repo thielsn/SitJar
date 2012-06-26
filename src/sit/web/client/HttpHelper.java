@@ -6,6 +6,7 @@ package sit.web.client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -13,10 +14,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import sit.web.HttpConstants;
+import sit.web.MimeTypes;
 import sit.web.multipart.MultipartContainer;
 
 /**
@@ -24,6 +27,7 @@ import sit.web.multipart.MultipartContainer;
  * @author simon
  */
 public class HttpHelper {
+    
 
     public static String encodeString(String myString) {
         if (myString == null) {
@@ -63,6 +67,57 @@ public class HttpHelper {
     public HttpHelper(String sslContext) {
         HTTPUrlConnectionHelper.initAllTrustingManager(sslContext);
     }
+    
+    /**
+ * 
+ *  
+ * @param method
+ * @param host
+ * @param port
+ * @param path
+ * @param payload
+ * @param mimeType mimetype as string e.g. "application/json" will be added to the content type of the http call
+ * @param isHTTPS
+ * @param unamePword64
+ * @return
+ * @throws MalformedURLException
+ * @throws ProtocolException
+ * @throws IOException 
+ */
+    public HTTPResponse doHTTPRequest(String method, String host, int port, String path, String payload, String mimeType,
+            boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException {
+        
+        
+        return doHTTPRequest(method, host, port, path, payload, mimeType, Charset.defaultCharset(), isHTTPS, unamePword64);
+    }
+    
+        /**
+ * 
+ *  
+ * @param method
+ * @param host
+ * @param port
+ * @param path
+ * @param payload
+ * @param mimeType mimetype as string e.g. "application/json" will be added to the content type of the http call
+ * @param isHTTPS
+ * @param unamePword64
+ * @return
+ * @throws MalformedURLException
+ * @throws ProtocolException
+ * @throws IOException 
+ */
+    public HTTPResponse doHTTPRequest(String method, String host, int port, String path, String payload, String mimeType, Charset charSet,
+            boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException {
+        
+        if (mimeType==null || mimeType.isEmpty()){
+            mimeType = MimeTypes.getMimeType(""); //get unknown mime type if mimetype not set
+        }
+        String contentType = mimeType+"; "+HttpConstants.CHARSET_CONTENT_TYPE_TAG+charSet.name(); //text/html; charset=utf-8
+        return doHTTPRequest(method, host, port, path, payload.getBytes(charSet) ,contentType, isHTTPS, unamePword64);
+    
+}
+    
 /**
  * 
  *  
@@ -79,11 +134,11 @@ public class HttpHelper {
  * @throws ProtocolException
  * @throws IOException 
  */
-    public HTTPResponse doHTTPRequest(String method, String host, int port, String path, String payload, String contentType,
+    public HTTPResponse doHTTPRequest(String method, String host, int port, String path, byte[] payload, String contentType,
             boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException {
 
         if (payload == null) { //make sure payload is initialized
-            payload = "";
+            payload = new byte[0];
         }
 
         URL url = getURL(host, port, path, isHTTPS);
@@ -101,7 +156,7 @@ public class HttpHelper {
         connection.setRequestMethod(method);
         connection.setRequestProperty("Host", host);
         connection.setRequestProperty("Content-Type", contentType);
-        connection.setRequestProperty("Content-length", String.valueOf(payload.length()));
+        connection.setRequestProperty("Content-length", String.valueOf(payload.length));
 
         if (isHTTPS) {
             connection.setRequestProperty("Authorization", "Basic " + unamePword64);
@@ -109,13 +164,13 @@ public class HttpHelper {
 
 
         connection.setDoInput(true);
-        if (payload.length() > 0) {
+        if (payload.length > 0) {
             // open up the output stream of the connection
             connection.setDoOutput(true);
-            DataOutputStream output = new DataOutputStream(connection.getOutputStream());
+            FilterOutputStream output = new FilterOutputStream(connection.getOutputStream());
 
             // write out the data
-            output.writeBytes(payload);
+            output.write(payload);
             output.close();
         }
 
@@ -187,7 +242,7 @@ public class HttpHelper {
             output.close();
         }
 
-        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), "[multipart content]");
+        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), "[multipart content]".getBytes());
 
 
         response.code = connection.getResponseCode();
