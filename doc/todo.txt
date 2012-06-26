@@ -1,3 +1,5 @@
+
+* use long for content-length
 * Refactor WebBuffer: printstream is not actually used (change interfaces for FilterOutputStream )
 * Correct Handling of Multipart messages (and other binary content) on the server - currently everything is handled as UTF-8
 *  correct set and handle charset in http calls 

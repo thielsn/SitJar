@@ -5,16 +5,9 @@
 package sit.web;
 
 import java.io.File;
-import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sit.web.multipart.MultipartParser;
-import sit.web.multipart.TYPES;
 
 /**
  *

@@ -69,7 +69,7 @@ public class HttpHelper {
     
     /**
  * 
- *  
+ * convenient call, sets charSet automatically to <code>Charset.defaultCharset()</code>
  * @param method
  * @param host
  * @param port
@@ -99,6 +99,7 @@ public class HttpHelper {
  * @param path
  * @param payload
  * @param mimeType mimetype as string e.g. "application/json" will be added to the content type of the http call
+ * @param charSet set charSet to null to omit sending a char flag (e.g. for binary files)
  * @param isHTTPS
  * @param unamePword64
  * @return
@@ -112,7 +113,11 @@ public class HttpHelper {
         if (mimeType==null || mimeType.isEmpty()){
             mimeType = MimeTypes.getMimeType(""); //get unknown mime type if mimetype not set
         }
-        String contentType = mimeType+"; "+HttpConstants.CHARSET_CONTENT_TYPE_TAG+charSet.name(); //text/html; charset=utf-8
+        String contentType = mimeType;
+        if (charSet!=null){
+            contentType += HttpConstants.SUB_FIELD_SEPARATOR+HttpConstants.CHARSET_CONTENT_TYPE_TAG+charSet.name(); //text/html; charset=utf-8
+        }
+        
         return doHTTPRequest(method, host, port, path, payload.getBytes(charSet) ,contentType, isHTTPS, unamePword64);
     
 }
@@ -151,7 +156,6 @@ public class HttpHelper {
             connection = (HttpURLConnection) url.openConnection();
         }
 
-
         connection.setRequestMethod(method);
         connection.setRequestProperty("Host", host);
         connection.setRequestProperty("Content-Type", contentType);
@@ -160,7 +164,6 @@ public class HttpHelper {
         if (isHTTPS) {
             connection.setRequestProperty("Authorization", "Basic " + unamePword64);
         }
-
 
         connection.setDoInput(true);
         if (payload.length > 0) {
@@ -174,7 +177,6 @@ public class HttpHelper {
         }
 
         HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload, HttpConstants.DEFAULT_CHARSET); //TODO forward charset ot this method
-
 
         response.code = connection.getResponseCode();
         response.message = connection.getResponseMessage();

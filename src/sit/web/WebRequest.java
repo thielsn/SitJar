@@ -78,7 +78,7 @@ public class WebRequest {
         if (headerItems != null) {
             result += "\nHeader:\n";
             for (Entry<String, String> headerEntry : headerItems.entrySet()) {
-                result += headerEntry.getKey() + ": " + headerEntry.getValue() + "\n";
+                result += headerEntry.getKey() + " " + headerEntry.getValue() + "\n";
             }
             result += "\n";
         }
@@ -97,7 +97,7 @@ public class WebRequest {
         if (headerItems != null) {
             result += "\nHeader:\n";
             for (Entry<String, String> headerEntry : headerItems.entrySet()) {
-                result += headerEntry.getKey() + ": " + headerEntry.getValue() + "\n";
+                result += headerEntry.getKey() + " " + headerEntry.getValue() + "\n";
             }
             result += "\n";
         }
