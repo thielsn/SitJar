@@ -8,6 +8,7 @@
 package sit.simplewebserver;
 
 import java.nio.charset.Charset;
+import sit.web.client.HttpHelper;
 
 /**
  * PrintCharSets
@@ -25,8 +26,8 @@ public class PrintCharSets {
 //            
             System.out.println(charSet.displayName()+";"+charSet.name()+";"+charSet.toString());
         }
+     
         
         
-        System.out.println("012345".length()+"-" + "012345".substring(6)+"-");
     }
 }
