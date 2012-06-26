@@ -25,8 +25,13 @@ import sit.web.multipart.MultipartContainer;
  *
  * @author simon
  */
+
+import sit.tools.Base64;
 public class HttpHelper {
-    
+
+    public static String getBase64UserNamePwdToken(String username, String password){
+        return Base64.encodeBytes((username+":"+password).getBytes());
+    }
 
     public static String encodeString(String myString) {
         if (myString == null) {

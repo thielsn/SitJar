@@ -67,8 +67,8 @@ public interface HttpConstants {
     public static final byte[] CRLF_BYTE = {(byte) '\r', (byte) '\n'};
     public static final byte[] CRLFCRLF_BYTE = {(byte) '\r', (byte) '\n', (byte) '\r', (byte) '\n'};
  
-    public static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
-    //public static final Charset DEFAULT_CHARSET = Charset.forName("US-ASCII");
+    //public static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
+    public static final Charset DEFAULT_CHARSET = Charset.forName("US-ASCII");
     
     public static final String DEFAULT_MIME_TYPE = "text/html";
     public static final String MULTIPART_MIME_TYPE = "multipart/form-data";
