@@ -109,7 +109,7 @@ class WebWorker implements HttpConstants, Runnable {
                 ps.print("HTTP/1.0 " + HTTP_BAD_METHOD
                         + " unsupported method type: ");
                 buf.writeToOutStream(ps, 0, 5);
-                ps.write(WebBuffer.EOL);
+                ps.write(HttpConstants.CRLF_BYTE);
                 ps.flush();
                 socket.close();
                 return;
@@ -119,7 +119,7 @@ class WebWorker implements HttpConstants, Runnable {
                         + " Entity Too Large";
                 Logger.getLogger(WebWorker.class.getName()).log(Level.WARNING, message);
                 ps.print(message);
-                ps.write(WebBuffer.EOL);
+                ps.write(HttpConstants.CRLF_BYTE);
                 ps.flush();
                 socket.close();
                 return;
@@ -128,7 +128,7 @@ class WebWorker implements HttpConstants, Runnable {
                         + " Internal Server Error";
                 Logger.getLogger(WebWorker.class.getName()).log(Level.WARNING, message + "\n" + ex.getMessage());
                 ps.print(message + "\n" + ex.getMessage());
-                ps.write(WebBuffer.EOL);
+                ps.write(HttpConstants.CRLF_BYTE);
                 ps.flush();
                 socket.close();
                 return;
@@ -178,21 +178,21 @@ class WebWorker implements HttpConstants, Runnable {
         Logger.getLogger(WebWorker.class.getName()).log(Level.FINE, "content:\n{0}", content);
 
         ps.print("HTTP/1.0 " + HTTP_OK + " OK");
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
         ps.print("Server: SIT java");
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
         ps.print("Date: " + (new Date()));
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
 
         ps.print("Content-length: " + content.length());
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
         ps.print("Last Modified: " + Calendar.getInstance().getTime());
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
         ps.print("Content-type: " + contentType);
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
         ps.print("Connection: close");
-        ps.write(WebBuffer.EOL);
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(HttpConstants.CRLF_BYTE);
         ps.print(content);
 
 
@@ -205,12 +205,12 @@ class WebWorker implements HttpConstants, Runnable {
         if (!targetFile.exists()) {
             returnCode = HTTP_NOT_FOUND;
             ps.print("HTTP/1.0 " + HTTP_NOT_FOUND + " not found");
-            ps.write(WebBuffer.EOL);
+            ps.write(HttpConstants.CRLF_BYTE);
             result = false;
         } else {
             returnCode = HTTP_OK;
             ps.print("HTTP/1.0 " + HTTP_OK + " OK");
-            ps.write(WebBuffer.EOL);
+            ps.write(HttpConstants.CRLF_BYTE);
             result = true;
         }
         Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
@@ -219,46 +219,46 @@ class WebWorker implements HttpConstants, Runnable {
                     targetFile.getAbsolutePath(), returnCode});
 
         ps.print("Server: SIT java");
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
         ps.print("Date: " + (new Date()));
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
 
         if (result) {
             if (!targetFile.isDirectory()) {
                 ps.print("Content-length: " + targetFile.length());
-                ps.write(WebBuffer.EOL);
+                ps.write(HttpConstants.CRLF_BYTE);
                 ps.print("Last Modified: " + (new Date(targetFile.lastModified())));
-                ps.write(WebBuffer.EOL);
+                ps.write(HttpConstants.CRLF_BYTE);
                 
                 String contentType = MimeTypes.getMimeTypeFromFileName(targetFile.getName());
                 
                 ps.print("Content-type: " + contentType);
-                ps.write(WebBuffer.EOL);
+                ps.write(HttpConstants.CRLF_BYTE);
             } else {
                 ps.print("Content-type: text/html");
-                ps.write(WebBuffer.EOL);
+                ps.write(HttpConstants.CRLF_BYTE);
             }
         }
         return result;
     }
 
     private void send404(PrintStream ps) throws IOException {
-        ps.write(WebBuffer.EOL);
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(HttpConstants.CRLF_BYTE);
         ps.println("<h1>Not Found</h1><br/><br/>\n\n"
                 + "The requested resource was not found.\n");
     }
 
     private void send403(PrintStream ps) throws IOException {
-        ps.write(WebBuffer.EOL);
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
+        ps.write(HttpConstants.CRLF_BYTE);
         ps.println("<h1>Forbidden</h1><br/><br/>\n\n"
                 + "Access to the requested resource was denied.\n");
     }
 
     private void sendFile(File targetFile, PrintStream ps) throws IOException {
         InputStream is = null;
-        ps.write(WebBuffer.EOL);
+        ps.write(HttpConstants.CRLF_BYTE);
 
         //handle directory
         if (targetFile.isDirectory()) {

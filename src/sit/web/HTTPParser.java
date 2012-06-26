@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sit.sstl.ByteBuilder;
 
 /**
  *
@@ -15,8 +16,8 @@ import java.util.logging.Logger;
  */
 public class HTTPParser {
 
-    public int getCRLFCRLFindex(StringBuilder data) {
-        return data.indexOf(HttpConstants.CRLFCRLF);
+    public int getCRLFCRLFindex(ByteBuilder data) {
+        return data.indexOf(HttpConstants.CRLFCRLF_BYTE);
     }
 
     private boolean proceedToRead(WebBuffer buf, InputStream is, boolean finished) throws IOException {
@@ -36,22 +37,22 @@ public class HTTPParser {
     public HTTPMessage getHeaderAndBody(InputStream is, WebBuffer buf) throws IOException, MessageTooLargeException, HTTPParseException {
         HTTPMessage result = new HTTPMessage();
 
-        StringBuilder data = new StringBuilder("");
+        ByteBuilder data = new ByteBuilder();
         buf.init();
 
         //get header
         while (proceedToRead(buf, is, (result.hasHeader()))) {
 
-            data.append(buf.toString());
+            data.append(buf.getBuffer(), buf.getReadBytes());
             int myIndex = getCRLFCRLFindex(data);
             if (myIndex != -1) {                                //true in case CRLFCRLF was finaly retrieved and is in data 
                                                                 // (this can only be called once since after this result.hasHeader()==finished==true)
-                result.setHeader(data.substring(0, myIndex));
+                result.setHeader(new String(data.subSequence(0, myIndex), HttpConstants.DEFAULT_CHARSET));
                 //remaining part is reserved for the body
-                if (data.length() > myIndex + HttpConstants.CRLFCRLF.length()) {
-                    data = new StringBuilder(data.substring(myIndex + HttpConstants.CRLFCRLF.length())); //remove headerpart from data, but keep additional data read
+                if (data.size() > myIndex + HttpConstants.CRLFCRLF_BYTE.length) {
+                    data = new ByteBuilder(data.subSequence(myIndex + HttpConstants.CRLFCRLF_BYTE.length)); //remove headerpart from data, but keep additional data read
                 }else{
-                    data = new StringBuilder();
+                    data = new ByteBuilder();
                 }
             }
             checkMaxLenght(data);
@@ -60,7 +61,7 @@ public class HTTPParser {
 
         //check for missing header caused e.g. by timeout or malformed http call
         if (!result.hasHeader()){
-            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "missing header received data (" + data.length() + "):"+data.toString()
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "missing header received data (" + data.size() + "):"+data.toString()
                     +"\nread bytes:"+buf.getReadBytes());
             return null;
         }
@@ -82,12 +83,12 @@ public class HTTPParser {
                 }
             }
             //get body
-            while (proceedToRead(buf, is, (data.length()>=contentLength))) {
-                data.append(buf.toString());
+            while (proceedToRead(buf, is, (data.size()>=contentLength))) {
+                data.append(buf.getBuffer(), buf.getReadBytes());
                 checkMaxLenght(data);
             }
-            result.getWebRequest().body = data.toString();
-            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "read " + data.length() + " body data");
+            result.getWebRequest().body = data.toByteArray();
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "read " + data.size() + " body data");
             Logger.getLogger(HTTPParser.class.getName()).log(Level.FINER, "body data:\n"+result.getWebRequest().body);
         }
         return result;
@@ -95,8 +96,8 @@ public class HTTPParser {
 
     }
 
-    private void checkMaxLenght(StringBuilder data) throws MessageTooLargeException {
-        if (data.length() > HTTPMessage.MAX_MESSAGE_SIZE) {
+    private void checkMaxLenght(ByteBuilder data) throws MessageTooLargeException {
+        if (data.size() > HTTPMessage.MAX_MESSAGE_SIZE) {
             throw new MessageTooLargeException();
         }
     }

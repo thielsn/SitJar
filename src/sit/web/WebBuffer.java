@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class WebBuffer {
 
     public static final int BUF_SIZE = 2048;
-    public static final byte[] EOL = {(byte) '\r', (byte) '\n'};
+    
     private static int READ_TIMEOUT_MS = 500; //FIXME adapt to WebServer.getInstance().getTimeOut();
     private static final int WAIT_TIME_OUT_MS = 5;
     /* buffer to use for requests */
@@ -51,7 +51,7 @@ public class WebBuffer {
 
     @Override
     public String toString() {
-        return new String(buf, 0, readBytes, Charset.forName("US-ASCII"));
+        return new String(buf, 0, readBytes, HttpConstants.DEFAULT_CHARSET);
     }
 
     public int getReadBytes() {
@@ -102,5 +102,9 @@ public class WebBuffer {
 
     public boolean isMoreDataToRead() {
         return !endOfStream;
+    }
+
+    byte[] getBuffer() {
+        return buf;
     }
 }

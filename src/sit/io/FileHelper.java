@@ -29,6 +29,13 @@ public class FileHelper implements FileHelperI {
         writer.close();
 
     }
+    
+     public void writeToFile(String fileName, byte[] content) throws IOException {
+        FileOutputStream writer = new FileOutputStream(fileName);
+        writer.write(content);
+        writer.close();
+
+    }
 
     public String readFromTextFile(String fileName) throws FileNotFoundException, IOException {
         String line;

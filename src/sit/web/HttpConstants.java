@@ -5,6 +5,7 @@
 
 package sit.web;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 
 /**
@@ -63,7 +64,9 @@ public interface HttpConstants {
 
     public final static String CRLF = "\r\n";
     public final static String CRLFCRLF = CRLF + CRLF;
+    public static final byte[] CRLF_BYTE = {(byte) '\r', (byte) '\n'};
+    public static final byte[] CRLFCRLF_BYTE = {(byte) '\r', (byte) '\n', (byte) '\r', (byte) '\n'};
+ 
+    public static final Charset DEFAULT_CHARSET = Charset.forName("US-ASCII");
     
-    
-   
 }

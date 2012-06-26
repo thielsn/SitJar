@@ -4,8 +4,11 @@
  */
 package sit.web;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -16,7 +19,7 @@ public class WebRequest {
     public String httpCommand = null;
     public String fname = null;
     public String param = null;
-    public String body = null;
+    public byte[] body = null;
 
     public Hashtable<String,String> headerItems = null;
 
@@ -37,5 +40,13 @@ public class WebRequest {
             result += "\nBody:\n"+body+"\n----\n";
         }
         return result;
+    }
+    public String getBodyAsString(){
+        try {
+            return new String(body,"utf8");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(WebRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 }
