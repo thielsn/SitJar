@@ -47,10 +47,10 @@ public abstract class MultipartEntry {
         StringBuilder result = new StringBuilder(HttpConstants.CONTENT_DISPOSITION_TAG);
 
         if (name != null) {
-            result.append(HttpConstants.NAME_DISPOSITION_TAG).append(name).append("\"; ");
+            result.append(HttpConstants.NAME_DISPOSITION_TAG).append("\"").append(name).append("\"; ");
         }
         if (filename != null) {
-            result.append(HttpConstants.FILENAME_DISPOSITION_TAG).append(filename).append("\"; ");
+            result.append(HttpConstants.FILENAME_DISPOSITION_TAG).append("\"").append(filename).append("\"; ");
         }
         result.append(HttpConstants.CRLF).append(HttpConstants.CONTENT_TYPE_TAG).append(contentType).append(HttpConstants.CRLF);
 

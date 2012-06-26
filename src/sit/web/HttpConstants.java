@@ -78,8 +78,8 @@ public interface HttpConstants {
     public static final String SUB_FIELD_SEPARATOR = "; ";
     
     public static final String CONTENT_DISPOSITION_TAG = "Content-Disposition: form-data; ";
-    public static final String FILENAME_DISPOSITION_TAG = "filename=\"";
-    public static final String NAME_DISPOSITION_TAG = "name=\"";
+    public static final String FILENAME_DISPOSITION_TAG = "filename=";
+    public static final String NAME_DISPOSITION_TAG = "name=";
 
     public static final String CONTENT_LENGTH_TAG = "Content-Length: ";
     

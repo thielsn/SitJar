@@ -17,7 +17,18 @@ public class HTTPParseHelper {
     
     public static String getValueIfExists(String prefix, String value){
         if (value.toLowerCase().startsWith(prefix.toLowerCase())){            
-            return value.substring(prefix.length());
+            String result = value.substring(prefix.length());
+            if (result.isEmpty()){
+                return result;
+            }
+            //remove quotes if any
+            if (result.equals("\"\"")){
+                return "";
+            }
+            if (result.charAt(0)=='"' && result.charAt(result.length()-1)=='"'){
+                result = result.substring(1, result.length()-1);
+            }
+            return result;
         }
         return null;
     } 

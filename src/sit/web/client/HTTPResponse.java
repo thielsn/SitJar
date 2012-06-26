@@ -7,6 +7,9 @@
  */
 package sit.web.client;
 
+import java.nio.charset.Charset;
+import sit.web.HttpConstants;
+
 /**
  *
  * @author Simon Thiel <simon.thiel at gmx.de>
@@ -17,15 +20,18 @@ public class HTTPResponse {
     
     public String call;
     public String message = "";
+    public Charset charset;
     /** http response code from the call */
     public int code = -1;    
     public final byte[] payload;
     public String reply = "";
+    
 
 
-    public HTTPResponse(String call, byte[] payload) {
+    public HTTPResponse(String call, byte[] payload, Charset charset) {
 
         this.call = call;
+        this.charset = charset;
         this.payload = payload;
     }
 
@@ -36,7 +42,7 @@ public class HTTPResponse {
     @Override
     public String toString() {
         String result = "call:" + call;
-        result += "\npayload:\n" + payload + "\ncode:" + code + "\nmessage:\n" + message + "\nreply:\n" + reply;
+        result += "\npayload:\n" + new String(payload, charset) + "\ncode:" + code + "\nmessage:\n" + message + "\nreply:\n" + reply;
         return result;
     }
 

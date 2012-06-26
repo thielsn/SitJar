@@ -102,7 +102,7 @@ public class WebRequest {
             result += "\n";
         }
         if (body != null) {
-            result += "\nBody:\n" + getBodyAsString() + "\n----\n";
+            result += "\n" + getBodyAsString() + "\n\n";
         }
         return result;
     }

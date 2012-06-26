@@ -34,13 +34,13 @@ public class MultipartParser {
         ByteBuilder content = new ByteBuilder(payload);
 
 
-        int oldIndex = 0;
+        int oldIndex = boundary.length+HttpConstants.CRLF_BYTE.length;
 
         int index;
         while (-1 != (index = content.indexOf(oldIndex, boundary))) {
 
-            result.addPart(parsePart(charSet, content.subSequence(oldIndex + boundary.length, index)));
-            oldIndex = index + boundary.length;
+            result.addPart(parsePart(charSet, content.subSequence(oldIndex, index)));
+            oldIndex = index + boundary.length+HttpConstants.CRLF_BYTE.length;
         }
 
 
@@ -71,7 +71,7 @@ public class MultipartParser {
 
         if (headerFields.containsKey(HttpConstants.CONTENT_DISPOSITION_TAG)) {
 
-            String disposition = headerFields.get(HttpConstants.CONTENT_DISPOSITION_TAG).substring(HttpConstants.CONTENT_DISPOSITION_TAG.length());
+            String disposition = headerFields.get(HttpConstants.CONTENT_DISPOSITION_TAG);
 
             HashMap<String, String> dispoFields = HTTPParseHelper.parseAndFillFittingValues(
                     new String[]{HttpConstants.NAME_DISPOSITION_TAG,
@@ -87,8 +87,8 @@ public class MultipartParser {
         }
         if (headerFields.containsKey(HttpConstants.CONTENT_TYPE_TAG)) {
 
-            String contentTypePayload = headerFields.get(HttpConstants.CONTENT_TYPE_TAG).substring(HttpConstants.CONTENT_TYPE_TAG.length());
-            
+            String contentTypePayload = headerFields.get(HttpConstants.CONTENT_TYPE_TAG);
+
             contentType.parseContentType(contentTypePayload);
             if (contentType.mimeType.equalsIgnoreCase(HttpConstants.MIME_APPLICATION_OCTETSTREAM)) {
                 type = TYPES.BINARY;
@@ -96,7 +96,7 @@ public class MultipartParser {
                 type = TYPES.MIME;
             }
             charSet = contentType.charSet; //possibly been changed by content-type setting...
-            
+
         }
 
 

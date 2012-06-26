@@ -173,7 +173,7 @@ public class HttpHelper {
             output.close();
         }
 
-        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload);
+        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload, HttpConstants.DEFAULT_CHARSET); //TODO forward charset ot this method
 
 
         response.code = connection.getResponseCode();
@@ -241,7 +241,7 @@ public class HttpHelper {
             output.close();
         }
 
-        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), "[multipart content]".getBytes());
+        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), "[multipart content]".getBytes(), HttpConstants.DEFAULT_CHARSET);
 
 
         response.code = connection.getResponseCode();
