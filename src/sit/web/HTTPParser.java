@@ -15,22 +15,21 @@ import sit.sstl.ByteBuilder;
  * @author Simon Thiel <simon.thiel at gmx.de>
  */
 public class HTTPParser {
-    
-    
+
     public int getCRLFCRLFindex(ByteBuilder data) {
         return data.indexOf(HttpConstants.CRLFCRLF_BYTE);
     }
 
     private boolean proceedToRead(WebBuffer buf, InputStream is, boolean finished) throws IOException {
-        if (finished) {        
+        if (finished) {
             return false;
         }
-        if (!buf.isMoreDataToRead()) {        
+        if (!buf.isMoreDataToRead()) {
             return false;
         }
-        if (buf.readFromInputStream(is) > -1) {            
+        if (buf.readFromInputStream(is) > -1) {
             return true;
-        }        
+        }
         Logger.getLogger(HTTPParser.class.getName()).log(Level.WARNING, "connection timed out!");
         return false;
     }
@@ -47,12 +46,12 @@ public class HTTPParser {
             data.append(buf.getBuffer(), buf.getReadBytes());
             int myIndex = getCRLFCRLFindex(data);
             if (myIndex != -1) {                                //true in case CRLFCRLF was finaly retrieved and is in data 
-                                                                // (this can only be called once since after this result.hasHeader()==finished==true)
+                // (this can only be called once since after this result.hasHeader()==finished==true)
                 result.setHeader(new String(data.subSequence(0, myIndex), HttpConstants.DEFAULT_CHARSET));
                 //remaining part is reserved for the body
                 if (data.size() > myIndex + HttpConstants.CRLFCRLF_BYTE.length) {
                     data = new ByteBuilder(data.subSequence(myIndex + HttpConstants.CRLFCRLF_BYTE.length)); //remove headerpart from data, but keep additional data read
-                }else{
+                } else {
                     data = new ByteBuilder();
                 }
             }
@@ -61,36 +60,37 @@ public class HTTPParser {
         }
 
         //check for missing header caused e.g. by timeout or malformed http call
-        if (!result.hasHeader()){
-            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "missing header received data (" + data.size() + "):"+data.toString()
-                    +"\nread bytes:"+buf.getReadBytes());
+        if (!result.hasHeader()) {
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "missing header received data (" + data.size() + "):" + data.toString()
+                    + "\nread bytes:" + buf.getReadBytes());
             return null;
         }
-        if (result.getWebRequest()==null){            
-            throw new HTTPParseException("WebRequest==null! - data:"+data.toString());
+        if (result.getWebRequest() == null) {
+            throw new HTTPParseException("WebRequest==null! - data:" + data.toString());
         }
 
-        Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "httpCommand:"+result.getWebRequest().httpCommand);
+        Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "httpCommand:" + result.getWebRequest().httpCommand);
         if (result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_POST) || result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_PUT)) {
 
             //retrieve content length field
-            String contentLenghtStr = result.getWebRequest().headerItems.get(HttpConstants.HTTP_HEADER_FIELD_CONTENT_LENGTH);
-            int contentLength = Integer.MAX_VALUE;
-            if (contentLenghtStr!=null){
-                try{
-                    contentLength = Integer.parseInt(contentLenghtStr);
-                }catch(NumberFormatException ex){
-                    //ignore and assume maxint
+            String contentLengthStr = result.getWebRequest().headerItems.get(HttpConstants.HTTP_HEADER_FIELD_CONTENT_LENGTH);
+            long contentLength = Long.MAX_VALUE;
+            if (contentLengthStr != null) {
+                try {
+                    contentLength = Long.parseLong(contentLengthStr);
+                } catch (NumberFormatException ex) {
+                    //ignore and assume maxlong
                 }
             }
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.INFO, "contentLength:" + contentLengthStr + "(" + contentLength + ")");
             //get body
-            while (proceedToRead(buf, is, (data.size()>=contentLength))) {
+            while (proceedToRead(buf, is, (data.size() >= contentLength))) {
                 data.append(buf.getBuffer(), buf.getReadBytes());
                 checkMaxLenght(data);
             }
             result.getWebRequest().body = data.toByteArray();
-            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "read " + data.size() + " body data");
-            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINER, "body data:\n"+result.getWebRequest().body);
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.INFO, "read " + data.size()+ " body data");
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINER, "body data:\n" + result.getWebRequest().body);
         }
         return result;
 

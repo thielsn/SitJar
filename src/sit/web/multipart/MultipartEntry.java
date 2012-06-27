@@ -38,9 +38,13 @@ public abstract class MultipartEntry {
     
     public abstract long getContentLengthOfContent();
     
-    public long getContentLength(){
+    public long getContentLength(int boundaryLength){
         
-        return getContentLengthOfContent() + getHeader().length();
+        return boundaryLength
+                +HttpConstants.CRLF_BYTE.length
+                +getHeader().length()
+                +getContentLengthOfContent()
+                +HttpConstants.CRLF_BYTE.length;
     }
 
     public String getHeader() {
@@ -70,11 +74,12 @@ public abstract class MultipartEntry {
         DataOutputStream output = new DataOutputStream(out);
                
         // write out the data
-        output.writeBytes(boundary+HttpConstants.CRLF);
+        output.writeBytes(boundary);
+        output.write(HttpConstants.CRLF_BYTE);
         output.writeBytes(getHeader());
 
         writePartContentTo(out);
-        output.writeBytes(HttpConstants.CRLF);
+        output.write(HttpConstants.CRLF_BYTE);
     }
 
     protected abstract void writePartContentTo(OutputStream out) throws IOException;
