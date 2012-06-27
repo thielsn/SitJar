@@ -38,9 +38,13 @@ public abstract class MultipartEntry {
     
     public abstract long getContentLengthOfContent();
     
-    public long getContentLength(){
+    public long getContentLength(int boundaryLength){
         
-        return getContentLengthOfContent() + getHeader().length();
+        return boundaryLength
+                +HttpConstants.CRLF_BYTE.length
+                +getHeader().length()
+                +getContentLengthOfContent()
+                +HttpConstants.CRLF_BYTE.length;
     }
 
     public String getHeader() {

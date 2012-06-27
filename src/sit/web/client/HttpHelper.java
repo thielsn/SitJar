@@ -228,6 +228,7 @@ public class HttpHelper {
         }
         
         long length = mpc.getContentLength();
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "contentLength:"+length);
 
         connection.setRequestMethod(method);
         connection.setRequestProperty("Host", host);
@@ -246,11 +247,12 @@ public class HttpHelper {
             OutputStream output = connection.getOutputStream();
 
             // write out the data
-            mpc.write(output);            
+            mpc.write(output);   
             output.close();
         }
 
-        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), "[multipart content]".getBytes(), HttpConstants.DEFAULT_CHARSET);
+        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), "[multipart content]".getBytes(),
+                HttpConstants.DEFAULT_CHARSET);
 
 
         response.code = connection.getResponseCode();
