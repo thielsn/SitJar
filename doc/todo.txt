@@ -5,6 +5,9 @@ TODO
 * Correct Handling of Multipart messages (and other binary content) on the server - currently everything is handled as UTF-8
 ** better solution for sitlight version of SitJar
 * Handling Timeout issue on POST calls
+** when reading the message body there seems to be a bug causing a -1
+
+
 
 Done:
 * use long for content-length
