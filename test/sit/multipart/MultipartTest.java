@@ -15,7 +15,6 @@ import sit.web.client.HttpHelper;
 import sit.web.multipart.MPFileEntry;
 import sit.web.multipart.MPTextEntry;
 import sit.web.multipart.MultipartContainer;
-import sit.web.multipart.MultipartEntry;
 import sit.web.multipart.TYPES;
 
 
@@ -34,7 +33,7 @@ public class MultipartTest {
             MultipartContainer mpc = new MultipartContainer();
             mpc.addPart(new MPTextEntry(TYPES.TEXT, "text/plain", "filename", myFile.getName()));
             mpc.addPart(new MPFileEntry(TYPES.BINARY, MimeTypes.getMimeTypeFromFileName(myFile.getName()),"file", myFile));
-            HTTPResponse response = new HttpHelper().postMulitPartContainer("localhost", 8080, "/testservice", mpc, false,"");
+            HTTPResponse response = new HttpHelper().postMultiPartContainer("localhost", 8080, "/testservice", mpc, false,"");
             Logger.getLogger(MultipartTest.class.getName()).log(Level.INFO, 
                     "response: "+response.toString());
             
