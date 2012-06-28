@@ -17,6 +17,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sun.security.krb5.internal.KDCOptions;
 
 /**
  *
@@ -38,6 +39,9 @@ class WebWorker implements HttpConstants, Runnable {
      * indicates whether the thread is ordered to stop
      */
     private boolean stopping = false;
+    
+    private final static Logger logger = Logger.getLogger(WebWorker.class.getName());    
+    private final static Level level = logger.getLevel();
 
     public synchronized void setSocket(Socket s) {
         this.socket = s;
@@ -46,7 +50,7 @@ class WebWorker implements HttpConstants, Runnable {
 
     public void stop() {
         this.stopping = true;
-        Logger.getLogger(WebWorker.class.getName()).log(Level.FINE, "stop WebWorker");
+        logger.log(Level.FINE, "stop WebWorker");
     }
 
     @Override
@@ -118,7 +122,7 @@ class WebWorker implements HttpConstants, Runnable {
 
                 String message = "HTTP/1.0 " + HTTP_ENTITY_TOO_LARGE
                         + " Entity Too Large";
-                Logger.getLogger(WebWorker.class.getName()).log(Level.WARNING, message);
+                logger.log(Level.WARNING, message);
                 ps.print(message);
                 ps.write(HttpConstants.CRLF_BYTE);
                 ps.flush();
@@ -127,7 +131,7 @@ class WebWorker implements HttpConstants, Runnable {
             } catch (HTTPParseException ex) {
                 String message = "HTTP/1.0 " + HTTP_SERVER_ERROR
                         + " Internal Server Error";
-                Logger.getLogger(WebWorker.class.getName()).log(Level.WARNING, message + "\n" + ex.getMessage());
+                logger.log(Level.WARNING, message + "\n" + ex.getMessage());
                 ps.print(message + "\n" + ex.getMessage());
                 ps.write(HttpConstants.CRLF_BYTE);
                 ps.flush();
@@ -139,18 +143,17 @@ class WebWorker implements HttpConstants, Runnable {
                 return;
             }
 
-            Logger logger = Logger.getLogger(WebWorker.class.getName());
             if (logger.getLevel() == Level.FINE) {
                 logger.log(Level.FINE, "request:{0}", request.toBriefString());
-            } else if (logger.getLevel() == Level.FINER) {
-                logger.log(Level.FINE, "request:{0}", request.toString());
+            } else{
+                logger.log(Level.FINER, "request:{0}", request.toString());
             }
 
 
             //if we find a fitting service call the service
             ServiceEndpoint service = ServiceEndpoints.getInstance().getEndpoint(request.fname);
             if (service != null) {
-                Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
+                logger.log(Level.FINE,
                         "found service:" + service.getEndpointName());
 
                 printDynamicPage(service.getContentTypeAsString(), service.getCharSet(), service.handleCall(request), ps);
@@ -171,7 +174,7 @@ class WebWorker implements HttpConstants, Runnable {
                 }
             }
             ps.flush();
-            //Logger.getLogger(WebWorker.class.getName()).log(Level.INFO, "done.");
+            //logger.log(Level.INFO, "done.");
 
         } finally {
             socket.close();
@@ -185,7 +188,7 @@ class WebWorker implements HttpConstants, Runnable {
             charSet = DEFAULT_CHARSET;
         }
 
-        Logger.getLogger(WebWorker.class.getName()).log(Level.FINE, "content:\n{0}", content);
+        logger.log(Level.FINE, "content:\n{0}", content);
 
         output.write(("HTTP/1.0 " + HTTP_OK + " OK").getBytes(charSet));
         output.write(CRLF_BYTE);
@@ -223,7 +226,7 @@ class WebWorker implements HttpConstants, Runnable {
             ps.write(HttpConstants.CRLF_BYTE);
             result = true;
         }
-        Logger.getLogger(WebWorker.class.getName()).log(Level.FINE,
+        logger.log(Level.FINE,
                 "From {0}: GET {1}-->{2}",
                 new Object[]{socket.getInetAddress().getHostAddress(),
                     targetFile.getAbsolutePath(), returnCode});

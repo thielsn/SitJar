@@ -32,8 +32,11 @@ public class TestService extends ServiceEndpoint{
     @Override
     public byte[] handleCall(WebRequest request) {
         try {
-            Logger.getLogger(TestService.class.getName()).log(Level.INFO, "reveived call:\n"+request);
-            new FileHelper().writeToFile("request_body", request.body);
+            //Logger.getLogger(TestService.class.getName()).log(Level.INFO, "reveived call:\n"+request);
+            
+            if (request.body!=null){
+                new FileHelper().writeToFile("request_body", request.body);
+            }
             
             if(request.contentType.isMultiPart()){
                 MultipartContainer result = MultipartParser.parse(request.contentType.boundary, HttpConstants.DEFAULT_CHARSET, request.body);

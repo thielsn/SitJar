@@ -205,7 +205,7 @@ public class HttpHelper {
         return response;
     }
 
-    public HTTPResponse postMulitPartContainer(String host, int port, String path, MultipartContainer mpc,
+    public HTTPResponse postMultiPartContainer(String host, int port, String path, MultipartContainer mpc,
             boolean isHTTPS, String unamePword64) throws MalformedURLException, IOException {
 
         String method = HttpConstants.HTTP_COMMAND_POST;
