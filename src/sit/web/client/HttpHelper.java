@@ -129,8 +129,8 @@ public class HttpHelper {
             //throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+charSet);
         }
         
+
         return doHTTPRequest(method, host, port, path, payload.getBytes() ,contentType, isHTTPS, unamePword64);
-    
 }
     
 /**
