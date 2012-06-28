@@ -21,7 +21,6 @@ import sit.tools.Base64;
 import sit.web.HttpConstants;
 import sit.web.MimeTypes;
 import sit.web.multipart.MultipartContainer;
-import sun.net.www.http.HttpClient;
 
 
 public class HttpHelper {
