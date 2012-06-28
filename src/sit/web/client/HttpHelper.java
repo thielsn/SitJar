@@ -123,9 +123,7 @@ public class HttpHelper {
             contentType += HttpConstants.SUB_FIELD_SEPARATOR+HttpConstants.CHARSET_CONTENT_TYPE_TAG+charSet.name(); //text/html; charset=utf-8
         }
         
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "POST: character length:"+payload.length());
-        
-        return doHTTPRequest(method, host, port, path, payload.getBytes(charSet) ,contentType, isHTTPS, unamePword64);
+         return doHTTPRequest(method, host, port, path, payload.getBytes(charSet) ,contentType, isHTTPS, unamePword64);
     
 }
     
@@ -190,7 +188,7 @@ public class HttpHelper {
             output.close();
         }
 
-        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload, HttpConstants.DEFAULT_CHARSET); //TODO forward charset ot this method
+        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload, Charset.defaultCharset()); //TODO forward charset ot this method
 
         response.code = connection.getResponseCode();
         response.message = connection.getResponseMessage();
