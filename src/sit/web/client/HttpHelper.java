@@ -126,10 +126,9 @@ public class HttpHelper {
         if (!charSet.equals(Charset.defaultCharset())){
             Logger.getLogger(HttpHelper.class.getName()).log(Level.WARNING, "unexpected charset: "+charSet+ " should be "+ Charset.defaultCharset());
             
-            // throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+charSet);
+            //throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+charSet);
         }
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "POST: character length:"+payload.length());
-
+        
         return doHTTPRequest(method, host, port, path, payload.getBytes() ,contentType, isHTTPS, unamePword64);
     
 }
@@ -178,9 +177,9 @@ public class HttpHelper {
         }
         
         Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "trying to connect:\n" + method + " " 
-                + url + "\nhttps:" + isHTTPS
-                +"\nContentType:" + contentType
-                +"\nContent-Length:" + String.valueOf(payload.length)                
+                + url + "\nhttps: " + isHTTPS
+                +"\nContentType: " + contentType
+                +"\nContent-Length: " + String.valueOf(payload.length)                
                 );
         
 
@@ -195,7 +194,7 @@ public class HttpHelper {
             output.close();
         }
 
-        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload, HttpConstants.DEFAULT_CHARSET); //TODO forward charset ot this method
+        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload, Charset.defaultCharset()); //TODO forward charset ot this method
 
         response.code = connection.getResponseCode();
         response.message = connection.getResponseMessage();
