@@ -45,7 +45,7 @@ public class TestService extends ServiceEndpoint{
                         
                         MPFileEntry fEntry = (MPFileEntry)entry;
                         if (fEntry.getFileName()!=null){
-                            
+                            Logger.getLogger(TestService.class.getName()).log(Level.INFO, "received file:"+fEntry.getFileName());
                             new FileHelper().writeToFile((new File(entry.getFileName())).getName(), fEntry.getFileContent());
                         }
                     }

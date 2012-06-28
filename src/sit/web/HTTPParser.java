@@ -82,14 +82,14 @@ public class HTTPParser {
                     //ignore and assume maxlong
                 }
             }
-            Logger.getLogger(HTTPParser.class.getName()).log(Level.INFO, "contentLength:" + contentLengthStr + "(" + contentLength + ")");
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "contentLength:" + contentLengthStr + "(" + contentLength + ")");
             //get body
             while (proceedToRead(buf, is, (data.size() >= contentLength))) {
                 data.append(buf.getBuffer(), buf.getReadBytes());
                 checkMaxLenght(data);
             }
             result.getWebRequest().body = data.toByteArray();
-            Logger.getLogger(HTTPParser.class.getName()).log(Level.INFO, "read " + data.size()+ " body data");
+            Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "read " + data.size()+ " body data");
             Logger.getLogger(HTTPParser.class.getName()).log(Level.FINER, "body data:\n" + result.getWebRequest().body);
         }
         return result;

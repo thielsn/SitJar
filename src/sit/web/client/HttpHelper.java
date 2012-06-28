@@ -226,7 +226,7 @@ public class HttpHelper {
         }
         
         long length = mpc.getContentLength();
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "contentLength:"+length);
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.FINE, "contentLength: " + length);
 
         connection.setRequestMethod(method);
         connection.setRequestProperty("Host", host);
