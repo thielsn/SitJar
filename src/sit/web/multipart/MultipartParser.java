@@ -20,6 +20,7 @@ import sit.web.HTTPParseHelper;
 import sit.web.HttpConstants;
 import sit.web.WebRequest;
 import sit.web.WebRequest.ContentType;
+import sit.web.client.HTTPResponse;
 
 /**
  *
@@ -32,7 +33,8 @@ public class MultipartParser {
         MultipartContainer result = new MultipartContainer();
 
         if (!charSet.equals(Charset.defaultCharset())) {
-            throw new RuntimeException("other charsets than " + Charset.defaultCharset() + " not allowed in this implementation! charset:" + charSet);
+            Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "unexpected charset: "+charSet+ " should be "+ Charset.defaultCharset());
+            //throw new RuntimeException("other charsets than " + Charset.defaultCharset() + " not allowed in this implementation! charset:" + charSet);
         }
         byte[] boundary = boundaryStr.getBytes();
         ByteBuilder content = new ByteBuilder(payload);
@@ -67,7 +69,8 @@ public class MultipartParser {
         }
         //TODO  re-use HTTPMessage parser for parsing the headers !!!
         if (!charSet.equals(Charset.defaultCharset())) {
-            throw new RuntimeException("other charsets than " + Charset.defaultCharset() + " not allowed in this implementation! charset:" + charSet);
+            Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "unexpected charset: "+charSet+ " should be "+ Charset.defaultCharset());
+            //throw new RuntimeException("other charsets than " + Charset.defaultCharset() + " not allowed in this implementation! charset:" + charSet);
         }
         String header = new String(content.subSequence(0, endOfHeader));
 
@@ -114,7 +117,8 @@ public class MultipartParser {
             result = new MPFileEntry(type, contentType.mimeType, name, fileName, content.subSequence(endOfHeader + HttpConstants.CRLFCRLF_BYTE.length));
         } else {
             if (!charSet.equals(Charset.defaultCharset())) {
-                throw new RuntimeException("other charsets than " + Charset.defaultCharset() + " not allowed in this implementation! charset:" + charSet);
+                Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "unexpected charset: "+charSet+ " should be "+ Charset.defaultCharset());
+                //throw new RuntimeException("other charsets than " + Charset.defaultCharset() + " not allowed in this implementation! charset:" + charSet);
             }
             result = new MPTextEntry(type, contentType.mimeType, name,
                     new String(content.subSequence(endOfHeader + HttpConstants.CRLFCRLF_BYTE.length)));

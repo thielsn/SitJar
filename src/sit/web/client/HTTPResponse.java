@@ -8,6 +8,8 @@
 package sit.web.client;
 
 import java.nio.charset.Charset;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import sit.web.HttpConstants;
 
 /**
@@ -39,7 +41,8 @@ public class HTTPResponse {
 
    public String getPayloadAsString(){
        if (!charset.equals(Charset.defaultCharset())){
-            throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+charset);
+            Logger.getLogger(HTTPResponse.class.getName()).log(Level.WARNING, "unexpected charset: "+charset+ " should be "+ Charset.defaultCharset());
+            //throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+charset);
        }
        return new String(payload);
    }
