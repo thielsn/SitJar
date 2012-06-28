@@ -187,7 +187,7 @@ class WebWorker implements HttpConstants, Runnable {
             charSet = DEFAULT_CHARSET;
         }
 
-        logger.log(Level.FINE, "content:\n{0}", content);
+        logger.log(Level.FINE, "content:\n{0}", new String(content, charSet));
 
         output.write(("HTTP/1.0 " + HTTP_OK + " OK").getBytes(charSet));
         output.write(CRLF_BYTE);
