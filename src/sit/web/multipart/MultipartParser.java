@@ -4,23 +4,17 @@
  */
 package sit.web.multipart;
 
-import java.io.IOException;
-import java.io.OutputStream;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sit.sstl.ByteBuilder;
-import sit.web.HTTPMessage;
 import sit.web.HTTPParseHelper;
 import sit.web.HttpConstants;
 import sit.web.WebRequest;
 import sit.web.WebRequest.ContentType;
-import sit.web.client.HTTPResponse;
 
 /**
  *
@@ -45,8 +39,10 @@ public class MultipartParser {
         int index;
         while (-1 != (index = content.indexOf(oldIndex, boundary))) {
 
-            result.addPart(parsePart(charSet, content.subSequence(oldIndex, index)));
-            oldIndex = index + boundary.length + HttpConstants.CRLF_BYTE.length;
+
+        result.addPart(parsePart(charSet, content.subSequence(oldIndex, index-HttpConstants.CRLF_BYTE.length)));    
+        oldIndex = index + boundary.length + HttpConstants.CRLF_BYTE.length;
+        
         }
 
 
