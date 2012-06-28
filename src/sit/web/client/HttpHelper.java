@@ -122,11 +122,14 @@ public class HttpHelper {
         if (charSet!=null){
             contentType += HttpConstants.SUB_FIELD_SEPARATOR+HttpConstants.CHARSET_CONTENT_TYPE_TAG+charSet.name(); //text/html; charset=utf-8
         }
+
         if (!charSet.equals(Charset.defaultCharset())){
             Logger.getLogger(HttpHelper.class.getName()).log(Level.WARNING, "unexpected charset: "+charSet+ " should be "+ Charset.defaultCharset());
             
             // throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+charSet);
         }
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "POST: character length:"+payload.length());
+
         return doHTTPRequest(method, host, port, path, payload.getBytes() ,contentType, isHTTPS, unamePword64);
     
 }
@@ -156,7 +159,7 @@ public class HttpHelper {
 
         URL url = getURL(host, port, path, isHTTPS);
 
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.FINE, "trying to connect " + method + " to " + url + " https:" + isHTTPS);
+        
 
         HttpURLConnection connection;
         if (isHTTPS) {
@@ -173,6 +176,13 @@ public class HttpHelper {
         if (isHTTPS) {
             connection.setRequestProperty("Authorization", "Basic " + unamePword64);
         }
+        
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "trying to connect:\n" + method + " " 
+                + url + "\nhttps:" + isHTTPS
+                +"\nContentType:" + contentType
+                +"\nContent-Length:" + String.valueOf(payload.length)                
+                );
+        
 
         connection.setDoInput(true);
         if (payload.length > 0) {
