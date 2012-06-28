@@ -17,16 +17,12 @@ import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
+import sit.tools.Base64;
 import sit.web.HttpConstants;
 import sit.web.MimeTypes;
 import sit.web.multipart.MultipartContainer;
 
-/**
- *
- * @author simon
- */
 
-import sit.tools.Base64;
 public class HttpHelper {
 
     public static String getBase64UserNamePwdToken(String username, String password){
@@ -175,11 +171,11 @@ public class HttpHelper {
         if (isHTTPS) {
             connection.setRequestProperty("Authorization", "Basic " + unamePword64);
         }
-        
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "trying to connect:\n" + method + " " 
-                + url + "\nhttps: " + isHTTPS
-                +"\nContentType: " + contentType
-                +"\nContent-Length: " + String.valueOf(payload.length)                
+   
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.FINER, "trying to connect:\n" + method + " " 
+                + url + "\nhttps:" + isHTTPS
+                +"\nContentType:" + contentType
+                +"\nContent-Length:" + String.valueOf(payload.length)
                 );
         
 
