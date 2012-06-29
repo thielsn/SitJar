@@ -5,9 +5,12 @@
 package sit.web.client;
 
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URI;
@@ -17,6 +20,7 @@ import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.net.ssl.HttpsURLConnection;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -213,7 +217,7 @@ public class HttpHelper {
            return doApacheHTTPRequest(method, host, port, path, payload, contentType, isHTTPS, unamePword64);
        }//else
        
-       return doURLConnectionHTTPRequest(method, host, port, path, payload, contentType, isHTTPS, unamePword64);
+       return doHttpURLConnectionRequest(method, host, port, path, payload, contentType, isHTTPS, unamePword64);
     }
     
       /**
@@ -307,9 +311,73 @@ public class HttpHelper {
      * @throws ProtocolException
      * @throws IOException
      */
-    public HTTPResponse doURLConnectionHTTPRequest(String method, String host, int port, String path, byte[] payload, String contentType,
+    public HTTPResponse doHttpURLConnectionRequest(String method, String host, int port, String path, byte[] payload, String contentType,
             boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
+
+        if (payload == null) { //make sure payload is initialized
+            payload = new byte[0];
+        }
+
+        URL url = getURL(host, port, path, isHTTPS);
+
         
+
+        HttpURLConnection connection;
+        if (isHTTPS) {
+            connection = (HttpsURLConnection) url.openConnection();
+        } else {
+            connection = (HttpURLConnection) url.openConnection();
+        }
+
+        connection.setRequestMethod(method);
+        connection.setRequestProperty("Host", host);
+        connection.setRequestProperty("Content-Type", contentType);
+        connection.setRequestProperty("Content-Length", String.valueOf(payload.length));
+
+        if (isHTTPS) {
+            connection.setRequestProperty("Authorization", "Basic " + unamePword64);
+        }
+        
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.FINER, "trying to connect:\n" + method + " " 
+                + url + "\nhttps:" + isHTTPS
+                +"\nContentType:" + contentType
+                +"\nContent-Length:" + String.valueOf(payload.length)                
+                );
+        
+
+        connection.setDoInput(true);
+        if (payload.length > 0) {
+            // open up the output stream of the connection
+            connection.setDoOutput(true);
+            FilterOutputStream output = new FilterOutputStream(connection.getOutputStream());
+
+            // write out the data
+            output.write(payload);
+            output.close();
+        }
+
+        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), payload, Charset.defaultCharset()); //TODO forward charset ot this method
+
+        response.code = connection.getResponseCode();
+        response.message = connection.getResponseMessage();
+
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.FINE, "received response: "
+                + response.message + " with code: " + response.code);
+
+        if (response.code != 500) {
+
+            // get ready to read the response from the cgi script
+            DataInputStream input = new DataInputStream(connection.getInputStream());
+
+
+            // read in each character until end-of-stream is detected
+            for (int c = input.read(); c != -1; c = input.read()) {
+                response.reply += (char) c + "";
+
+            }
+            input.close();
+        }
+        return response;
     }
 
 }
