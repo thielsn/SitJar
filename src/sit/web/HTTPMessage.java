@@ -32,7 +32,7 @@ public class HTTPMessage {
         result.headerItems = new Hashtable();
         for (int i=0;i<lines.length;i++){
             
-            int firstSpace = lines[i].indexOf(" ");
+            int firstSpace = lines[i].indexOf(' ');
             String name = lines[i].substring(0, firstSpace);
             String value = "";
             if (lines[i].length()>firstSpace+1){
@@ -40,9 +40,9 @@ public class HTTPMessage {
             }
 
             if (i==0){ // the first line contains the httpcommand e.g. GET /wiki/Http HTTP/1.1
-                result.httpCommand = name;
+                result.httpCommand = name.toUpperCase();
             }
-            result.headerItems.put(name, value);
+            result.headerItems.put(name.toUpperCase(), value);
             
         }
 
@@ -62,9 +62,9 @@ public class HTTPMessage {
         webRequest = parseHTTPHeader(header);
 
         String uri = webRequest.headerItems.get(webRequest.httpCommand);
-        uri = uri.substring(0, uri.indexOf(" "));
+        uri = uri.substring(0, uri.indexOf(' '));
 
-        int paramStart = uri.indexOf("?");
+        int paramStart = uri.indexOf('?');
 
         if (paramStart > 0 && paramStart < uri.length()) {
             webRequest.fname = uri.substring(0, paramStart);
@@ -80,7 +80,7 @@ public class HTTPMessage {
         }
 
         //parse contentType
-        String contentTypeEntry = webRequest.headerItems.get(HttpConstants.CONTENT_TYPE_TAG.trim());  //TODO introduce real handling of Request properties trim is here only required to remove the trailing space :-(
+        String contentTypeEntry = webRequest.headerItems.get(HttpConstants.CONTENT_TYPE_TAG.toUpperCase().trim());  //TODO handle case issue !!!//TODO introduce real handling of Request properties trim is here only required to remove the trailing space :-(
         if (contentTypeEntry!=null){
            webRequest.contentType.parseContentType(contentTypeEntry);
         }
