@@ -7,6 +7,8 @@
  */
 package sit.web.client;
 
+import java.nio.charset.Charset;
+import java.security.KeyStore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HostnameVerifier;
@@ -16,12 +18,23 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 
 /**
  * HTTPUrlConnectionHelper
  *
  */
-class HTTPUrlConnectionHelper {
+class HTTPTrustHelper {
 
     // Create a trust manager that does not validate certificate chains
     private static TrustManager[] trustAllCerts = new TrustManager[]{
@@ -53,8 +66,7 @@ class HTTPUrlConnectionHelper {
             sc.init(kms, tms, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         } catch (Exception ex) {
-            Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, ex.
-                    getMessage(), ex);
+            Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
 
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
@@ -65,5 +77,37 @@ class HTTPUrlConnectionHelper {
             }
         });
         HttpsURLConnection.setFollowRedirects(true);
+    }
+
+    /**
+     * from
+     * http://stackoverflow.com/questions/2642777/trusting-all-certificates-using-httpclient-over-https
+     *
+     * @param charset
+     * @param port
+     * @return
+     */
+    public static HttpClient getNewHttpClient(Charset charset, int port) {
+        try {
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, null);
+
+            SSLSocketFactory sf = new MySSLSocketFactory(trustStore);
+            sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+
+            HttpParams params = new BasicHttpParams();
+            HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+            HttpProtocolParams.setContentCharset(params, charset.name());
+
+            SchemeRegistry registry = new SchemeRegistry();
+            //registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+            registry.register(new Scheme("https", sf, port));
+
+            ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, registry);
+
+            return new DefaultHttpClient(ccm, params);
+        } catch (Exception e) {
+            return new DefaultHttpClient();
+        }
     }
 }

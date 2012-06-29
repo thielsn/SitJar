@@ -5,11 +5,9 @@
 package sit.web.client;
 
 import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URI;
@@ -19,7 +17,6 @@ import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.net.ssl.HttpsURLConnection;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -29,7 +26,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -39,9 +35,7 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import sit.io.IOString;
 import sit.sstl.ByteBuilder;
 import sit.tools.Base64;
 import sit.web.HttpConstants;
@@ -49,6 +43,8 @@ import sit.web.MimeTypes;
 import sit.web.multipart.MultipartContainer;
 
 public class HttpHelper {
+
+    private final static boolean USE_APACHE = true;
 
     public static String getBase64UserNamePwdToken(String username, String password) {
         return Base64.encodeBytes((username + ":" + password).getBytes());
@@ -95,11 +91,35 @@ public class HttpHelper {
     }
 
     public HttpHelper() {
-        HTTPUrlConnectionHelper.initAllTrustingManager("TLS"); //or "SSL"
+        HTTPTrustHelper.initAllTrustingManager("TLS"); //or "SSL"
     }
 
     public HttpHelper(String sslContext) {
-        HTTPUrlConnectionHelper.initAllTrustingManager(sslContext);
+        HTTPTrustHelper.initAllTrustingManager(sslContext);
+    }
+
+    public HTTPResponse postMultiPartContainer(String host, int port, String path, MultipartContainer mpc,
+            boolean isHTTPS, String unamePword64) throws MalformedURLException, IOException, ProtocolException {
+
+        if (mpc == null) { //make sure multipartContainer is initialized
+            return null;
+        }
+
+        String contentType = mpc.getContentType();
+        ByteBuilder bb = new ByteBuilder();
+        OutputStream os = bb.getOutputStream();
+        mpc.write(os);
+        os.close();
+
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "mpc length " + mpc.getContentLength() + " bb.size():" + bb.size());
+
+        byte[] payload = bb.toByteArray();
+        try {
+            return doHTTPRequest(HttpConstants.HTTP_COMMAND_POST, host, port, path, payload, contentType, isHTTPS, unamePword64);
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
     /**
@@ -160,48 +180,14 @@ public class HttpHelper {
 
         if (!charSet.equals(Charset.defaultCharset())) {
             Logger.getLogger(HttpHelper.class.getName()).log(Level.WARNING, "unexpected charset: " + charSet + " should be " + Charset.defaultCharset());
-
-            //throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+charSet);
         }
         try {
             return doHTTPRequest(method, host, port, path, payload.getBytes(), contentType, isHTTPS, unamePword64);
         } catch (URISyntaxException ex) {
-            //Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, null, ex);
+            
             throw new MalformedURLException(ex.getMessage());
         }
 
-    }
-
-    /**
-     * from
-     * http://stackoverflow.com/questions/2642777/trusting-all-certificates-using-httpclient-over-https
-     *
-     * @param charset
-     * @param port
-     * @return
-     */
-    private HttpClient getNewHttpClient(Charset charset, int port) {
-        try {
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            trustStore.load(null, null);
-
-            SSLSocketFactory sf = new MySSLSocketFactory(trustStore);
-            sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
-            HttpParams params = new BasicHttpParams();
-            HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-            HttpProtocolParams.setContentCharset(params, charset.name());
-
-            SchemeRegistry registry = new SchemeRegistry();
-            //registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-            registry.register(new Scheme("https", sf, port));
-
-            ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, registry);
-
-            return new DefaultHttpClient(ccm, params);
-        } catch (Exception e) {
-            return new DefaultHttpClient();
-        }
     }
 
     /**
@@ -223,19 +209,45 @@ public class HttpHelper {
     public HTTPResponse doHTTPRequest(String method, String host, int port, String path, byte[] payload, String contentType,
             boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
 
+       if (USE_APACHE){
+           return doApacheHTTPRequest(method, host, port, path, payload, contentType, isHTTPS, unamePword64);
+       }//else
+       
+       return doURLConnectionHTTPRequest(method, host, port, path, payload, contentType, isHTTPS, unamePword64);
+    }
+    
+      /**
+     *
+     *
+     * @param method
+     * @param host
+     * @param port
+     * @param path
+     * @param payload
+     * @param contentType content type e.g. "application/json"
+     * @param isHTTPS
+     * @param unamePword64
+     * @return
+     * @throws MalformedURLException
+     * @throws ProtocolException
+     * @throws IOException
+     */
+    public HTTPResponse doApacheHTTPRequest(String method, String host, int port, String path, byte[] payload, String contentType,
+            boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
+
         if (payload == null) { //make sure payload is initialized
             payload = new byte[0];
         }
 
         URI url = getURI(host, port, path, isHTTPS);
-        
+
         HttpClient httpclient;
-        if (isHTTPS){
-            httpclient = getNewHttpClient(Charset.defaultCharset(), port);
-        }else{
+        if (isHTTPS) {
+            httpclient = HTTPTrustHelper.getNewHttpClient(Charset.defaultCharset(), port);
+        } else {
             httpclient = new DefaultHttpClient();
         }
-        
+
         HTTPResponse result = null;
         HttpResponse response = null;
 
@@ -250,61 +262,54 @@ public class HttpHelper {
             request.setEntity(reqEntity);
             reqEntity.setContentType(contentType);
             response = httpclient.execute(request);
-        }else if (method.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_PUT)){
+        } else if (method.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_PUT)) {
             HttpPut request = new HttpPut(url);
             request.setHeader("Authorization", "Basic " + unamePword64);
             InputStreamEntity reqEntity = new InputStreamEntity(new ByteArrayInputStream(payload), payload.length);
             request.setEntity(reqEntity);
             reqEntity.setContentType(contentType);
             response = httpclient.execute(request);
-        }else if (method.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_DELETE)){
+        } else if (method.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_DELETE)) {
             HttpDelete request = new HttpDelete(url);
             request.setHeader("Authorization", "Basic " + unamePword64);
             response = httpclient.execute(request);
-        }else{
-            throw new RuntimeException("HTTP method not supported! Method:"+method);
+        } else {
+            throw new RuntimeException("HTTP method not supported! Method:" + method);
         }
-        
-        
-        result = new HTTPResponse(path, payload, Charset.defaultCharset()); 
+
+
+        result = new HTTPResponse(path, payload, Charset.defaultCharset());
         HttpEntity responseEntity = response.getEntity();
-        if (responseEntity != null) {            
+        if (responseEntity != null) {
             result.reply = EntityUtils.toString(responseEntity);
         }
         result.code = response.getStatusLine().getStatusCode();
         result.message = response.getStatusLine().getReasonPhrase();
 
-        
-        
+
+
         httpclient.getConnectionManager().shutdown();
         return result;
-
-
+    }
+   /**
+     *
+     *
+     * @param method
+     * @param host
+     * @param port
+     * @param path
+     * @param payload
+     * @param contentType content type e.g. "application/json"
+     * @param isHTTPS
+     * @param unamePword64
+     * @return
+     * @throws MalformedURLException
+     * @throws ProtocolException
+     * @throws IOException
+     */
+    public HTTPResponse doURLConnectionHTTPRequest(String method, String host, int port, String path, byte[] payload, String contentType,
+            boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
+        
     }
 
-    public HTTPResponse postMultiPartContainer(String host, int port, String path, MultipartContainer mpc,
-            boolean isHTTPS, String unamePword64) throws MalformedURLException, IOException, ProtocolException {
-
-         if (mpc == null) { //make sure multipartContainer is initialized
-            return null;
-        }
-
-        String contentType =  mpc.getContentType();
-        ByteBuilder bb = new ByteBuilder();
-        OutputStream os = bb.getOutputStream();
-        mpc.write(os);
-        os.close();
-        
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "mpc length "+ mpc.getContentLength()+" bb.size():"+bb.size());
-        
-        byte[]payload = bb.toByteArray();
-        try {
-            return doHTTPRequest(HttpConstants.HTTP_COMMAND_POST, host, port, path, payload, contentType, isHTTPS, unamePword64);
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
-        
-
-    }
 }
