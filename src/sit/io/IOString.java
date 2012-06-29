@@ -16,6 +16,15 @@ import java.io.OutputStream;
 
 public class IOString {
 
+    public static String convertStreamToString(java.io.InputStream is) {
+        try {
+            return new java.util.Scanner(is).useDelimiter("\\A").next();
+        } catch (java.util.NoSuchElementException e) {
+            return "";
+        }
+    }
+
+    
     private StringBuffer buf;
 
     /** Creates a new instance of IOString */
