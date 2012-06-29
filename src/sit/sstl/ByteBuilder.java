@@ -18,6 +18,8 @@
  */
 package sit.sstl;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +41,52 @@ import java.util.List;
 public class ByteBuilder {
 
     
-    public static final int DEFAULT_CHUNK_SIZE = 4096;    
-    private final int chunkSize;
+    public static final int DEFAULT_CHUNK_SIZE = 4096;
+
+    /**
+     * non synchronized stream!!!
+     */
+    public static class ByteBuilderOutputStream extends OutputStream {
+        private final ByteBuilder byteBuilder;
+        private final byte[] buffer;
+        private int bufferSize = 0;
+        
+        public ByteBuilderOutputStream(ByteBuilder byteBuilder) {
+            this.byteBuilder = byteBuilder;
+            this.buffer = new byte[byteBuilder.getChunkSize()];
+        }
+
+        @Override
+        public void write(int aByte) throws IOException {
+            if (bufferSize>=buffer.length){
+                appendBuffer();
+            }
+            buffer[bufferSize++] = (byte)aByte;
+        }
+        
+        private void appendBuffer(){
+            byteBuilder.append(buffer, bufferSize);
+            bufferSize = 0;
+        }
+
+        @Override
+        public void flush() throws IOException {
+            super.flush();
+            appendBuffer();            
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            appendBuffer();            
+        }
+        
+        
+    }
+    
+    protected final int chunkSize;
+
+   
 
     private class SequenceFinder {
 
@@ -93,6 +139,14 @@ public class ByteBuilder {
         append(bytes);
     }
 
+     public OutputStream getOutputStream() {
+        return new ByteBuilderOutputStream(this);
+    }
+
+    public int getChunkSize() {
+        return chunkSize;
+    }
+    
     public final void append(byte[] bytes) {
         append(bytes, bytes.length);
     }

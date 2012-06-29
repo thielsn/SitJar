@@ -24,8 +24,10 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -40,6 +42,7 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import sit.io.IOString;
+import sit.sstl.ByteBuilder;
 import sit.tools.Base64;
 import sit.web.HttpConstants;
 import sit.web.MimeTypes;
@@ -247,19 +250,32 @@ public class HttpHelper {
             request.setEntity(reqEntity);
             reqEntity.setContentType(contentType);
             response = httpclient.execute(request);
-
+        }else if (method.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_PUT)){
+            HttpPut request = new HttpPut(url);
+            request.setHeader("Authorization", "Basic " + unamePword64);
+            InputStreamEntity reqEntity = new InputStreamEntity(new ByteArrayInputStream(payload), payload.length);
+            request.setEntity(reqEntity);
+            reqEntity.setContentType(contentType);
+            response = httpclient.execute(request);
+        }else if (method.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_DELETE)){
+            HttpDelete request = new HttpDelete(url);
+            request.setHeader("Authorization", "Basic " + unamePword64);
+            response = httpclient.execute(request);
+        }else{
+            throw new RuntimeException("HTTP method not supported! Method:"+method);
         }
+        
+        
+        result = new HTTPResponse(path, payload, Charset.defaultCharset()); 
         HttpEntity responseEntity = response.getEntity();
-
-        if (responseEntity != null) {
-            responseEntity.consumeContent();
-            result = new HTTPResponse(path, payload, Charset.defaultCharset());
-            result.reply = IOString.convertStreamToString(responseEntity.getContent());
-            result.code = response.getStatusLine().getStatusCode();
-            result.message = response.getStatusLine().getReasonPhrase();
+        if (responseEntity != null) {            
+            result.reply = EntityUtils.toString(responseEntity);
         }
+        result.code = response.getStatusLine().getStatusCode();
+        result.message = response.getStatusLine().getReasonPhrase();
 
-
+        
+        
         httpclient.getConnectionManager().shutdown();
         return result;
 
@@ -267,73 +283,28 @@ public class HttpHelper {
     }
 
     public HTTPResponse postMultiPartContainer(String host, int port, String path, MultipartContainer mpc,
-            boolean isHTTPS, String unamePword64) throws MalformedURLException, IOException {
+            boolean isHTTPS, String unamePword64) throws MalformedURLException, IOException, ProtocolException {
 
-        String method = HttpConstants.HTTP_COMMAND_POST;
-
-        if (mpc == null) { //make sure multipartContainer is initialized
+         if (mpc == null) { //make sure multipartContainer is initialized
             return null;
         }
 
-        URL url = getURL(host, port, path, isHTTPS);
-
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.FINE, "trying to connect " + method + " to " + url + " https:" + isHTTPS);
-
-        HttpURLConnection connection;
-        if (isHTTPS) {
-            connection = (HttpsURLConnection) url.openConnection();
-        } else {
-            connection = (HttpURLConnection) url.openConnection();
+        String contentType =  mpc.getContentType();
+        ByteBuilder bb = new ByteBuilder();
+        OutputStream os = bb.getOutputStream();
+        mpc.write(os);
+        os.close();
+        
+        Logger.getLogger(HttpHelper.class.getName()).log(Level.INFO, "mpc length "+ mpc.getContentLength()+" bb.size():"+bb.size());
+        
+        byte[]payload = bb.toByteArray();
+        try {
+            return doHTTPRequest(HttpConstants.HTTP_COMMAND_POST, host, port, path, payload, contentType, isHTTPS, unamePword64);
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
-
-        long length = mpc.getContentLength();
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.FINE, "contentLength: " + length);
-
-        connection.setRequestMethod(method);
-        connection.setRequestProperty("Host", host);
-        connection.setRequestProperty("Content-Type", mpc.getContentType()); //content-type of multipart message must not have a charset field
-        connection.setRequestProperty("Content-Length", "" + length);
-
-        if (isHTTPS) {
-            connection.setRequestProperty("Authorization", "Basic " + unamePword64);
-        }
-
-
-        connection.setDoInput(true);
-        if (length > 0) {
-            // open up the output stream of the connection
-            connection.setDoOutput(true);
-            OutputStream output = connection.getOutputStream();
-
-            // write out the data
-            mpc.write(output);
-            output.close();
-        }
-
-        HTTPResponse response = new HTTPResponse(method + " " + url.toString(), "[multipart content]".getBytes(),
-                HttpConstants.DEFAULT_CHARSET);
-
-
-        response.code = connection.getResponseCode();
-        response.message = connection.getResponseMessage();
-
-        Logger.getLogger(HttpHelper.class.getName()).log(Level.FINE, "received response: "
-                + response.message + " with code: " + response.code);
-
-        if (response.code != 500) {
-
-            // get ready to read the response from the cgi script
-            DataInputStream input = new DataInputStream(connection.getInputStream());
-
-
-            // read in each character until end-of-stream is detected
-            for (int c = input.read(); c != -1; c = input.read()) {
-                response.reply += (char) c + "";
-
-            }
-            input.close();
-        }
-        return response;
+        
 
     }
 }
