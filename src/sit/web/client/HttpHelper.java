@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package sit.web.client;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -15,16 +16,28 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.security.KeyStore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import sit.io.IOString;
 import sit.tools.Base64;
@@ -153,7 +166,39 @@ public class HttpHelper {
             //Logger.getLogger(HttpHelper.class.getName()).log(Level.SEVERE, null, ex);
             throw new MalformedURLException(ex.getMessage());
         }
-        
+
+    }
+
+    /**
+     * from
+     * http://stackoverflow.com/questions/2642777/trusting-all-certificates-using-httpclient-over-https
+     *
+     * @param charset
+     * @param port
+     * @return
+     */
+    private HttpClient getNewHttpClient(Charset charset, int port) {
+        try {
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, null);
+
+            SSLSocketFactory sf = new MySSLSocketFactory(trustStore);
+            sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+
+            HttpParams params = new BasicHttpParams();
+            HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+            HttpProtocolParams.setContentCharset(params, charset.name());
+
+            SchemeRegistry registry = new SchemeRegistry();
+            //registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+            registry.register(new Scheme("https", sf, port));
+
+            ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, registry);
+
+            return new DefaultHttpClient(ccm, params);
+        } catch (Exception e) {
+            return new DefaultHttpClient();
+        }
     }
 
     /**
@@ -180,7 +225,14 @@ public class HttpHelper {
         }
 
         URI url = getURI(host, port, path, isHTTPS);
-        HttpClient httpclient = new DefaultHttpClient();
+        
+        HttpClient httpclient;
+        if (isHTTPS){
+            httpclient = getNewHttpClient(Charset.defaultCharset(), port);
+        }else{
+            httpclient = new DefaultHttpClient();
+        }
+        
         HTTPResponse result = null;
         HttpResponse response = null;
 
@@ -197,17 +249,17 @@ public class HttpHelper {
             response = httpclient.execute(request);
 
         }
-         HttpEntity responseEntity = response.getEntity();
+        HttpEntity responseEntity = response.getEntity();
 
-            if (responseEntity != null) {
-                EntityUtils.consume(responseEntity);
-                result = new HTTPResponse(path, payload, Charset.defaultCharset());
-                result.reply = IOString.convertStreamToString(responseEntity.getContent());
-                result.code = response.getStatusLine().getStatusCode();
-                result.message = response.getStatusLine().getReasonPhrase();
-            }
+        if (responseEntity != null) {
+            responseEntity.consumeContent();
+            result = new HTTPResponse(path, payload, Charset.defaultCharset());
+            result.reply = IOString.convertStreamToString(responseEntity.getContent());
+            result.code = response.getStatusLine().getStatusCode();
+            result.message = response.getStatusLine().getReasonPhrase();
+        }
 
-        
+
         httpclient.getConnectionManager().shutdown();
         return result;
 
