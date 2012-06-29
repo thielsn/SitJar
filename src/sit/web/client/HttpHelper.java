@@ -170,14 +170,13 @@ public class HttpHelper {
         String contentType = mimeType;
         if (charSet != null) {
             contentType += HttpConstants.SUB_FIELD_SEPARATOR + HttpConstants.CHARSET_CONTENT_TYPE_TAG + charSet.name(); //text/html; charset=utf-8
-            //##CHARSET_MARKER##
-            if (!charSet.equals(Charset.defaultCharset())) {
-                Logger.getLogger(HttpHelper.class.getName()).log(Level.WARNING, "unexpected charset: " + charSet + " should be " + Charset.defaultCharset());
-            }
+            //##CHARSET_MARKER##            
+        }else{
+            charSet = Charset.defaultCharset();
         }
         
         try {
-            return doHTTPRequest(method, host, port, path, payload.getBytes(), contentType, isHTTPS, unamePword64);
+            return doHTTPRequest(method, host, port, path, payload.getBytes(charSet), contentType, isHTTPS, unamePword64);
         } catch (URISyntaxException ex) {
             
             throw new MalformedURLException(ex.getMessage());

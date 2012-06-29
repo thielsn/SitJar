@@ -40,11 +40,8 @@ public class HTTPResponse {
     
 
    public String getPayloadAsString(){
-       if (!charset.equals(Charset.defaultCharset())){
-           //##CHARSET_MARKER##
-            Logger.getLogger(HTTPResponse.class.getName()).log(Level.WARNING, "unexpected charset: "+charset+ " should be "+ Charset.defaultCharset());            
-       }
-       return new String(payload);
+        //##CHARSET_MARKER##
+       return new String(payload, charset);
    }
 
     @Override

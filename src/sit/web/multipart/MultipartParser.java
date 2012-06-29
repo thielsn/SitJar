@@ -25,12 +25,9 @@ public class MultipartParser {
     public static MultipartContainer parse(String boundaryStr, Charset charSet, byte[] payload) throws UnsupportedEncodingException {
 
         MultipartContainer result = new MultipartContainer();
-
-        if (!charSet.equals(Charset.defaultCharset())) {
-            //##CHARSET_MARKER##
-            Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "unexpected charset: "+charSet+ " should be "+ Charset.defaultCharset());            
-        }
-        byte[] boundary = boundaryStr.getBytes();
+        
+        //##CHARSET_MARKER##        
+        byte[] boundary = boundaryStr.getBytes(charSet);
         ByteBuilder content = new ByteBuilder(payload);
 
 
@@ -64,11 +61,9 @@ public class MultipartParser {
             return null;
         }
         //TODO  re-use HTTPMessage parser for parsing the headers !!!
-        if (!charSet.equals(Charset.defaultCharset())) {
-            //##CHARSET_MARKER##
-            Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "unexpected charset: "+charSet+ " should be "+ Charset.defaultCharset());            
-        }
-        String header = new String(content.subSequence(0, endOfHeader));
+        //##CHARSET_MARKER##
+        
+        String header = new String(content.subSequence(0, endOfHeader), charSet);
 
         HashMap<String, String> headerFields = HTTPParseHelper.parseAndFillFittingValues(
                 new String[]{HttpConstants.CONTENT_DISPOSITION_TAG,
@@ -112,12 +107,10 @@ public class MultipartParser {
         if (type.equals(TYPES.BINARY)) {
             result = new MPFileEntry(type, contentType.mimeType, name, fileName, content.subSequence(endOfHeader + HttpConstants.CRLFCRLF_BYTE.length));
         } else {
-            if (!charSet.equals(Charset.defaultCharset())) {
-                //##CHARSET_MARKER##
-                Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "unexpected charset: "+charSet+ " should be "+ Charset.defaultCharset());                
-            }
+            
+            //##CHARSET_MARKER##
             result = new MPTextEntry(type, contentType.mimeType, name,
-                    new String(content.subSequence(endOfHeader + HttpConstants.CRLFCRLF_BYTE.length)));
+                    new String(content.subSequence(endOfHeader + HttpConstants.CRLFCRLF_BYTE.length),charSet));
         }
         return result;
 
