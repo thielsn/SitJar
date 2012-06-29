@@ -41,8 +41,8 @@ public class HTTPResponse {
 
    public String getPayloadAsString(){
        if (!charset.equals(Charset.defaultCharset())){
-            Logger.getLogger(HTTPResponse.class.getName()).log(Level.WARNING, "unexpected charset: "+charset+ " should be "+ Charset.defaultCharset());
-            //throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+charset);
+           //##CHARSET_MARKER##
+            Logger.getLogger(HTTPResponse.class.getName()).log(Level.WARNING, "unexpected charset: "+charset+ " should be "+ Charset.defaultCharset());            
        }
        return new String(payload);
    }

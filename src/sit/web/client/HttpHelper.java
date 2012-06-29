@@ -17,28 +17,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.security.KeyStore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.util.EntityUtils;
 import sit.sstl.ByteBuilder;
 import sit.tools.Base64;
@@ -180,11 +170,12 @@ public class HttpHelper {
         String contentType = mimeType;
         if (charSet != null) {
             contentType += HttpConstants.SUB_FIELD_SEPARATOR + HttpConstants.CHARSET_CONTENT_TYPE_TAG + charSet.name(); //text/html; charset=utf-8
+            //##CHARSET_MARKER##
+            if (!charSet.equals(Charset.defaultCharset())) {
+                Logger.getLogger(HttpHelper.class.getName()).log(Level.WARNING, "unexpected charset: " + charSet + " should be " + Charset.defaultCharset());
+            }
         }
-
-        if (!charSet.equals(Charset.defaultCharset())) {
-            Logger.getLogger(HttpHelper.class.getName()).log(Level.WARNING, "unexpected charset: " + charSet + " should be " + Charset.defaultCharset());
-        }
+        
         try {
             return doHTTPRequest(method, host, port, path, payload.getBytes(), contentType, isHTTPS, unamePword64);
         } catch (URISyntaxException ex) {

@@ -107,8 +107,8 @@ public class WebRequest {
 
     public String getBodyAsString() {
         if (!contentType.charSet.equals(Charset.defaultCharset())){
-            Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "unexpected charset: "+contentType.charSet+ " should be "+ Charset.defaultCharset());
-            //throw new RuntimeException("other charsets than "+Charset.defaultCharset()+" not allowed in this implementation! charset:"+contentType.charSet);
+            //##CHARSET_MARKER##
+            Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "unexpected charset: "+contentType.charSet+ " should be "+ Charset.defaultCharset());            
         }
         return new String(body);
     }
