@@ -5,3 +5,5 @@
 request_body
 simplewebserver0.log*
 picknick.jpg
+nbproject/private/*
+nbproject/project.properties

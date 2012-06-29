@@ -70,10 +70,11 @@ public class HTTPParser {
         }
 
         Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "httpCommand:" + result.getWebRequest().httpCommand);
-        if (result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_POST) || result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_PUT)) {
+        if (result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_POST) 
+                || result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_PUT)) {
 
             //retrieve content length field
-            String contentLengthStr = result.getWebRequest().headerItems.get(HttpConstants.HTTP_HEADER_FIELD_CONTENT_LENGTH);
+            String contentLengthStr = result.getWebRequest().headerItems.get(HttpConstants.HTTP_HEADER_FIELD_CONTENT_LENGTH.toUpperCase());
             long contentLength = Long.MAX_VALUE;
             if (contentLengthStr != null) {
                 try {
