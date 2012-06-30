@@ -22,23 +22,23 @@ import sit.web.WebRequest.ContentType;
  */
 public class MultipartParser {
 
-    public static MultipartContainer parse(String boundaryStr, Charset charSet, byte[] payload) throws UnsupportedEncodingException {
+    public static MultipartContainer parse(String pure_boundary, Charset charSet, byte[] payload) throws UnsupportedEncodingException {
 
-        MultipartContainer result = new MultipartContainer();
+        MultipartContainer result = new MultipartContainer(pure_boundary);
         
         //##CHARSET_MARKER##        
-        byte[] boundary = boundaryStr.getBytes(charSet);
+        byte[] part_boundary = result.getPart_boundary().getBytes(charSet);
         ByteBuilder content = new ByteBuilder(payload);
 
 
-        int oldIndex = boundary.length + HttpConstants.CRLF_BYTE.length;
+        int oldIndex = part_boundary.length + HttpConstants.CRLF_BYTE.length;
 
         int index;
-        while (-1 != (index = content.indexOf(oldIndex, boundary))) {
+        while (-1 != (index = content.indexOf(oldIndex, part_boundary))) {
 
 
         result.addPart(parsePart(charSet, content.subSequence(oldIndex, index-HttpConstants.CRLF_BYTE.length)));    
-        oldIndex = index + boundary.length + HttpConstants.CRLF_BYTE.length;
+        oldIndex = index + part_boundary.length + HttpConstants.CRLF_BYTE.length;
         
         }
 
