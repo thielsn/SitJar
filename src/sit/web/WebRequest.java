@@ -106,10 +106,13 @@ public class WebRequest {
     }
 
     public String getBodyAsString() {
+        
+        //##CHARSET_MARKER##        
         if (!contentType.charSet.equals(Charset.defaultCharset())){
-            //##CHARSET_MARKER##
-            Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "unexpected charset: "+contentType.charSet+ " should be "+ Charset.defaultCharset());            
-        }
-        return new String(body);
+            Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, 
+                    "unexpected charset: "+contentType.charSet+ " should be "+ Charset.defaultCharset());      
+        }        
+    
+        return new String(body);        
     }
 }

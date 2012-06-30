@@ -6,6 +6,7 @@ package sit.web;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sit.sstl.ByteBuilder;
@@ -15,6 +16,9 @@ import sit.sstl.ByteBuilder;
  * @author Simon Thiel <simon.thiel at gmx.de>
  */
 public class HTTPParser {
+    public static final String CONTINUE_100 = "100-continue";
+    public static final String EXPECT_HEADER_FIELD = "Expect:";
+    public static final String HTTP_100__CONTINUE = "HTTP/1.1 100 Continue\r\n\r\n";
 
     public int getCRLFCRLFindex(ByteBuilder data) {
         return data.indexOf(HttpConstants.CRLFCRLF_BYTE);
@@ -22,19 +26,22 @@ public class HTTPParser {
 
     private boolean proceedToRead(WebBuffer buf, InputStream is, boolean finished) throws IOException {
         if (finished) {
+            //Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "finished");
             return false;
         }
         if (!buf.isMoreDataToRead()) {
+           // Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "no more data");
             return false;
         }
         if (buf.readFromInputStream(is) > -1) {
+            //Logger.getLogger(HTTPParser.class.getName()).log(Level.FINE, "more data found");
             return true;
         }
         Logger.getLogger(HTTPParser.class.getName()).log(Level.WARNING, "connection timed out!");
         return false;
     }
 
-    public HTTPMessage getHeaderAndBody(InputStream is, WebBuffer buf) throws IOException, MessageTooLargeException, HTTPParseException {
+    public HTTPMessage getHeaderAndBody(InputStream is, WebBuffer buf, PrintStream ps) throws IOException, MessageTooLargeException, HTTPParseException {
         HTTPMessage result = new HTTPMessage();
 
         ByteBuilder data = new ByteBuilder();
@@ -73,6 +80,13 @@ public class HTTPParser {
         if (result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_POST) 
                 || result.getWebRequest().httpCommand.equalsIgnoreCase(HttpConstants.HTTP_COMMAND_PUT)) {
 
+            //handle 100 continue issue // 100 (Continue)   "HTTP/1.1 100 Continue"
+            if (CONTINUE_100.equalsIgnoreCase(result.getWebRequest().headerItems.get(EXPECT_HEADER_FIELD.toUpperCase()))){
+                ps.print(HTTP_100__CONTINUE);
+                ps.flush();
+                Logger.getLogger(HTTPParser.class.getName()).log(Level.INFO, "sent: "+"HTTP/1.1 100 Continue\r\n\r\n");
+            }
+            
             //retrieve content length field
             String contentLengthStr = result.getWebRequest().headerItems.get(HttpConstants.HTTP_HEADER_FIELD_CONTENT_LENGTH.toUpperCase());
             long contentLength = Long.MAX_VALUE;
