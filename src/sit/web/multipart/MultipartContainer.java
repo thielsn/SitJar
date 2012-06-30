@@ -19,28 +19,31 @@ import sit.web.HttpConstants;
  * @author simon
  */
 public class MultipartContainer implements Iterable<MultipartEntry> {
-    public static final String FINAL_BORDER = "--"+HttpConstants.CRLF;
+    public static final String PRE_BOUNDARY = "--";
+    public static final String FINAL_BORDER = PRE_BOUNDARY+HttpConstants.CRLF;
     public static final String MULTIPART_CONTENT_TYPE_FORMDATA_BOUNDARY = HttpConstants.MULTIPART_MIME_TYPE
             +HttpConstants.SUB_FIELD_SEPARATOR+HttpConstants.BOUNDARY_CONTENT_TYPE_PREFIX;
     
     
+    
 
     
-    private final String boundary;
+    private final String pure_boundary;
+    private final String part_boundary;
     private final String contentType; //content-type of multipart message must not have a charset field
     private Vector<MultipartEntry> parts = new Vector();
 
     public MultipartContainer() {
-         boundary = "----------------"+UUID.randomUUID().toString();
-         contentType = MULTIPART_CONTENT_TYPE_FORMDATA_BOUNDARY+boundary;
+         pure_boundary = UUID.randomUUID().toString();
+         part_boundary=PRE_BOUNDARY+pure_boundary;
+         contentType = MULTIPART_CONTENT_TYPE_FORMDATA_BOUNDARY+pure_boundary;
     }
 
-    public MultipartContainer(String boundary) {
-        this.boundary = boundary;
-        contentType = MULTIPART_CONTENT_TYPE_FORMDATA_BOUNDARY+boundary;
+    public MultipartContainer(String pure_boundary) {
+        this.pure_boundary = pure_boundary;
+        part_boundary=PRE_BOUNDARY+pure_boundary;
+        contentType = MULTIPART_CONTENT_TYPE_FORMDATA_BOUNDARY+pure_boundary;
     }
-    
-    
     
     
     /**
@@ -59,9 +62,9 @@ public class MultipartContainer implements Iterable<MultipartEntry> {
         long result = 0;
         
         for (MultipartEntry entry : parts){           
-            result+=entry.getContentLength(boundary.length());
+            result+=entry.getContentLength(part_boundary.length());
         }
-        result+=boundary.length()+FINAL_BORDER.length();
+        result+=part_boundary.length()+FINAL_BORDER.length();
         
         return result;
     }
@@ -70,7 +73,7 @@ public class MultipartContainer implements Iterable<MultipartEntry> {
         try {
             for (MultipartEntry entry : parts){
                 try {
-                    entry.writeTo(output, boundary);
+                    entry.writeTo(output, part_boundary);
                 } catch (IOException ex) {
                     Logger.getLogger(MultipartContainer.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -78,7 +81,7 @@ public class MultipartContainer implements Iterable<MultipartEntry> {
              DataOutputStream dout = new DataOutputStream(output);
                    
             // write out the data
-            dout.writeBytes(boundary+FINAL_BORDER);
+            dout.writeBytes(part_boundary+FINAL_BORDER);
         } catch (IOException ex) {
             Logger.getLogger(MultipartContainer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -86,6 +89,13 @@ public class MultipartContainer implements Iterable<MultipartEntry> {
 
     public Iterator<MultipartEntry> iterator() {
         return parts.iterator();
+    }
+
+    /**
+     * @return the part_boundary
+     */
+    public String getPart_boundary() {
+        return part_boundary;
     }
 
     

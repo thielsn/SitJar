@@ -22,26 +22,28 @@ import sit.web.WebRequest.ContentType;
  */
 public class MultipartParser {
 
-    public static MultipartContainer parse(String boundaryStr, Charset charSet, byte[] payload) throws UnsupportedEncodingException {
+    public static MultipartContainer parse(String pure_boundary, Charset charSet, byte[] payload) throws UnsupportedEncodingException {
 
-        MultipartContainer result = new MultipartContainer();
-
-        if (!charSet.equals(Charset.defaultCharset())) {
-            //##CHARSET_MARKER##
-            Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING, "unexpected charset: "+charSet+ " should be "+ Charset.defaultCharset());            
+        MultipartContainer result = new MultipartContainer(pure_boundary);
+        
+        //##CHARSET_MARKER##        
+        if (!charSet.equals(Charset.defaultCharset())) {        
+            Logger.getLogger(MultipartParser.class.getName()).log(Level.WARNING,
+                    "unexpected charset: "+charSet+ " should be "+ Charset.defaultCharset());            
         }
-        byte[] boundary = boundaryStr.getBytes();
+        byte[] part_boundary = result.getPart_boundary().getBytes();
+
         ByteBuilder content = new ByteBuilder(payload);
 
 
-        int oldIndex = boundary.length + HttpConstants.CRLF_BYTE.length;
+        int oldIndex = part_boundary.length + HttpConstants.CRLF_BYTE.length;
 
         int index;
-        while (-1 != (index = content.indexOf(oldIndex, boundary))) {
+        while (-1 != (index = content.indexOf(oldIndex, part_boundary))) {
 
 
         result.addPart(parsePart(charSet, content.subSequence(oldIndex, index-HttpConstants.CRLF_BYTE.length)));    
-        oldIndex = index + boundary.length + HttpConstants.CRLF_BYTE.length;
+        oldIndex = index + part_boundary.length + HttpConstants.CRLF_BYTE.length;
         
         }
 
