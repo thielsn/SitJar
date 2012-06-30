@@ -92,7 +92,7 @@ public class WebBuffer {
             buf[readBytes] = (byte) r;
             readBytes++;
         }
-        Logger.getLogger(WebBuffer.class.getName()).log(Level.FINE, ">"+this.toString()+"<");
+        //Logger.getLogger(WebBuffer.class.getName()).log(Level.FINE, ">"+this.toString()+"<");
         return readBytes;
 
 
