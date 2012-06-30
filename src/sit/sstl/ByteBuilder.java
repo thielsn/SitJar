@@ -23,6 +23,8 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -248,7 +250,11 @@ public class ByteBuilder {
     }
 
     public String toString(Charset charSet) {
-        return new String(toByteArray(), charSet);
+        //##CHARSET_MARKER##
+        if (!charSet.equals(Charset.defaultCharset())) {
+            Logger.getLogger(ByteBuilder.class.getName()).log(Level.WARNING, "unexpected charset: " + charSet + " should be " + Charset.defaultCharset());
+        }
+        return new String(toByteArray());
     }
 
     /**
