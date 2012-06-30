@@ -248,6 +248,7 @@ public class ByteBuilder {
     }
 
     public String toString(Charset charSet) {
+        //##CHARSET_MARKER##
         return new String(toByteArray(), charSet);
     }
 
