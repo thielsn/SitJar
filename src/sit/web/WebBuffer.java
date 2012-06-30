@@ -7,7 +7,6 @@ package sit.web;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,7 +19,7 @@ public class WebBuffer {
 
     public static final int BUF_SIZE = 2048;
     
-    private static int READ_TIMEOUT_MS = 500; //FIXME adapt to WebServer.getInstance().getTimeOut();
+    private static int READ_TIMEOUT_MS = 1000; //FIXME adapt to WebServer.getInstance().getTimeOut();
     private static final int WAIT_TIME_OUT_MS = 5;
     /* buffer to use for requests */
     private byte[] buf = new byte[BUF_SIZE];
@@ -93,7 +92,7 @@ public class WebBuffer {
             buf[readBytes] = (byte) r;
             readBytes++;
         }
-//        System.out.println(">"+this.toString()+"<");
+        Logger.getLogger(WebBuffer.class.getName()).log(Level.FINE, ">"+this.toString()+"<");
         return readBytes;
 
 

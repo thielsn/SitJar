@@ -80,9 +80,9 @@ class WebWorker implements HttpConstants, Runnable {
         }
     }
 
-    private WebRequest getWebRequest(InputStream is) throws UnsupportedHTTPMethodException, IOException, MessageTooLargeException, HTTPParseException {
+    private WebRequest getWebRequest(InputStream is, PrintStream ps) throws UnsupportedHTTPMethodException, IOException, MessageTooLargeException, HTTPParseException {
 
-        HTTPMessage result = httphelp.getHeaderAndBody(is, buf);
+        HTTPMessage result = httphelp.getHeaderAndBody(is, buf, ps);
 
         if (result == null) {
             return null;
@@ -105,7 +105,7 @@ class WebWorker implements HttpConstants, Runnable {
         try {
             WebRequest request = null;
             try {
-                request = getWebRequest(is);
+                request = getWebRequest(is, ps);
             } catch (UnsupportedHTTPMethodException ex) {
                 /*
                  * we don't support this method
