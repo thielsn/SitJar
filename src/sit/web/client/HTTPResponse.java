@@ -26,7 +26,7 @@ public class HTTPResponse {
     /** http response code from the call */
     public int code = -1;    
     public final byte[] payload;
-    public String reply = "";
+    public String reply = ""; //TODO switch toy byte array for reply
     
 
 
