@@ -504,7 +504,7 @@ public class MimeTypes {
      * @return
      */
     public static String getMimeType(String fileType) {
-        return mimeTypes.get(fileType);
+        return mimeTypes.get(fileType.toLowerCase());
     }
 
     public static String getMimeTypeFromFileName(String fileName) {
