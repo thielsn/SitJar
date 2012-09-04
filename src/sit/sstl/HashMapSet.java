@@ -17,6 +17,8 @@ import java.util.Iterator;
 /**
  * class HashMapSet
  *
+ * @param <K>
+ * @param <V>  
  */
 public class HashMapSet<K,V extends ObjectWithKey<K>>
     implements Iterable<V>, Serializable{
