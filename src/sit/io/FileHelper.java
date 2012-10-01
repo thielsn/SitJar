@@ -122,4 +122,13 @@ public class FileHelper implements FileHelperI {
         }
         return newFileName;
     }
+    
+    public String getExtention(String fileName){
+        int dotIndex = fileName.lastIndexOf('.');
+        if ((dotIndex==-1) 
+                || dotIndex==fileName.length()-1){
+            return "";
+        }
+        return fileName.substring(dotIndex+1);
+    }
 }
