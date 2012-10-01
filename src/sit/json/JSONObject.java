@@ -40,6 +40,14 @@ public class JSONObject implements Iterable<Map.Entry<String, JSONObject>> {
         this.setValue(value, hasQuotes);
     }
 
+    /**
+     * manually set the type of the JSONObject
+     * generally this is done automatically - please make sure, you know what you're doing.
+     * 
+     * valid types are JSONObject.JSON_TYPE_*
+     * 
+     * @param type 
+     */
     public void setType(int type) {
         saveTypeSwitch(type);
     }
@@ -87,6 +95,9 @@ public class JSONObject implements Iterable<Map.Entry<String, JSONObject>> {
         if (type != JSON_TYPE_COLLECTION) {
             return -1;
         }
+        if (children==null){
+            return 0;
+        }        
         return this.children.size();
     }
 
