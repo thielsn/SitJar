@@ -1,7 +1,9 @@
 package sit.sound;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import sit.sstl.ByteBuilder;
 
@@ -265,6 +267,12 @@ public class WavStream{
                 outBuffer.append(oneByte);
             }
     }
+    
+    
+    public InputStream getInStream() {
+        return new ByteArrayInputStream(outBuffer.toByteArray());
+    }
+
 
     
 }
