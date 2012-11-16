@@ -7,8 +7,10 @@
  */ 
 package sit.web;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -497,6 +499,36 @@ public class MimeTypes {
 
     }
 
+    /**
+     * returns true in case the given mimeType is existing/supported
+     * @param mimeType
+     * @return 
+     */
+    public static boolean isMimeType(String mimeType){
+        return mimeTypes.containsValue(mimeType);
+    }
+    
+    /**
+     * returns a list of extensions fitting with the given mime-type
+     * @param mimeType
+     * @return 
+     */
+    public static List<String> getExtensionForMimeType(String mimeType){
+        if (mimeType==null){
+            return null;
+        }
+        
+        ArrayList<String> result = new ArrayList();
+        
+        
+        for (Map.Entry<String, String> entry : mimeTypes.entrySet()){
+            if (mimeType.equals(entry.getValue())){
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+    
     /**
      * looks up mimetype for give filetype in ".abc" style
      *
