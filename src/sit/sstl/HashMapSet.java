@@ -17,6 +17,8 @@ import java.util.Iterator;
 /**
  * class HashMapSet
  *
+ * @param <K>
+ * @param <V>  
  */
 public class HashMapSet<K,V extends ObjectWithKey<K>>
     implements Iterable<V>, Serializable{
@@ -47,6 +49,13 @@ public class HashMapSet<K,V extends ObjectWithKey<K>>
         return set.values().iterator();
     }
 
+    /**
+     * Returns the object to which the specified key is mapped, or null 
+     * if this map contains no mapping for the key.
+     * 
+     * @param id
+     * @return 
+     */
     public synchronized V get(K id){
         return set.get(id);
     }

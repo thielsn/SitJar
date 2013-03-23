@@ -14,8 +14,8 @@ import java.util.logging.Logger;
  * @author Simon Thiel <simon.thiel at gmx.de>
  */
 public class HTTPMessage {
-
-    public final static int MAX_MESSAGE_SIZE = 2097152;
+                                               //was 2097152 previously - why?
+    public final static int MAX_MESSAGE_SIZE = Integer.MAX_VALUE-1;
     private WebRequest webRequest = null;
     private String header = null;
 

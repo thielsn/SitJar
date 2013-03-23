@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 /**
  *
+ * @param <DATASET> 
  * @author thiel
  */
 public class TxtParser <DATASET extends DataSet> implements Iterable<DATASET>{
@@ -51,9 +52,9 @@ public class TxtParser <DATASET extends DataSet> implements Iterable<DATASET>{
         try {
             return (DATASET) dsClass.newInstance();
         } catch (InstantiationException ex) {
-            Logger.getLogger(TxtParser.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TxtParser.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         } catch (IllegalAccessException ex) {
-            Logger.getLogger(TxtParser.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TxtParser.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
         return null;
     }
@@ -61,7 +62,7 @@ public class TxtParser <DATASET extends DataSet> implements Iterable<DATASET>{
     /**
      * engage parsing
      */
-    public void parse(){
+    public void parse(ParseContext context){
 
 
         try {
@@ -71,12 +72,12 @@ public class TxtParser <DATASET extends DataSet> implements Iterable<DATASET>{
 
             while ((line = reader.readLine())!= null) {
 
-                if (!dataSet.processLine(line)){
+                if (!dataSet.processLine(context, line)){
                     if (dataSet.isComplete()){
                         dataSets.add(dataSet);
                     }
                     dataSet = getDSInstance(); //new DATASET()
-                    dataSet.processLine(line);
+                    dataSet.processLine(context, line);
                 }
                 
             }

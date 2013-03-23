@@ -27,7 +27,7 @@ public abstract class DataSet {
      * @param line
      * @return true in case the line still belongs to a dataset; in case the dataset was completed already it returns false
      */
-    public abstract boolean processLine(String line);
+    public abstract boolean processLine(ParseContext context, String line);
 
     /**
      * indicates that this dataset was the last one found in the file
