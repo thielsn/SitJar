@@ -48,7 +48,27 @@ public class ServiceEndpointHelper {
         }
         return result;
     }
-
+    
+    public static ServiceComponent getServiceComponent(ServiceComponents serviceComponents, String key){
+        for (ServiceComponent component: serviceComponents){
+            if (component.getA().equals(key)){
+                return component;
+            }
+        }
+        return null;
+    }
+    
+    
+    public static String getURLParamForKeyFromWR(WebRequest wr, String key) throws UnsupportedEncodingException{
+        ServiceComponents urlParams = extractNameValues(wr.param);
+        ServiceComponent sc = getServiceComponent(urlParams, key);
+        if (sc!=null){
+            return sc.getB();
+        }
+        return null;
+        
+    }
+    
 
     public static String xmlize(String rootTag, Vector<Pair<String, String>> nv){
         String result ="<"+rootTag+">";
