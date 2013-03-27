@@ -68,5 +68,29 @@ public class HashMapSet<K,V extends ObjectWithKey<K>>
         return set.size();
     }
 
+    
+    @Override
+    public synchronized boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final HashMapSet<K, V> other = (HashMapSet<K, V>) obj;
+        if (this.set != other.set && (this.set == null || !this.set.equals(other.set))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public synchronized int hashCode() {
+        int hash = 3;
+        hash = 17 * hash + (this.set != null ? this.set.hashCode() : 0);
+        return hash;
+    }
+
+    
    
 }
