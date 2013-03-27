@@ -70,7 +70,7 @@ public class HashMapSet<K,V extends ObjectWithKey<K>>
 
     
     @Override
-    public boolean equals(Object obj) {
+    public synchronized boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }
@@ -85,7 +85,7 @@ public class HashMapSet<K,V extends ObjectWithKey<K>>
     }
 
     @Override
-    public int hashCode() {
+    public synchronized int hashCode() {
         int hash = 3;
         hash = 17 * hash + (this.set != null ? this.set.hashCode() : 0);
         return hash;
