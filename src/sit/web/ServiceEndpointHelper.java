@@ -60,6 +60,9 @@ public class ServiceEndpointHelper {
     
     
     public static String getURLParamForKeyFromWR(WebRequest wr, String key) throws UnsupportedEncodingException{
+        if (wr==null || wr.param==null){
+            return null;
+        }
         ServiceComponents urlParams = extractNameValues(wr.param);
         ServiceComponent sc = getServiceComponent(urlParams, key);
         if (sc!=null){
