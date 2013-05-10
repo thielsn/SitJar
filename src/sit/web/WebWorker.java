@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.nio.charset.Charset;
@@ -17,6 +18,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sit.sstl.ByteBuilder;
+import sit.web.client.HttpHelper;
 
 /**
  *
@@ -41,7 +44,15 @@ class WebWorker implements HttpConstants, Runnable {
     
     private final static Logger logger = Logger.getLogger(WebWorker.class.getName());    
     private final static Level level = logger.getLevel();
-
+    
+    private final static String e404Msg="<html><body><h1>Not Found</h1><br/><br/>\n\n"
+                + "The requested resource was not found.\n</body></html>";
+    private final static String e403Msg="<html><body><h1>Forbidden</h1><br/><br/>\n\n"
+                + "Access to the requested resource was denied.\n</body></html>";
+    
+    private final static String e500Msg="<html><body><h1>Internal Server Error</h1><br/><br/>\n\n"
+                + "The server had an internal error.\n</body></html>";
+            
     public synchronized void setSocket(Socket s) {
         this.socket = s;
         notify();
@@ -90,6 +101,7 @@ class WebWorker implements HttpConstants, Runnable {
         return result.getWebRequest();
     }
 
+
     private void handleClient() throws IOException {
 
         InputStream is = new BufferedInputStream(socket.getInputStream());
@@ -106,35 +118,22 @@ class WebWorker implements HttpConstants, Runnable {
             WebRequest request = null;
             try {
                 request = getWebRequest(is, ps);
+                
             } catch (UnsupportedHTTPMethodException ex) {
-                /*
-                 * we don't support this method
-                 */
-                ps.print("HTTP/1.0 " + HTTP_BAD_METHOD
-                        + " unsupported method type: ");
-                buf.writeToOutStream(ps, 0, 5);
-                ps.write(HttpConstants.CRLF_BYTE);
-                ps.flush();
-                socket.close();
+                               
+                String message = "unsupported method type: " + new String(buf.getBytes(0, 5));
+                sendHtmlMessageAndClose(HTTP_BAD_METHOD, message, ps);
                 return;
+                
             } catch (MessageTooLargeException ex) {
-
-                String message = "HTTP/1.0 " + HTTP_ENTITY_TOO_LARGE
-                        + " Entity Too Large";
-                logger.log(Level.WARNING, message);
-                ps.print(message);
-                ps.write(HttpConstants.CRLF_BYTE);
-                ps.flush();
-                socket.close();
+                sendHtmlMessageAndClose(HTTP_ENTITY_TOO_LARGE, "Entity Too Large", ps);
+                logger.log(Level.WARNING, "Entity Too Large:\n" + ex.getMessage());  
                 return;
+                
             } catch (HTTPParseException ex) {
-                String message = "HTTP/1.0 " + HTTP_SERVER_ERROR
-                        + " Internal Server Error";
-                logger.log(Level.WARNING, message + "\n" + ex.getMessage());
-                ps.print(message + "\n" + ex.getMessage());
-                ps.write(HttpConstants.CRLF_BYTE);
-                ps.flush();
-                socket.close();
+                sendHtmlMessageAndClose(HTTP_SERVER_ERROR, "Internal Server Error", ps);                      
+                logger.log(Level.WARNING, "Internal Server Error:\n" + ex.getMessage());
+               
                 return;
             }
             if (request == null) {
@@ -148,36 +147,60 @@ class WebWorker implements HttpConstants, Runnable {
                 logger.log(Level.FINER, "request:{0}", request.toString());
             }
 
-
+            
             //if we find a fitting service call the service
             ServiceEndpoint service = ServiceEndpoints.getInstance().getEndpoint(request.fname);
             if (service != null) {
-                logger.log(Level.FINE,
-                        "found service:" + service.getEndpointName());
+                logger.log(Level.FINE, "found service:" + service.getEndpointName());
 
                 printDynamicPage(service.getContentTypeAsString(), service.getCharSet(), service.handleCall(request), ps);
             } else {
-
-                //look for a fitting file/directory
-                File targetFile = new File(WebServer.getInstance().getRoot(), request.fname);
-                if (targetFile.isDirectory()) {
-                    File indexFile = new File(targetFile, "index.html");
-                    if (indexFile.exists()) {
-                        targetFile = indexFile;
-                    }
-                }
-                if (printHeaders(targetFile, ps)) {
-                    sendFile(targetFile, ps);
-                } else {
-                    send404(ps);
-                }
+               handleFileAndDirectoryCall(request, ps);
             }
-            ps.flush();
-            //logger.log(Level.INFO, "done.");
 
         } finally {
             socket.close();
         }
+    }
+    
+    
+    private void handleFileAndDirectoryCall(WebRequest request, PrintStream ps) throws IOException{
+         
+        String filename=HttpHelper.decodeString(request.fname);
+        //look for a fitting file/directory
+        File targetFile = new File(WebServer.getInstance().getRoot(), filename);
+
+        //check 404
+        if (!targetFile.exists()) {
+            sendHtmlMessageAndClose(HTTP_NOT_FOUND, e404Msg, ps, request.contentType.charSet);
+            return;
+        }
+        //check indexfile       
+        if (targetFile.isDirectory()) {
+            File indexFile = new File(targetFile, "index.html");
+            if (indexFile.exists()) {
+                targetFile = indexFile;
+            }
+        }
+        //check directory listing
+        if (targetFile.isDirectory()) { //could have been replaced by index.html
+            //handle directory
+            if (WebServer.getInstance().isPermitDirectoryListing()) {
+                String body = getDirectoryList(targetFile);
+                sendHtmlMessageAndClose(HTTP_OK, body, ps, request.contentType.charSet);
+                return;
+            } else {                
+                sendHtmlMessageAndClose(HTTP_FORBIDDEN, e403Msg, ps, request.contentType.charSet);
+                return;
+            }
+        }else{
+            
+            ByteBuilder headers = getHeaders(HTTP_OK,MimeTypes.getMimeTypeFromFileName(targetFile.getName()), 
+                    request.contentType.charSet, targetFile.length());
+            
+            sendFileAndClose(headers.toByteArray(), targetFile, ps);
+            return;
+        } 
     }
 
     private void printDynamicPage(String contentType, Charset charSet, byte[] content, FilterOutputStream output)
@@ -206,85 +229,81 @@ class WebWorker implements HttpConstants, Runnable {
         output.write(CRLF_BYTE);
         output.write(CRLF_BYTE);
         output.write(content);
-
+        
+        closeCall(output);
 
     }
-
-    private boolean printHeaders(File targetFile, PrintStream ps) throws IOException {
-        boolean result = false;
-        int returnCode = 0;
-
-        if (!targetFile.exists()) {
-            returnCode = HTTP_NOT_FOUND;
-            ps.print("HTTP/1.0 " + HTTP_NOT_FOUND + " not found");
-            ps.write(HttpConstants.CRLF_BYTE);
-            result = false;
-        } else {
-            returnCode = HTTP_OK;
-            ps.print("HTTP/1.0 " + HTTP_OK + " OK");
-            ps.write(HttpConstants.CRLF_BYTE);
-            result = true;
+    
+    
+    private ByteBuilder getHeaders(int returnCode, String mimeType, Charset charset, long contentLength){
+        ByteBuilder result = new ByteBuilder();
+        
+        String returnCodeMessage = HttpConstantsHelper.getHTTPCodeMessage(returnCode);
+        if (returnCodeMessage==null){
+            Logger.getLogger(WebWorker.class.getName()).log(Level.WARNING, "no message found for HTTP code:"+returnCode);
+            returnCodeMessage="";
         }
-        logger.log(Level.FINE,
-                "From {0}: GET {1}-->{2}",
-                new Object[]{socket.getInetAddress().getHostAddress(),
-                    targetFile.getAbsolutePath(), returnCode});
-
-        ps.print("Server: SIT java");
-        ps.write(HttpConstants.CRLF_BYTE);
-        ps.print("Date: " + (new Date()));
-        ps.write(HttpConstants.CRLF_BYTE);
-
-        if (result) {
-            if (!targetFile.isDirectory()) {
-                ps.print("Content-length: " + targetFile.length());
-                ps.write(CRLF_BYTE);
-                ps.print("Last Modified: " + (new Date(targetFile.lastModified())));
-                ps.write(CRLF_BYTE);
-
-                String contentType = MimeTypes.getMimeTypeFromFileName(targetFile.getName());
-
-                ps.print(CONTENT_TYPE_TAG + contentType);
-                ps.write(CRLF_BYTE);
-            } else {
-                ps.print(CONTENT_TYPE_TAG + DEFAULT_MIME_TYPE);
-                ps.write(CRLF_BYTE);
-            }
-        }
+        
+        
+        result.append(("HTTP/1.0 " + returnCode + " "+returnCodeMessage).getBytes(charset));
+        result.append(HttpConstants.CRLF_BYTE);
+        
+        result.append("Server: SIT java 0.2".getBytes(charset));
+        result.append(HttpConstants.CRLF_BYTE);
+        
+        result.append(("Date: " + (new Date())).getBytes(charset));
+        result.append(HttpConstants.CRLF_BYTE);
+        
+        result.append((CONTENT_TYPE_TAG + mimeType
+                +HttpConstants.SUB_FIELD_SEPARATOR+HttpConstants.CHARSET_CONTENT_TYPE_TAG+charset.name()).getBytes(charset));
+        result.append(CRLF_BYTE);
+        
+        result.append((CONTENT_LENGTH_TAG + contentLength).getBytes(charset));
+        result.append(CRLF_BYTE);
+        
+        result.append(CRLF_BYTE);
         return result;
+        
     }
-
-    private void send404(PrintStream ps) throws IOException {
-        ps.write(CRLF_BYTE);
-        ps.write(CRLF_BYTE);
-        ps.println("<h1>Not Found</h1><br/><br/>\n\n"
-                + "The requested resource was not found.\n");
+    
+        
+    private void closeCall(OutputStream os) throws IOException{
+        os.flush();
+        socket.close();
     }
-
-    private void send403(PrintStream ps) throws IOException {
-        ps.write(CRLF_BYTE);
-        ps.write(CRLF_BYTE);
-        ps.println("<h1>Forbidden</h1><br/><br/>\n\n"
-                + "Access to the requested resource was denied.\n");
+    
+    private void sendHtmlMessageAndClose(String htmlMessage, PrintStream ps) throws IOException{
+        sendHtmlMessageAndClose(HTTP_OK, htmlMessage, ps,  HttpConstants.DEFAULT_CHARSET);
     }
+    
+    private void sendHtmlMessageAndClose(int returnCode, String htmlMessage, PrintStream ps) throws IOException{
+        sendHtmlMessageAndClose(returnCode, htmlMessage, ps,  HttpConstants.DEFAULT_CHARSET);
+    }
+    
+    private void sendHtmlMessageAndClose(int returnCode, String htmlMessage, PrintStream ps, Charset charset) throws IOException{
+    
+        byte[] message = htmlMessage.getBytes(charset);
+        
+        ByteBuilder headers = getHeaders(returnCode, DEFAULT_MIME_TYPE, charset, message.length);
+        sendBytesAndClose(headers.toByteArray(), message, ps); 
+    }
+    
+    
+    private void sendBytesAndClose(byte[] header, byte[] body, PrintStream ps) throws IOException{
+        ps.write(header);
+        ps.write(body);
+        closeCall(ps);
+    } 
 
-    private void sendFile(File targetFile, PrintStream ps) throws IOException {
+
+    private void sendFileAndClose(byte[] header, File targetFile, PrintStream ps) throws IOException {
+        
+        ps.write(header);
+        
         InputStream is = null;
-        ps.write(CRLF_BYTE);
-
-        //handle directory
-        if (targetFile.isDirectory()) {
-            if (WebServer.getInstance().isPermitDirectoryListing()) {
-                listDirectory(targetFile, ps);
-            } else {
-                send403(ps);
-            }
-            return;
-
-            //handle file
-        } else {
-            is = new FileInputStream(targetFile.getAbsolutePath());
-        }
+     
+        is = new FileInputStream(targetFile.getAbsolutePath());
+    
         try {
             int n;
             while ((n = buf.readFromInputStream(is)) > 0) {
@@ -293,16 +312,11 @@ class WebWorker implements HttpConstants, Runnable {
         } finally {
             is.close();
         }
-    }
-
-    private void listDirectory(File dir, PrintStream ps) throws IOException {
-
-
-        ps.println("<html><head><title>Directory listing</title></head>\n");
-
-        ps.println("<body><h1>Directory listing</h1>\n");
-        ps.println("<p><a href=\"..\">[Parent directory]</a><br/>\n");
         
+        closeCall(ps);
+    }
+    
+    private String getMyPath(File dir){
         String myPath = ServiceEndpointHelper.replaceBackSlashes(
                 (dir.getPath().length() > 0) ? dir.getPath() : "");
         try{//remove previously added prefix from the path
@@ -314,16 +328,31 @@ class WebWorker implements HttpConstants, Runnable {
         if (myPath.startsWith("/")){
             myPath = myPath.substring(1);
         }
+        return myPath;
+    }
+
+    private String getDirectoryList(File dir)  {
+        String myPath = getMyPath(dir);
+
+        StringBuilder result = new StringBuilder();
+        result.append("<html><head><title>Directory listing</title></head>\n");
+
+        result.append("<body><h1>Directory listing</h1>\n");
+        result.append("<p><a href=\"..\">[Parent directory]</a><br/>\n");
+        
+        
         
         File[] list = dir.listFiles();
         for (int i = 0; list != null && i < list.length; i++) {
             File f = list[i];
             if (f.isDirectory()) {
-                ps.println("<a href=\"/" + myPath + "/" + f.getName() + "/\">" + f.getName() + "/</a><br/>\n");
+                result.append("<a href=\"/" + myPath + "/" + f.getName() + "/\">" + f.getName() + "/</a><br/>\n");
             } else {
-                ps.println("<a href=\"/" + myPath + "/" + f.getName() + "\">" + f.getName() + "</a><br/>\n");
+                result.append("<a href=\"/" + myPath + "/" + f.getName() + "\">" + f.getName() + "</a><br/>\n");
             }
         }
-        ps.println("<br/></p><p><hr></p><p><i>" + (new Date()) + "</i></p></body></html>");
+        result.append("<br/></p><p><hr></p><p><i>" + (new Date()) + "</i></p></body></html>");
+        
+        return result.toString();
     }
 }

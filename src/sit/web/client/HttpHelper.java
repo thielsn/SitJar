@@ -84,6 +84,7 @@ public class HttpHelper {
         return new URL(myUrl);
     }
 
+   
     public HttpHelper() {
         HTTPTrustHelper.initAllTrustingManager("TLS"); //or "SSL"
     }

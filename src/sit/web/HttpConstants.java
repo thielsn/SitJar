@@ -24,10 +24,11 @@ public interface HttpConstants {
     /** 3XX: relocation/redirect */
     public static final int HTTP_MULT_CHOICE = 300;
     public static final int HTTP_MOVED_PERM = 301;
-    public static final int HTTP_MOVED_TEMP = 302;
+    public static final int HTTP_FOUND = 302;
     public static final int HTTP_SEE_OTHER = 303;
     public static final int HTTP_NOT_MODIFIED = 304;
     public static final int HTTP_USE_PROXY = 305;
+    public static final int HTTP_TEMPORARY_REDIRECT = 307;
     /** 4XX: client error */
     public static final int HTTP_BAD_REQUEST = 400;
     public static final int HTTP_UNAUTHORIZED = 401;
@@ -45,6 +46,8 @@ public interface HttpConstants {
     public static final int HTTP_ENTITY_TOO_LARGE = 413;
     public static final int HTTP_REQ_TOO_LONG = 414;
     public static final int HTTP_UNSUPPORTED_TYPE = 415;
+    
+    public static final int HTTP_TOO_MANY_REQUESTS = 429;
     /** 5XX: server error */
     public static final int HTTP_SERVER_ERROR = 500;
     public static final int HTTP_INTERNAL_ERROR = 501;
@@ -89,4 +92,5 @@ public interface HttpConstants {
     
     
     public static final String CONTENT_TRANSFER_ENCODING_BINARY_TAG = "Content-Transfer-Encoding: binary";
+    
 }
