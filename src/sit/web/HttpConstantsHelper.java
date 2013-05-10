@@ -11,10 +11,19 @@ import java.util.Map;
  *
  * @author simon
  */
-public class HttpConstantsHelper  implements HttpConstants{
-    private final static Map<Integer, String> CODE_MESSAGE_MAP = new HashMap();
+public final class HttpConstantsHelper  implements HttpConstants{
+    private final Map<Integer, String> CODE_MESSAGE_MAP = new HashMap();
+
+    private static HttpConstantsHelper instance = new HttpConstantsHelper();
     
-    {
+    
+    private HttpConstantsHelper() {
+        this.init();
+    }
+    
+    
+    
+    private void init(){
         //200
         CODE_MESSAGE_MAP.put(HTTP_OK, "OK");
         CODE_MESSAGE_MAP.put(HTTP_CREATED, "Created");
@@ -61,7 +70,7 @@ public class HttpConstantsHelper  implements HttpConstants{
     }
     
     public static String getHTTPCodeMessage(int returnCode) {
-        return CODE_MESSAGE_MAP.get(returnCode);
+        return instance.CODE_MESSAGE_MAP.get(returnCode);
         
     }
 }
