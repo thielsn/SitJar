@@ -317,7 +317,6 @@ class WebWorker implements HttpConstants, Runnable {
     }
     
     private String getMyPath(File dir){
-        Logger.getLogger(WebWorker.class.getName()).log(Level.INFO, "init path:\n"+dir.getPath());
         
         String myPath = ServiceEndpointHelper.replaceBackSlashes(
                 (dir.getPath().length() > 0) ? dir.getPath() : "");
@@ -334,8 +333,7 @@ class WebWorker implements HttpConstants, Runnable {
         if (myPath.length()==0 || (!myPath.endsWith("/"))){
             myPath+="/";
         }
-        
-        Logger.getLogger(WebWorker.class.getName()).log(Level.INFO, "exit path:\n"+myPath);
+                
         return myPath;
     }
 
