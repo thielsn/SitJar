@@ -317,17 +317,25 @@ class WebWorker implements HttpConstants, Runnable {
     }
     
     private String getMyPath(File dir){
+        Logger.getLogger(WebWorker.class.getName()).log(Level.INFO, "init path:\n"+dir.getPath());
+        
         String myPath = ServiceEndpointHelper.replaceBackSlashes(
                 (dir.getPath().length() > 0) ? dir.getPath() : "");
+        
         try{//remove previously added prefix from the path
             myPath = myPath.substring(WebServer.getInstance().getRoot().getPath().length());
         }catch (Exception ex){
             Logger.getLogger(WebWorker.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
         
-        if (myPath.startsWith("/")){
-            myPath = myPath.substring(1);
+        if (!myPath.startsWith("/")){
+            myPath="/"+myPath;
         }
+        if (myPath.length()==0 || (!myPath.endsWith("/"))){
+            myPath+="/";
+        }
+        
+        Logger.getLogger(WebWorker.class.getName()).log(Level.INFO, "exit path:\n"+myPath);
         return myPath;
     }
 
@@ -346,9 +354,9 @@ class WebWorker implements HttpConstants, Runnable {
         for (int i = 0; list != null && i < list.length; i++) {
             File f = list[i];
             if (f.isDirectory()) {
-                result.append("<a href=\"/" + myPath + "/" + f.getName() + "/\">" + f.getName() + "/</a><br/>\n");
+                result.append("<a href=\"" + myPath + f.getName() + "/\">" + f.getName() + "/</a><br/>\n");
             } else {
-                result.append("<a href=\"/" + myPath + "/" + f.getName() + "\">" + f.getName() + "</a><br/>\n");
+                result.append("<a href=\"" + myPath + f.getName() + "\">" + f.getName() + "</a><br/>\n");
             }
         }
         result.append("<br/></p><p><hr></p><p><i>" + (new Date()) + "</i></p></body></html>");
