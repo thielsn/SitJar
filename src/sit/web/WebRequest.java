@@ -116,12 +116,14 @@ public class WebRequest {
         return new String(body);        
     }
     
+       
     /**
      * returns a specific entry from the header 
      * double point at the end of a term is required - if
      * case is ignored
      * 
-     * @param key 
+     * @param key
+     * @return  
      */
     public String getHeaderEntry(String key){
        return headerItems.get(key.toUpperCase());

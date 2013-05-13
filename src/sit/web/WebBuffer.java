@@ -32,7 +32,7 @@ public class WebBuffer {
     }
 
     /**
-     * Writes <code>len</code> bytes from the specified byte array starting at
+     * Writes <code>len</code> bytes from the WebBuffer starting at
      * offset <code>off</code> to the given stream.
      *
      * @param ps 
@@ -46,6 +46,32 @@ public class WebBuffer {
 
     public void writeToOutStream(PrintStream ps) {
         ps.write(buf, 0, readBytes);
+    }
+    
+    /**
+     * Returns <code>len</code> bytes from the WebBuffer starting at
+     * offset <code>off</code> to the given stream.
+     * 
+     * If off+len > buffer size then null is returned.
+     * If off+len > readBytes the buffer returned is filled with 0 at the end.
+     *
+     * @param ps 
+     * @param  off   Offset from which to start taking bytes
+     * @param  len   Number of bytes to write
+     */
+    public byte[] getBytes(int off, int len){
+        if ((off+len)>BUF_SIZE) {
+            return null;
+        }
+        
+        int size =Math.min(len, (readBytes-off));
+        
+        byte[] result = new byte[len];
+        for (int i=0;i<size;i++){
+            result[i]=buf[i+off];
+        }
+        
+        return result;
     }
 
     @Override
