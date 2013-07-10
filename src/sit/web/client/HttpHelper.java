@@ -356,17 +356,24 @@ public class HttpHelper {
                 + response.message + " with code: " + response.code);
 
         if (response.code != 500) {
+            byte[] buffer =new byte[1024];
 
+            ByteBuilder bytes = new ByteBuilder();
+
+            
             // get ready to read the response from the cgi script
             DataInputStream input = new DataInputStream(connection.getInputStream());
+            boolean done = false;
+            while(!done){
+                int readBytes = input.read(buffer);
+                done=(readBytes==-1);
 
-
-            // read in each character until end-of-stream is detected
-            for (int c = input.read(); c != -1; c = input.read()) {
-                response.reply += (char) c + "";
-
+                if(!done){
+                    bytes.append(buffer,readBytes);
+                }
             }
             input.close();
+            response.reply=bytes.toString(Charset.defaultCharset());
         }
         return response;
     }
