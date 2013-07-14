@@ -8,6 +8,7 @@
 package sit.xml;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.w3c.dom.CDATASection;
 
 /**
  *
@@ -76,8 +77,14 @@ public class XMLTool {
     
     /**
      *  get all text of a element node
-     **/
+     *
+     * @param xmlInput
+     * @return  
+     */
     public String getText(org.w3c.dom.Node xmlInput){
+        if (xmlInput==null){
+            return null;
+        }
         String result = "";
         org.w3c.dom.Node childNode = null;
         
@@ -90,6 +97,25 @@ public class XMLTool {
         }
         
         return result.trim();
+    }
+    
+    
+    public String getCData(org.w3c.dom.Node xmlInput){ 
+        if (xmlInput==null){
+            return null;
+        }
+        String result = "";
+        org.w3c.dom.Node childNode = null;
+        
+        childNode = xmlInput.getFirstChild();
+        while(childNode != null){
+            if (childNode.getNodeType()==org.w3c.dom.Node.CDATA_SECTION_NODE){
+                result += ((CDATASection)childNode).getData();
+            }
+            childNode = childNode.getNextSibling();
+        }
+        
+        return result;
     }
 
     public boolean getAttributeAsBool(org.w3c.dom.Node xmlInput, String tag){
@@ -281,4 +307,6 @@ public class XMLTool {
         }
         return null;
     }
+    
+    
 }
