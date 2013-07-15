@@ -227,6 +227,7 @@ public class HttpHelper {
      * @throws MalformedURLException
      * @throws ProtocolException
      * @throws IOException
+     * @throws URISyntaxException  
      */
     public HTTPResponse doApacheHTTPRequest(String method, String host, int port, String path, byte[] payload, String contentType,
             boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
@@ -302,19 +303,26 @@ public class HttpHelper {
      * @throws MalformedURLException
      * @throws ProtocolException
      * @throws IOException
+     * @throws URISyntaxException  
      */
     public HTTPResponse doHttpURLConnectionRequest(String method, String host, int port, String path, byte[] payload, String contentType,
             boolean isHTTPS, String unamePword64) throws MalformedURLException, ProtocolException, IOException, URISyntaxException {
 
+        
+        URL url = getURL(host, port, path, isHTTPS);
+
+        return doHttpUrlConnectionRequest(url, method, contentType, payload, unamePword64);
+    }
+
+    public HTTPResponse doHttpUrlConnectionRequest(URL url, String method, String contentType, byte [] payload, String unamePword64) throws MalformedURLException, ProtocolException, IOException, URISyntaxException{
+        
         if (payload == null) { //make sure payload is initialized
             payload = new byte[0];
         }
 
-        URL url = getURL(host, port, path, isHTTPS);
-
-        
-
+        boolean isHTTPS = url.getProtocol().equalsIgnoreCase("https");
         HttpURLConnection connection;
+        
         if (isHTTPS) {
             connection = (HttpsURLConnection) url.openConnection();
         } else {
@@ -322,7 +330,7 @@ public class HttpHelper {
         }
 
         connection.setRequestMethod(method);
-        connection.setRequestProperty("Host", host);
+        connection.setRequestProperty("Host", url.getHost());
         connection.setRequestProperty("Content-Type", contentType);
         connection.setRequestProperty("Content-Length", String.valueOf(payload.length));
 
@@ -357,19 +365,26 @@ public class HttpHelper {
                 + response.message + " with code: " + response.code);
 
         if (response.code != 500) {
+            byte[] buffer =new byte[20480];
 
+            ByteBuilder bytes = new ByteBuilder();
+
+            
             // get ready to read the response from the cgi script
             DataInputStream input = new DataInputStream(connection.getInputStream());
+            boolean done = false;
+            while(!done){
+                int readBytes = input.read(buffer);
+                done=(readBytes==-1);
 
-
-            // read in each character until end-of-stream is detected
-            for (int c = input.read(); c != -1; c = input.read()) {
-                response.reply += (char) c + "";
-
+                if(!done){
+                    bytes.append(buffer,readBytes);
+                }
             }
             input.close();
+            response.reply=bytes.toString(Charset.defaultCharset());
         }
         return response;
-    }
-
+    }           
+    
 }
