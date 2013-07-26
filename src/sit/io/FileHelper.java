@@ -9,11 +9,13 @@ package sit.io;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import sit.sstl.ByteBuilder;
 
 /**
  *
@@ -29,14 +31,49 @@ public class FileHelper implements FileHelperI {
         writer.close();
 
     }
-    
-     public void writeToFile(String fileName, byte[] content) throws IOException {
+
+    public void writeToFile(String fileName, byte[] content) throws IOException {
         FileOutputStream writer = new FileOutputStream(fileName);
         writer.write(content);
         writer.close();
 
     }
 
+    /**
+     *
+     * @param fileName
+     * @return
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public ByteBuilder readFromFile(String fileName) throws FileNotFoundException, IOException {
+        byte[] buffer = new byte[512 * 1024];
+        ByteBuilder result = new ByteBuilder();
+
+        FileInputStream reader = new FileInputStream(fileName);
+        try {
+            int read = 0;
+            while (read > -1) {
+                read = reader.read(buffer);
+                if (read > -1) {
+                    result.append(buffer);
+                }
+            }
+        } finally {
+            reader.close();
+        }
+        return result;
+    }
+
+    /**
+     * reads a file line by line Attention! This call potentially changes the
+     * line-separators!
+     *
+     * @param fileName
+     * @return
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
     public String readFromTextFile(String fileName) throws FileNotFoundException, IOException {
         String line;
         StringBuilder result = new StringBuilder(1024);
@@ -76,6 +113,7 @@ public class FileHelper implements FileHelperI {
      *
      * @param fileName fileName
      * @param data data
+     * @throws FileNotFoundException
      */
     public void appendStringToFile(String fileName, String data) throws FileNotFoundException {
         PrintWriter writer = new PrintWriter(new FileOutputStream(fileName, true));
@@ -122,13 +160,13 @@ public class FileHelper implements FileHelperI {
         }
         return newFileName;
     }
-    
-    public String getExtention(String fileName){
+
+    public String getExtention(String fileName) {
         int dotIndex = fileName.lastIndexOf('.');
-        if ((dotIndex==-1) 
-                || dotIndex==fileName.length()-1){
+        if ((dotIndex == -1)
+                || dotIndex == fileName.length() - 1) {
             return "";
         }
-        return fileName.substring(dotIndex+1);
+        return fileName.substring(dotIndex + 1);
     }
 }
