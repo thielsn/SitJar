@@ -64,7 +64,7 @@ public class FileHelper implements FileHelperI {
             while (read > -1) {
                 read = reader.read(buffer);
                 if (read > -1) {
-                    result.append(buffer);
+                    result.append(buffer, read);
                 }
             }
         } finally {
