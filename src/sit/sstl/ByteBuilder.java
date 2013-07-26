@@ -247,6 +247,14 @@ public class ByteBuilder {
         return response;
     }
 
+    @Override
+    public String toString() {
+        //##CHARSET_MARKER##
+        return toString(Charset.defaultCharset());
+    }
+
+
+
     public String toString(Charset charSet) {
         //##CHARSET_MARKER##
         return new String(toByteArray(), charSet);
