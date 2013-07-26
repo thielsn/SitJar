@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import sit.sstl.ByteBuilder;
 
 /**
@@ -26,8 +27,15 @@ public class FileHelper implements FileHelperI {
     public static final String lineSep = System.getProperty("line.separator");
 
     public void writeToFile(String fileName, String content) throws IOException {
-        PrintWriter writer = new PrintWriter(new FileOutputStream(fileName));
-        writer.write(content);
+        writeToFile(fileName, content, Charset.defaultCharset());
+
+    }
+
+
+    //##CHARSET_MARKER##
+    public void writeToFile(String fileName, String content, Charset charset) throws IOException {
+        FileOutputStream writer = new FileOutputStream(fileName);
+        writer.write(content.getBytes(charset));
         writer.close();
 
     }
