@@ -11,14 +11,21 @@ import java.util.EnumMap;
 
 /**
  *
- * @author Simon Thiel <simon.thiel at gmx.de> 
+ * @param <T> the enum containing the types
+ * @param <Q> the Class implementing StrictSITEnumContainer containing the content for the enum types
+ * @author Simon Thiel <simon.thiel at gmx.de>
  */
-public class StrictSITEnumMap<T extends Enum<T>, Q extends StrictSITEnumContainer> extends EnumMap<T, Q>  {
+public class StrictSITEnumMap<T extends Enum<T>, Q extends StrictSITEnumContainer> extends EnumMap<T, Q> {
+    private static final long serialVersionUID = 1L;
 
-    
-     public StrictSITEnumMap(Class type, final Q[] values) {
+    /**
+     * Constructor
+     * @param type class of the Enum Type
+     * @param values values of the map implementing StrictSITEnumContainer
+     */
+    public StrictSITEnumMap(Class type, final Q[] values) {
         super(type);
-        
+
         for (int i = 0; i < values.length; i++) {
             this.put((T) values[i].getEnumType(), values[i]);
         }
@@ -30,7 +37,6 @@ public class StrictSITEnumMap<T extends Enum<T>, Q extends StrictSITEnumContaine
         return (T) value.getEnumType();
     }
 
-
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
@@ -41,6 +47,10 @@ public class StrictSITEnumMap<T extends Enum<T>, Q extends StrictSITEnumContaine
 
     }
 
+    
+    public Q get(T key) {
+        return super.get(key);
+    }
     
     
 }
