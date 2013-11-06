@@ -1,15 +1,11 @@
 package sit.sound;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import sit.sstl.ByteBuilder;
 
-
-
-public class WavStream{
+public class WavStream {
 
     public static class WavStreamException extends Exception {
 
@@ -18,22 +14,20 @@ public class WavStream{
         }
     }
 
-   
     private enum IOState {
 
         READING, WRITING, CLOSED
     };
-    
+
     private final static int BUFFER_SIZE = 4096;
     private final static int FMT_CHUNK_ID = 0x20746D66;
     private final static int DATA_CHUNK_ID = 0x61746164;
     private final static int RIFF_CHUNK_ID = 0x46464952;
     private final static int RIFF_TYPE_ID = 0x45564157;
-    
-    
+
     private int bytesPerSample;			// Number of bytes required to store a single sample
     private long numFrames;					// Number of frames within the data section
-    
+
     private double floatScale;				// Scaling factor used for int <-> float conversion				
     private double floatOffset;			// Offset factor used for int <-> float conversion				
     private boolean wordAlignAdjust;		// Specify if an extra byte at the end of the data chunk is required for word alignment
@@ -46,15 +40,15 @@ public class WavStream{
     // Buffering
     private byte[] buffer;					// Local buffer used for IO
     private int bufferPointer;				// Points to the current position in local buffer
-    
+
     private long frameCounter;				// Current number of frames read or written
 
     private ByteBuilder outBuffer = new ByteBuilder();
-    
+
     /**
      * Cannot instantiate WavStream directly
-     */    
-     private WavStream(int numChannels, long numFrames, int validBits, long sampleRate) {
+     */
+    private WavStream(int numChannels, long numFrames, int validBits, long sampleRate) {
         buffer = new byte[BUFFER_SIZE];
         this.numChannels = numChannels;
         this.numFrames = numFrames;
@@ -64,8 +58,7 @@ public class WavStream{
         this.blockAlign = this.bytesPerSample * numChannels;
     }
 
-    private void init() throws WavStreamException{
-        
+    private void init() throws WavStreamException {
 
         // Sanity check arguments
         if (numChannels < 1 || numChannels > 65535) {
@@ -143,9 +136,8 @@ public class WavStream{
 
         this.bufferPointer = 0;
         this.frameCounter = 0;
-  
-    }
 
+    }
      
     public int getNumChannels() {
         return numChannels;
@@ -171,10 +163,9 @@ public class WavStream{
         // Instantiate new Wavfile and initialise
         WavStream wavStream = new WavStream(numChannels, numFrames, validBits, sampleRate);
         wavStream.init();
-       
+
         return wavStream;
     }
-
 
     // Get and Put little endian data from local buffer
     // ------------------------------------------------
@@ -200,7 +191,7 @@ public class WavStream{
 
     // Sample Writing and Reading
     // --------------------------
-    private void writeSample(long val)  {
+    private void writeSample(long val) {
 
         for (int b = 0; b < bytesPerSample; b++) {
             if (bufferPointer == BUFFER_SIZE) {
@@ -214,13 +205,12 @@ public class WavStream{
         }
     }
 
-
     public int writeFrames(double[] sampleBuffer, int numFramesToWrite) {
         return writeFrames(sampleBuffer, 0, numFramesToWrite);
     }
 
     public int writeFrames(double[] sampleBuffer, int offset, int numFramesToWrite) {
-      
+
         for (int f = 0; f < numFramesToWrite; f++) {
             if (frameCounter == numFrames) {
                 return f;
@@ -237,7 +227,7 @@ public class WavStream{
         return numFramesToWrite;
     }
 
-    public int writeFrames(double[][] sampleBuffer, int numFramesToWrite)  {
+    public int writeFrames(double[][] sampleBuffer, int numFramesToWrite) {
         return writeFrames(sampleBuffer, 0, numFramesToWrite);
     }
 
@@ -251,6 +241,7 @@ public class WavStream{
             for (int c = 0; c < numChannels; c++) {
                 writeSample((long) (floatScale * (floatOffset + sampleBuffer[c][offset])));
             }
+            http://iharder.net/base64
 
             offset++;
             frameCounter++;
@@ -259,20 +250,16 @@ public class WavStream{
         return numFramesToWrite;
     }
 
-    public void close() {     
+    public void close() {
 
-            // If an extra byte is required for word alignment, add it to the end
-            if (wordAlignAdjust) {
-                byte[] oneByte = {0};
-                outBuffer.append(oneByte);
-            }
+        // If an extra byte is required for word alignment, add it to the end
+        if (wordAlignAdjust) {
+            byte[] oneByte = {0};
+            outBuffer.append(oneByte);
+        }
     }
-    
-    
+
     public InputStream getInStream() {
         return new ByteArrayInputStream(outBuffer.toByteArray());
     }
-
-
-    
 }
