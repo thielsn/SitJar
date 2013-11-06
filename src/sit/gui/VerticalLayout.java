@@ -1,6 +1,13 @@
-/**
- * @version $Revision: $
- */
+/*
+* Copyright 2001 Colin Mummery colin_mummery@yahoo.com Homepage http://www.cellspark.com/vl.html
+*
+* THIS PROGRAM IS PROVIDED "AS IS" WITHOUT ANY WARRANTIES (OR CONDITIONS),
+* EXPRESS OR IMPLIED WITH RESPECT TO THE PROGRAM, INCLUDING THE IMPLIED WARRANTIES (OR CONDITIONS)
+* OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK ARISING OUT OF USE OR
+* PERFORMANCE OF THE PROGRAM AND DOCUMENTATION REMAINS WITH THE USER.
+*
+* Slightly adapted by Simon Thiel
+*/
 
 package sit.gui;
 
@@ -19,7 +26,7 @@ import java.util.*;
  *
  * Revision date 12th July 2001
  *
- * @author Colin Mummery  e-mail: colin_mummery@yahoo.com Homepage:www.kagi.com/equitysoft -
+ * @author Colin Mummery  e-mail: colin_mummery@yahoo.com Homepage:http://www.cellspark.com/vl.html -
  * Based on 'FlexLayout' in Java class libraries Vol 2 Chan/Lee Addison-Wesley 1998
  */
 public class VerticalLayout implements LayoutManager {

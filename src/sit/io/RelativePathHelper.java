@@ -1,7 +1,25 @@
 /*
- *  @author Simon Thiel <simon.thiel at gmx.de>
- *  @version $Revision: $
- */
+* Copyright originally from Klaue http://klaue.net16.net/programme/snippets/java/getrelativepath.en.php
+*  
+* major rework by Simon Thiel 
+*
+*
+* This file is part of SitJar.
+*
+* SitJar is free software: you can redistribute it and/or modify
+* it under the terms of the GNU LESSER GENERAL PUBLIC LICENSE as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+* 
+* SitJar is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU Lesser General Public License for more details.
+* 
+* You should have received a copy of the GNU Lesser General Public License
+* along with SitJar. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
+*/
+
 package sit.io;
 
 import java.io.File;
@@ -10,8 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * FIXME: wrong handling of non-canonical/relative sourcedir
- * from http://klaue.net16.net/programme/snippets/java/getrelativepath.en.php
+ * FIXME: wrong handling of non-canonical/relative sourcedir 
  */
 public class RelativePathHelper {
 
@@ -48,18 +65,13 @@ public class RelativePathHelper {
     }
 
     private String[] getSegmentedPath(String path) {
-
         return path.split(getSeparatorAsRegex(path));
     }
 
     public String resolveDottedPath(String dottedPath) throws IllegalPathException {
-
-
         String[] paths = getSegmentedPath(dottedPath);
         Vector<String> segments = new Vector();
-        for (int i = 0; i < paths.length; i++) {
-            String element = paths[i];
-
+        for (String element : paths) {
             if (element.equals("..")) {
                 if (segments.size() > 0) {
                     segments.removeElementAt(segments.size() - 1);
@@ -109,8 +121,8 @@ public class RelativePathHelper {
             }
             String sTmpTarget = targetDir.substring(7);
             String sTmpSource = sourceDir.substring(7);
-            sTmpTarget = sTmpTarget.substring(0, sTmpTarget.indexOf("/"));
-            sTmpSource = sTmpSource.substring(0, sTmpSource.indexOf("/"));
+            sTmpTarget = sTmpTarget.substring(0, sTmpTarget.indexOf('/'));
+            sTmpSource = sTmpSource.substring(0, sTmpSource.indexOf('/'));
             if (!sTmpTarget.equals(sTmpSource)) {
                 throw new IllegalArgumentException("Two subsites of different Websites");
             }
@@ -126,8 +138,6 @@ public class RelativePathHelper {
 
         StringBuilder sTargetDir = new StringBuilder(targetDir);
         StringBuilder sSourceDir = new StringBuilder(sourceDir);
-
-
 
         // firstly save the filename so only the dir is left
         int iStart = sTargetDir.lastIndexOf("/") + 1;
@@ -180,15 +190,22 @@ public class RelativePathHelper {
         return result;
     }
 
-    public String test(String source, String target, String correctPath) {
+    public String test(String source, String target, String correctPath, boolean shouldWork) {
         try {
             String result = getRelativePath(source, target);
+            boolean testWorked = result.equals(correctPath);
             return "source:" + source
                     + " target:" + target
                     + " result:" + result
-                    + " test:" + ((result.equals(correctPath)) ? "success" : "fail");
+                    + " test:" + ((testWorked) ? "success" : "fail")
+                    + ((testWorked==shouldWork)?" --> good": " --> bad");
         } catch (IllegalArgumentException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "source:" + source + " target:" + target, ex);
+            
+            if (!shouldWork){
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "source:" + source + " target:" + target + " Exception: " + ex.getMessage() +" --> good");
+            }else{
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "source:" + source + " target:" + target + " Exception: " + ex.getMessage() +" --> bad");
+            }
         }
         return "";
     }
@@ -200,21 +217,21 @@ public class RelativePathHelper {
         RelativePathHelper rph = new RelativePathHelper();
 
         Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
-                rph.test("C:\\jogurt\\muesli\\", "C:\\milch\\muesli\\", "..\\..\\milch\\muesli\\"));
+                rph.test("C:\\jogurt\\muesli\\", "C:\\milch\\muesli\\", "..\\..\\milch\\muesli\\", true));
         Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
-                rph.test("/home/max/moritz/", "home/max/moritz/", "home/max/moritz/"));
+                rph.test("/home/max/moritz/", "home/max/moritz/", "home/max/moritz/", true));
         Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
-                rph.test("/home/../home/max/moritz/", "/home/max/moritz/", "/home/max/moritz/"));
+                rph.test("/home/../home/max/moritz/", "/home/max/moritz/", "/home/max/moritz/", true));
         Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
-                rph.test("/home/max/moritz/", "/home/max/lempke/", "../lempke/"));
+                rph.test("/home/max/moritz/", "/home/max/lempke/", "../lempke/", true));
         Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
-                rph.test("C:\\muesli\\", "C:\\Programme\\Java\\", "..\\Programme\\Java\\"));
+                rph.test("C:\\muesli\\", "C:\\Programme\\Java\\", "..\\Programme\\Java\\", true));
         Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
-                rph.test("http://mywebhome.com/home.html", "http://mywebhome.com/unterseite/test.html", "unterseite/test.html"));
+                rph.test("http://mywebhome.com/home.html", "http://mywebhome.com/unterseite/test.html", "unterseite/test.html", true));
         Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
-                rph.test("http://mywebhome.com/unterseite/test.html", "http://mywebhome.com/home.html", "../home.html"));
+                rph.test("http://mywebhome.com/unterseite/test.html", "http://mywebhome.com/home.html", "../home.html", true));
         Logger.getLogger(RelativePathHelper.class.getName()).log(Level.INFO,
-                rph.test("http://mywebhome.com/home.html", "http://myOTHERwebhome.com/unterseite/test.html", ""));
+                rph.test("http://mywebhome.com/home.html", "http://myOTHERwebhome.com/unterseite/test.html", "", false));
 
     }
 }

@@ -17,18 +17,3 @@
 * along with SitJar. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 */
 
-/*
- *  @author Simon Thiel <simon.thiel at gmx.de>
- */
-
-package sit.web;
-
-import java.util.Vector;
-
-/**
- *
- * @author Simon Thiel <simon.thiel at gmx.de>
- */
-public class ServiceComponents extends Vector<ServiceComponent>{
-
-}
