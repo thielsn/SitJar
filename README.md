@@ -2,9 +2,9 @@
 
 
 
-SitJar library is a collection of classes that turned out to be useful for developing _prototype_ software in JAVA.
+_SitJar library is a collection of Java classes that turned out to be useful for developing prototype software._
 
-It contains classes felt as missing in the JAVA SDK as well as some convenience tools and helper classes. The whole library is continuously under development. Some part of the code is quite old (probably outdated). Some classes might even be under construction, so please do not simply rely on them without checking the code!
+It contains classes felt as missing in the java sdk as well as some convenience tools and helper classes. The whole library is continuously under development. Some part of the code is quite old (probably outdated). Some classes might even be under construction, so please do not simply rely on them without checking the code!
 
 ### Notable content:
 
