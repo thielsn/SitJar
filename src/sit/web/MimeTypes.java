@@ -262,6 +262,7 @@ public class MimeTypes {
         myMimeTypes.put(".mpe", "video/mpeg"); // 
         myMimeTypes.put(".mpeg", "video/mpeg"); // 
         myMimeTypes.put(".mpg", "video/mpeg"); // 
+        myMimeTypes.put(".mp4", "video/mp4"); //         
         myMimeTypes.put(".mpga", "audio/mpeg");
         myMimeTypes.put(".mpp", "application/vnd.ms-project");
         myMimeTypes.put(".mpt", "application/x-project");
