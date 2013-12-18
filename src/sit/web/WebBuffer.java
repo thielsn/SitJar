@@ -147,7 +147,7 @@ public class WebBuffer {
         return !endOfStream;
     }
 
-    byte[] getBuffer() {
+    public byte[] getBuffer() {
         return buf;
     }
 }
