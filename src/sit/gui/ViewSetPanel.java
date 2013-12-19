@@ -65,14 +65,23 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
 
 
     private void updateView(K viewType) {
+
         if (currentView.getKey()==viewType){
-            return;
+            return; //view was shown already
         }
         if (!views.contains(viewType)){
             throw new RuntimeException("View for type: "+viewType+ " has not been registered!");
         }
 
+        //call onHide on previous view
+        if (this.currentView!=null){
+            this.currentView.onHide();
+        }
+
         this.currentView = views.get(viewType);
+
+        //call onShow for new view
+        this.currentView.onShow();
 
         panel.removeAll();
         panel.add(currentView.getComponent(), getGridBackConstraints());

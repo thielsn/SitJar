@@ -29,4 +29,6 @@ import sit.sstl.ObjectWithKey;
  */
 public interface ViewSetEntry<K extends Enum> extends ObjectWithKey<K>{
     public Component getComponent();
+    public void onShow();
+    public void onHide();
 }
