@@ -41,7 +41,7 @@ import java.util.Iterator;
 public class HashMapSet<K,V extends ObjectWithKey<K>>
     implements Iterable<V>, Serializable{
 
-    private HashMap<K,V> set = new HashMap();
+    private final HashMap<K,V> set = new HashMap();
 
     public synchronized void clear(){
         set.clear();
