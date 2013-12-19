@@ -34,13 +34,21 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
 
 
     //the root panel
-    private final JPanel panel = new JPanel();
+    private final JPanel panel;
 
     private final HashMapSet<K, T> views = new HashMapSet();
 
     private T currentView = null;
 
+    public ViewSetPanel(JPanel panel) {
+        this.panel = panel;
+        panel.setLayout(new GridBagLayout());
+    }
+
+
+
     public ViewSetPanel() {
+        this.panel = new JPanel();
         panel.setLayout(new GridBagLayout());
     }
 
@@ -66,7 +74,7 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
 
     private void updateView(K viewType) {
 
-        if (currentView.getKey()==viewType){
+        if ((currentView!=null) && (currentView.getKey()==viewType)){
             return; //view was shown already
         }
         if (!views.contains(viewType)){
@@ -111,5 +119,15 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
         gridBagConstraints.ipadx=5;
         gridBagConstraints.ipady=5;
         return gridBagConstraints;
+    }
+
+
+    /**
+     * ATTENTION this method returns the actual component - changes will be reflected accordingly
+     * @param viewType
+     * @return
+     */
+    public synchronized T getView(K viewType) {
+        return views.get(viewType);
     }
 }
