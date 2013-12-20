@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with SitJar. If not, see <http://www.gnu.org/licenses/lgpl.txt>. * 
  */
-
 package sit.gui;
 
 import java.awt.GridBagConstraints;
@@ -29,61 +28,73 @@ import javax.swing.JPanel;
  * @author simon
  * @param <T>
  */
-public class ViewStackPanel<T extends JPanel>{
+public class ViewStackPanel<T extends JPanel> extends JPanel {
 
-    //the root panel
-    private final JPanel panel = new JPanel();
+    class StackEntry {
 
-    private final ArrayList<T> viewStack = new ArrayList();
+        T view;
+        String caption;
+
+        public StackEntry(T view, String caption) {
+            this.view = view;
+            this.caption = caption;
+        }
+
+    }
+
+    private final ArrayList<StackEntry> viewStack = new ArrayList();
 
     public ViewStackPanel() {
 
-        panel.setLayout(new GridBagLayout());
+        this.setLayout(new GridBagLayout());
     }
 
-
-
-    public synchronized void push(T panel){
-        viewStack.add(panel);
+    public synchronized void push(T panel, String caption) {
+        viewStack.add(new StackEntry(panel, caption));
+        updateView();
     }
 
-    public synchronized void updateView() {
-        panel.removeAll();
+    private void updateView() {
+        this.removeAll();
 
         if (!viewStack.isEmpty()) {
-            panel.add(getTopView(), getGridBackConstraints());
+            this.add(getTopView(), getGridBackConstraints());
         }
 
         //repaint panel
-        panel.revalidate();
-        panel.repaint();
+        this.revalidate();
+        this.repaint();
     }
 
     public synchronized T getTopView() {
         int stackSize = viewStack.size();
-        if (stackSize==0){
+        if (stackSize == 0) {
             return null;
         }
-        return viewStack.get(stackSize-1);
+        return viewStack.get(stackSize - 1).view;
     }
 
-    public synchronized T popView(){
+    public synchronized String getTopViewCaption() {
         int stackSize = viewStack.size();
-        if (stackSize==0){
+        if (stackSize == 0) {
             return null;
         }
-        T result = viewStack.remove(stackSize-1);
-        return result;
+        return viewStack.get(stackSize - 1).caption;
     }
 
-    public synchronized void clear(){
+    public synchronized T popView() {
+        int stackSize = viewStack.size();
+        if (stackSize == 0) {
+            return null;
+        }
+        StackEntry result = viewStack.remove(stackSize - 1);
+        updateView();
+        return result.view;
+    }
+
+    public synchronized void clear() {
         viewStack.clear();
     }
-
-    public JPanel getPanel() {
-        return panel;
-    }
-
 
     private GridBagConstraints getGridBackConstraints() {
         GridBagConstraints gridBagConstraints;
@@ -96,8 +107,8 @@ public class ViewStackPanel<T extends JPanel>{
         gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.ipadx=5;
-        gridBagConstraints.ipady=5;
+        gridBagConstraints.ipadx = 5;
+        gridBagConstraints.ipady = 5;
         return gridBagConstraints;
     }
 }
