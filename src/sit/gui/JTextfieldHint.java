@@ -20,9 +20,6 @@ package sit.gui;
 
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
 import javax.swing.JTextField;
 
 /**
@@ -32,6 +29,7 @@ import javax.swing.JTextField;
 public class JTextfieldHint {
 
     public void addHint(JTextField textField, String hintText) {
+        textField.setText(hintText);
         registerEvents(textField, hintText);
     }
 
