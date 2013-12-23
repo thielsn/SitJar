@@ -26,14 +26,14 @@ import javax.swing.JTextField;
  *
  * @author simon
  */
-public class JTextfieldHint {
+public class JTextfieldHintHelper {
 
-    public void addHint(JTextField textField, String hintText) {
+    public static void addHint(JTextField textField, String hintText) {
         textField.setText(hintText);
         registerEvents(textField, hintText);
     }
 
-    private void registerEvents(final JTextField textField, final String hintText) {
+    private static void registerEvents(final JTextField textField, final String hintText) {
         textField.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
                 if (textField.getText().equals(hintText)) {
