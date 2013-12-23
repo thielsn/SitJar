@@ -23,6 +23,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 import sit.sstl.HashMapSet;
+import sit.sstl.ObjectWithKey;
 
 /**
  *
@@ -32,13 +33,39 @@ import sit.sstl.HashMapSet;
  */
 public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
 
+    class ViewSetEntryContainer implements ObjectWithKey<K>{
+        private final K key;
+        private final T viewEntry;
+        private boolean firstView = true;
+
+        public ViewSetEntryContainer(K key, T viewEntry) {
+            this.key = key;
+            this.viewEntry = viewEntry;
+        }
+
+        public void setFirstView(boolean firstView) {
+            this.firstView = firstView;
+        }
+
+        public boolean isFirstView() {
+            return firstView;
+        }
+
+        public T getViewEntry() {
+            return viewEntry;
+        }
+
+        public K getKey() {
+            return key;
+        }
+    }
 
     //the root panel
     private final JPanel panel;
 
-    private final HashMapSet<K, T> views = new HashMapSet();
+    private final HashMapSet<K, ViewSetEntryContainer> views = new HashMapSet();
 
-    private T currentView = null;
+    private ViewSetEntryContainer currentView = null;
 
     public ViewSetPanel(JPanel panel) {
         this.panel = panel;
@@ -53,12 +80,12 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
     }
 
     public synchronized void registerView(T view){
-        views.add(view);
+        views.add(new ViewSetEntryContainer(view.getKey(), view));
     }
 
     public synchronized void registerViews(T [] views){
         for (T view : views){
-            this.views.add(view);
+            this.views.add(new ViewSetEntryContainer(view.getKey(), view));
         }
     }
 
@@ -83,16 +110,17 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
 
         //call onHide on previous view
         if (this.currentView!=null){
-            this.currentView.onHide();
+            this.currentView.getViewEntry().onHide();
         }
 
         this.currentView = views.get(viewType);
 
         //call onShow for new view
-        this.currentView.onShow();
+        this.currentView.getViewEntry().onShow(this.currentView.isFirstView());
+        this.currentView.setFirstView(false);
 
         panel.removeAll();
-        panel.add(currentView.getComponent(), getGridBackConstraints());
+        panel.add(currentView.getViewEntry().getComponent(), getGridBackConstraints());
 
         //repaint panel
         panel.revalidate();
@@ -128,6 +156,6 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
      * @return
      */
     public synchronized T getView(K viewType) {
-        return views.get(viewType);
+        return views.get(viewType).getViewEntry();
     }
 }
