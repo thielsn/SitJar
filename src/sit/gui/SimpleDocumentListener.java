@@ -29,12 +29,18 @@ import javax.swing.event.DocumentListener;
 public abstract class SimpleDocumentListener implements DocumentListener {
 
     public void insertUpdate(DocumentEvent e) {
-        //do nothing
+        changed(e);
     }
 
     public void removeUpdate(DocumentEvent e) {
-        //do nothing
+        changed(e);
     }
+
+    public void changedUpdate(DocumentEvent e) {
+        changed(e);
+    }
+
+    public abstract void changed(DocumentEvent e);
 
 
 }
