@@ -19,14 +19,11 @@
 
 package sit.gui;
 
-import javax.swing.JPanel;
-
 /**
  *
  * @author simon
- * @param <T>
  */
-public interface ViewStackPanelEntry <T extends JPanel> extends ViewStackPanelHandler{
-    public T getPanel();
-    public String getCaption();
+public interface ViewStackPanelHandler {
+    public void onLoadAfterPop();
+    public void onLoadAfterPush();
 }

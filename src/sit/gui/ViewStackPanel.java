@@ -38,6 +38,43 @@ public class ViewStackPanel<T extends JPanel> extends JPanel {
         this.setLayout(new GridBagLayout());
     }
 
+     public synchronized void push(final T panel, final String caption) {
+         push(panel, caption, new ViewStackPanelHandler() {
+
+             public void onLoadAfterPop() {
+                 //do nothing
+             }
+
+             public void onLoadAfterPush() {
+                 //do nothing
+             }
+         });
+    }
+
+    public synchronized void push(final T panel, final String caption, final ViewStackPanelHandler handler) {
+        ViewStackPanelEntry<T> stackEntry = new ViewStackPanelEntry<T>() {
+
+            public T getPanel() {
+                return panel;
+            }
+
+            public String getCaption() {
+                return caption;
+            }
+
+            public void onLoadAfterPop() {
+                handler.onLoadAfterPop();
+            }
+
+            public void onLoadAfterPush() {
+                handler.onLoadAfterPush();
+            }
+        };
+        push(stackEntry);
+    }
+
+   
+
     public synchronized void push(ViewStackPanelEntry<T> stackEntry) {
         viewStack.add(stackEntry);
         stackEntry.onLoadAfterPush();
