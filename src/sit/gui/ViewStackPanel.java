@@ -30,27 +30,17 @@ import javax.swing.JPanel;
  */
 public class ViewStackPanel<T extends JPanel> extends JPanel {
 
-    class StackEntry {
 
-        T view;
-        String caption;
-
-        public StackEntry(T view, String caption) {
-            this.view = view;
-            this.caption = caption;
-        }
-
-    }
-
-    private final ArrayList<StackEntry> viewStack = new ArrayList();
+    private final ArrayList<ViewStackPanelEntry<T>> viewStack = new ArrayList();
 
     public ViewStackPanel() {
 
         this.setLayout(new GridBagLayout());
     }
 
-    public synchronized void push(T panel, String caption) {
-        viewStack.add(new StackEntry(panel, caption));
+    public synchronized void push(ViewStackPanelEntry<T> stackEntry) {
+        viewStack.add(stackEntry);
+        stackEntry.onLoadAfterPush();
         updateView();
     }
 
@@ -71,7 +61,7 @@ public class ViewStackPanel<T extends JPanel> extends JPanel {
         if (stackSize == 0) {
             return null;
         }
-        return viewStack.get(stackSize - 1).view;
+        return viewStack.get(stackSize - 1).getPanel();
     }
 
     public synchronized String getTopViewCaption() {
@@ -79,7 +69,7 @@ public class ViewStackPanel<T extends JPanel> extends JPanel {
         if (stackSize == 0) {
             return null;
         }
-        return viewStack.get(stackSize - 1).caption;
+        return viewStack.get(stackSize - 1).getCaption();
     }
 
     public synchronized T popView() {
@@ -87,9 +77,10 @@ public class ViewStackPanel<T extends JPanel> extends JPanel {
         if (stackSize == 0) {
             return null;
         }
-        StackEntry result = viewStack.remove(stackSize - 1);
+        ViewStackPanelEntry<T>  result = viewStack.remove(stackSize - 1);
+        result.onLoadAfterPop();
         updateView();
-        return result.view;
+        return result.getPanel();
     }
 
     public synchronized void clear() {
