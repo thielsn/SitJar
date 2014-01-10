@@ -115,7 +115,12 @@ public class ViewStackPanel<T extends JPanel> extends JPanel {
             return null;
         }
         ViewStackPanelEntry<T>  result = viewStack.remove(stackSize - 1);
-        result.onLoadAfterPop();
+
+        if (stackSize>1){ //after pop there is still the at least one panel available
+            //stacksize was not updated after removing the top most panel
+            viewStack.get(stackSize - 2).onLoadAfterPop();
+        }
+
         updateView();
         return result.getPanel();
     }
