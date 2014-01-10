@@ -144,4 +144,9 @@ public class ViewStackPanel<T extends JPanel> extends JPanel {
         gridBagConstraints.ipady = 5;
         return gridBagConstraints;
     }
+
+
+    public int getStackSize(){
+        return viewStack.size();
+    }
 }
