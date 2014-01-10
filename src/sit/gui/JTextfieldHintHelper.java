@@ -20,7 +20,7 @@ package sit.gui;
 
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import javax.swing.JTextField;
+import javax.swing.text.JTextComponent;
 
 /**
  *
@@ -28,16 +28,17 @@ import javax.swing.JTextField;
  */
 public class JTextfieldHintHelper {
 
-    public static void addHint(JTextField textField, String hintText) {
-        textField.setText(hintText);
-        registerEvents(textField, hintText);
+    public static void addHint(JTextComponent textCmp, String hintText) {
+        textCmp.setText(hintText);
+        registerEvents(textCmp, hintText);
     }
 
-    private static void registerEvents(final JTextField textField, final String hintText) {
-        textField.addFocusListener(new FocusListener() {
+
+    private static void registerEvents(final JTextComponent textCmp, final String hintText) {
+        textCmp.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
-                if (textField.getText().equals(hintText)) {
-                    textField.setText("");
+                if (textCmp.getText().equals(hintText)) {
+                    textCmp.setText("");
                 }
             }
 
