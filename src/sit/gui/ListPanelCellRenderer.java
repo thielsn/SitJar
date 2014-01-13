@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with SitJar. If not, see <http://www.gnu.org/licenses/lgpl.txt>. * 
  */
-
 package sit.gui;
 
 import java.awt.Component;
@@ -28,8 +27,12 @@ import java.awt.event.MouseEvent;
  */
 public interface ListPanelCellRenderer<T> {
 
-    public Component[] getListCellRendererComponent(T element, int index, boolean isSelected);
+    public Component[] getListCellRendererComponent(T element, int index);
+
     public int getColumnSize();
-   public void mouseClicked(T element, MouseEvent e);
+
+    public void mouseClicked(T element, MouseEvent e);
+
     
+
 }

@@ -27,7 +27,9 @@ import java.awt.GridBagLayout;
 import java.awt.PopupMenu;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Vector;
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
@@ -45,14 +47,53 @@ public class ListPanel<T> implements ListDataListener {
     private final ListPanel<T> listPanelRef = this;
     private final ListPanelCellRenderer<T> cellRenderer;
     private final JPanel panel = new JPanel();
-    
+
     private ListModel<T> listModel = null;
-    private T selected = null;
+
+    class ComponentProps{
+        final Component comp;
+        final Color oldColor;
+        final boolean wasOpaque;
+        final boolean isJComponent;
+
+        public ComponentProps(Component comp) {
+            this.comp = comp;
+            this.isJComponent = JComponent.class.isAssignableFrom(comp.getClass());
+            if (this.isJComponent){
+                this.wasOpaque = ((JComponent)comp).isOpaque();
+            }else{
+                this.wasOpaque=true;
+            }
+            this.oldColor = comp.getBackground();
+        }
+
+        private void restore() {
+            setOpaque(wasOpaque);
+            comp.setBackground(oldColor);
+            comp.revalidate();
+            comp.repaint();
+        }
+
+        private void setOpaque(boolean opaque){
+            if (isJComponent){
+                ((JComponent)comp).setOpaque(opaque);
+            }
+        }
+
+        private void setSelected() {
+            setOpaque(true);
+            comp.setBackground(backGroundSelection);
+        }
+    }
+
+    private final Vector<ComponentProps> selection = new Vector();
+
+    private Color backGroundSelection = Color.GRAY;
+    private Color separationLineColor = Color.BLUE;
 
     public ListPanel(ListPanelCellRenderer<T> cellRenderer) {
         this.cellRenderer = cellRenderer;
         this.panel.setLayout(new GridBagLayout());
-       
 
     }
 
@@ -81,24 +122,24 @@ public class ListPanel<T> implements ListDataListener {
     }
 
     private void refreshPanel() {
-        int maxCol=getMaxCol();
-        int row = 1;        
+        int maxCol = getMaxCol();
+        int row = 1;
         panel.removeAll();
         for (int i = 0; i < listModel.getSize(); i++) {
             T element = listModel.getElementAt(i);
-            Component[] comps = cellRenderer.getListCellRendererComponent(element, i, (selected == element));
+            Component[] comps = cellRenderer.getListCellRendererComponent(element, i);
             for (int j = 0; j < comps.length; j++) {
                 Component comp = comps[j];
-                addMouseListener(comp, createMouseAdapter(element, row));
+                addMouseListener(comp, createMouseAdapter(element, comps));
                 panel.add(comp, getGridBackConstraints(row, j));
-            }            
-            row+=2;//the row counter is always increased by 2 to have space left for adding lines in later - as required            
+            }
+            row += 2;//the row counter is always increased by 2 to have space left for adding lines in later - as required
         }
         //add lines
         addLines(maxCol);
 
         //add spacer panel to fill the remaining Y-space
-        addSpacePanel(panel, row+1, maxCol);
+        addSpacePanel(panel, row + 1, maxCol);
         //repaint panel
         panel.revalidate();
         panel.repaint();
@@ -135,13 +176,12 @@ public class ListPanel<T> implements ListDataListener {
         }
     }
 
-    private MouseAdapter createMouseAdapter(final T element, final int row){
-         return new MouseAdapter() {
+    private MouseAdapter createMouseAdapter(final T element, final Component[] comps) {
+        return new MouseAdapter() {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                listPanelRef.selected = element;
-                listPanelRef.refreshPanel();
+                listPanelRef.showSelected(comps);
                 cellRenderer.mouseClicked(element, e);
             }
 
@@ -161,17 +201,18 @@ public class ListPanel<T> implements ListDataListener {
 
     private void addLine(final JPanel panel, final int row, final int maxCol) {
         JLabel line = new JLabel();
-    
+
         line.setBorder(BorderFactory.createMatteBorder(1, -1, -1, -1, Color.BLUE));
-        
+
         GridBagConstraints gbc = getGridBackConstraints(row, 0);
         gbc.gridwidth = maxCol;
+        gbc.ipady = 0;
         panel.add(line, gbc);
     }
 
     private void addLines(final int maxCol) {
-        for (int i=0; i<listModel.getSize()+1;i++){
-            addLine(panel, i*2, maxCol);
+        for (int i = 0; i < listModel.getSize() + 1; i++) {
+            addLine(panel, i * 2, maxCol);
         }
     }
 
@@ -181,5 +222,47 @@ public class ListPanel<T> implements ListDataListener {
 
     }
 
+    
+    private void showSelected(Component[] newSelection) {
+        //restore old fields        
+        for (ComponentProps comp : selection){
+            comp.restore();
+        }
+        //update selection with new selection
+        this.selection.clear();
+        for (Component comp : newSelection){
+            ComponentProps comProp = new ComponentProps(comp);
+            this.selection.add(comProp);
+            comProp.setSelected();            
+        }
+    }
+
+    /**
+     * @return the backGroundSelection
+     */
+    public Color getBackGroundSelection() {
+        return backGroundSelection;
+    }
+
+    /**
+     * @return the separationLineColor
+     */
+    public Color getSeparationLineColor() {
+        return separationLineColor;
+    }
+
+    /**
+     * @param backGroundSelection the backGroundSelection to set
+     */
+    public void setBackGroundSelection(Color backGroundSelection) {
+        this.backGroundSelection = backGroundSelection;
+    }
+
+    /**
+     * @param separationLineColor the separationLineColor to set
+     */
+    public void setSeparationLineColor(Color separationLineColor) {
+        this.separationLineColor = separationLineColor;
+    }
 
 }
