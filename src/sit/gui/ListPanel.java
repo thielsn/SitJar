@@ -1,22 +1,21 @@
 /*
-* Copyright 2013 Simon Thiel
-*
-* This file is part of SitJar.
-*
-* SitJar is free software: you can redistribute it and/or modify
-* it under the terms of the GNU LESSER GENERAL PUBLIC LICENSE as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* SitJar is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public License
-* along with SitJar. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
-*/
-
+ * Copyright 2013 Simon Thiel
+ *
+ * This file is part of SitJar.
+ *
+ * SitJar is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU LESSER GENERAL PUBLIC LICENSE as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * SitJar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with SitJar. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
+ */
 package sit.gui;
 
 import java.awt.Component;
@@ -31,7 +30,6 @@ import javax.swing.JPanel;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-
 
 /**
  *
@@ -49,15 +47,31 @@ public class ListPanel<T> implements ListDataListener {
     private ListModel<T> listModel = null;
     private T selected = null;
     private T focused = null;
+    private final MouseAdapter mouseListener;
 
     public ListPanel(ListPanelCellRenderer<T> cellRenderer) {
         this.cellRenderer = cellRenderer;
         this.panel.setLayout(new GridBagLayout());
-        this.panel.addMouseListener(getMouseListener());
+        this.mouseListener = new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                listPanelRef.selected = compMap.get(e.getComponent());
+                listPanelRef.focused  = listPanelRef.selected;
+                listPanelRef.refreshPanel();
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                super.mouseMoved(e);
+                
+            }
+
+        };
 
     }
 
-    public void setModel(ListModel<T> listModel){
+    public void setModel(ListModel<T> listModel) {
         this.listModel = listModel;
         //remove first to make sure only the model has only be added once
         listModel.removeListDataListener(this);
@@ -77,23 +91,23 @@ public class ListPanel<T> implements ListDataListener {
         refreshPanel();
     }
 
-
-    public JPanel getPanel(){
+    public JPanel getPanel() {
         return panel;
     }
 
     private void refreshPanel() {
-        int maxCol=0;
+        int maxCol = 0;
         panel.removeAll();
-        for (int i=0; i<listModel.getSize(); i++){
+        for (int i = 0; i < listModel.getSize(); i++) {
             T element = listModel.getElementAt(i);
-            Component [] comps = cellRenderer.getListCellRendererComponent(element, i, (selected==element), (focused==element));
-            for (int j=0; j<comps.length;j++){
+            Component[] comps = cellRenderer.getListCellRendererComponent(element, i, (selected == element), (focused == element));
+            for (int j = 0; j < comps.length; j++) {
                 Component comp = comps[j];
                 compMap.put(comp, element);
+                comp.addMouseListener(mouseListener);
                 panel.add(comp, getGridBackConstraints(i, j));
             }
-            maxCol=Math.max(maxCol, comps.length);
+            maxCol = Math.max(maxCol, comps.length);
         }
         //add spacer panel to fill the remaining Y-space
         panel.add(new JPanel(), getGridBackConstraints(listModel.getSize(), maxCol, 1.0, 1.0));
@@ -102,9 +116,9 @@ public class ListPanel<T> implements ListDataListener {
         panel.repaint();
     }
 
-     private GridBagConstraints getGridBackConstraints(int row, int column) {
-         return getGridBackConstraints(row, column, 0.5, 0.001);
-     }
+    private GridBagConstraints getGridBackConstraints(int row, int column) {
+        return getGridBackConstraints(row, column, 0.5, 0.001);
+    }
 
     private GridBagConstraints getGridBackConstraints(int row, int column, double weightx, double weighty) {
         GridBagConstraints gridBagConstraints;
@@ -117,32 +131,9 @@ public class ListPanel<T> implements ListDataListener {
         gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = weightx;
         gridBagConstraints.weighty = weighty;
-        gridBagConstraints.ipadx=12;
-        gridBagConstraints.ipady=5;
+        gridBagConstraints.ipadx = 12;
+        gridBagConstraints.ipady = 5;
         return gridBagConstraints;
     }
-
-    private MouseListener getMouseListener() {
-        return new MouseAdapter() {
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                listPanelRef.selected = compMap.get(e.getComponent());
-            }
-
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                super.mouseMoved(e);
-                listPanelRef.focused = compMap.get(e.getComponent());
-            }
-
-
-
-        };
-
-    }
-
-
-
 
 }
