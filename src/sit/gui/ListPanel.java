@@ -22,6 +22,11 @@ package sit.gui;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
@@ -35,14 +40,20 @@ import javax.swing.event.ListDataListener;
  */
 public class ListPanel<T> implements ListDataListener {
 
+    private final ListPanel<T> listPanelRef = this;
     private final ListPanelCellRenderer<T> cellRenderer;
     private final JPanel panel = new JPanel();
 
+    private final Map<Component, T> compMap = new HashMap();
+
     private ListModel<T> listModel = null;
+    private T selected = null;
+    private T focused = null;
 
     public ListPanel(ListPanelCellRenderer<T> cellRenderer) {
         this.cellRenderer = cellRenderer;
         this.panel.setLayout(new GridBagLayout());
+        this.panel.addMouseListener(getMouseListener());
 
     }
 
@@ -76,9 +87,10 @@ public class ListPanel<T> implements ListDataListener {
         panel.removeAll();
         for (int i=0; i<listModel.getSize(); i++){
             T element = listModel.getElementAt(i);
-            Component [] comps = cellRenderer.getListCellRendererComponent(element, i, false, false);
+            Component [] comps = cellRenderer.getListCellRendererComponent(element, i, (selected==element), (focused==element));
             for (int j=0; j<comps.length;j++){
                 Component comp = comps[j];
+                compMap.put(comp, element);
                 panel.add(comp, getGridBackConstraints(i, j));
             }
             maxCol=Math.max(maxCol, comps.length);
@@ -108,6 +120,26 @@ public class ListPanel<T> implements ListDataListener {
         gridBagConstraints.ipadx=12;
         gridBagConstraints.ipady=5;
         return gridBagConstraints;
+    }
+
+    private MouseListener getMouseListener() {
+        return new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                listPanelRef.selected = compMap.get(e.getComponent());
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                super.mouseMoved(e);
+                listPanelRef.focused = compMap.get(e.getComponent());
+            }
+
+
+
+        };
+
     }
 
 
