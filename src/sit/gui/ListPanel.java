@@ -24,6 +24,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Vector;
@@ -129,15 +130,21 @@ public class ListPanel<T> implements ListDataListener {
             for (int j = 0; j < comps.length; j++) {
                 Component comp = comps[j];
                 addMouseListener(comp, createMouseAdapter(element, comps));
-                panel.add(comp, getGridBackConstraints(row, j));
+                GridBagConstraints gc = getGridBackConstraints(row, j);
+                if (i==0){
+                    gc.insets= new Insets(0, 7, 0, 0);
+                }else if (i==listModel.getSize()-1){                    
+                    gc.insets= new Insets(0, 0, 0, 7);
+                    //the last column is oriented to the left
+                    gc.anchor=GridBagConstraints.EAST;
+                }
+                panel.add(comp, gc);
             }
             row += 2;//the row counter is always increased by 2 to have space left for adding lines in later - as required
         }
         //add lines
         addLines(maxCol);
 
-        //add spacer panel to fill the remaining Y-space
-        addSpacePanel(panel, row + 1, maxCol);
         //repaint panel
         panel.revalidate();
         panel.repaint();
@@ -191,21 +198,18 @@ public class ListPanel<T> implements ListDataListener {
         };
     }
 
-    private void addSpacePanel(final JPanel root, final int row, final int maxCol) {
-        JPanel result = new JPanel();
-        result.setOpaque(false);
-        root.add(result, getGridBackConstraints(row, maxCol, 1.0, 1.0));
-    }
+
 
     private void addLine(final JPanel panel, final int row, final int maxCol) {
         JLabel line = new JLabel();
 
         line.setBorder(BorderFactory.createMatteBorder(1, -1, -1, -1, separationLineColor));
-        line.setPreferredSize(new Dimension(2, 2));
+        line.setPreferredSize(new Dimension(2, 1));
 
         GridBagConstraints gbc = getGridBackConstraints(row, 0, 1.0, 0.0);
         gbc.gridwidth = maxCol;
         gbc.ipady = 0;
+        gbc.insets= new Insets(0, 7, 0, 7);
         panel.add(line, gbc);
     }
 
