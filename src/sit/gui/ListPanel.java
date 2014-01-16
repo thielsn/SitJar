@@ -145,6 +145,8 @@ public class ListPanel<T> implements ListDataListener {
         //add lines
         addLines(maxCol);
 
+        //add spacer panel to fill the remaining Y-space
+        addSpacePanel(panel, row + 1, maxCol);
         //repaint panel
         panel.revalidate();
         panel.repaint();
@@ -198,6 +200,11 @@ public class ListPanel<T> implements ListDataListener {
         };
     }
 
+    private void addSpacePanel(final JPanel root, final int row, final int maxCol) {
+        JPanel result = new JPanel();
+        result.setOpaque(false);
+        root.add(result, getGridBackConstraints(row, 0, 1.0, 1.0));
+    }
 
 
     private void addLine(final JPanel panel, final int row, final int maxCol) {
