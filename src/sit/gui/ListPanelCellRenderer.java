@@ -24,6 +24,7 @@ import java.awt.event.MouseEvent;
 /**
  *
  * @author simon
+ * @param <T>
  */
 public interface ListPanelCellRenderer<T> {
 

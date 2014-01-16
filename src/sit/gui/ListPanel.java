@@ -24,7 +24,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.PopupMenu;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Vector;
@@ -33,7 +32,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
@@ -202,9 +200,10 @@ public class ListPanel<T> implements ListDataListener {
     private void addLine(final JPanel panel, final int row, final int maxCol) {
         JLabel line = new JLabel();
 
-        line.setBorder(BorderFactory.createMatteBorder(1, -1, -1, -1, Color.BLUE));
+        line.setBorder(BorderFactory.createMatteBorder(1, -1, -1, -1, separationLineColor));
+        line.setPreferredSize(new Dimension(2, 2));
 
-        GridBagConstraints gbc = getGridBackConstraints(row, 0);
+        GridBagConstraints gbc = getGridBackConstraints(row, 0, 1.0, 0.0);
         gbc.gridwidth = maxCol;
         gbc.ipady = 0;
         panel.add(line, gbc);
