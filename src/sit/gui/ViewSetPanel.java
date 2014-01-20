@@ -21,6 +21,9 @@ package sit.gui;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import sit.sstl.HashMapSet;
 import sit.sstl.ObjectWithKey;
@@ -33,14 +36,38 @@ import sit.sstl.ObjectWithKey;
  */
 public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
 
+    public static final int MODE_CREATE_ON_VIEW=0;
+    public static final int MODE_CREATE_ONCE=0;
+
+    
+
+    
+
+    public static class ViewSetPanelException extends RuntimeException {
+
+        public ViewSetPanelException(String message) {
+           super(message);
+        }
+    }
+
+
+
     class ViewSetEntryContainer implements ObjectWithKey<K>{
+        private final Class<T> entryClass;
         private final K key;
-        private final T viewEntry;
+        private T viewEntry;
         private boolean firstView = true;
+
+        public ViewSetEntryContainer(K key, Class<T> viewEntryClass){
+            this.entryClass = viewEntryClass;
+            this.key = key;
+            this.viewEntry = null;
+        }
 
         public ViewSetEntryContainer(K key, T viewEntry) {
             this.key = key;
             this.viewEntry = viewEntry;
+            this.entryClass = (Class<T>) viewEntry.getClass();
         }
 
         public void setFirstView(boolean firstView) {
@@ -58,6 +85,18 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
         public K getKey() {
             return key;
         }
+
+        private void checkAndInstantiate() {
+            if (viewEntry==null){
+                try {
+                    viewEntry = entryClass.newInstance();
+                } catch (InstantiationException ex) {
+                    Logger.getLogger(ViewSetPanel.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(ViewSetPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
     }
 
     //the root panel
@@ -66,18 +105,36 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
     private final HashMapSet<K, ViewSetEntryContainer> views = new HashMapSet();
 
     private ViewSetEntryContainer currentView = null;
+    private final int mode;
+
+    public ViewSetPanel(JPanel panel, int mode) {
+        this.panel = panel;
+        this.mode = mode;
+    }
+
+    public ViewSetPanel(int mode) {
+        this(new JPanel(), mode);
+    }
+
 
     public ViewSetPanel(JPanel panel) {
-        this.panel = panel;
-        panel.setLayout(new GridBagLayout());
+        this(panel, MODE_CREATE_ONCE);
     }
-
-
 
     public ViewSetPanel() {
-        this.panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
+        this(new JPanel());
     }
+
+    public synchronized void registerView(K key, Class<T> viewClass){
+        views.add(new ViewSetEntryContainer(key, viewClass));
+    }
+
+    public synchronized void registerView(Map<K, Class<T>> viewMap){        
+        for (Map.Entry<K, Class<T>> entry : viewMap.entrySet()){
+            this.views.add(new ViewSetEntryContainer(entry.getKey(), entry.getValue()));
+        }
+    }
+
 
     public synchronized void registerView(T view){
         views.add(new ViewSetEntryContainer(view.getKey(), view));
@@ -98,7 +155,6 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
     }
 
 
-
     private void updateView(K viewType) {
 
         if ((currentView!=null) && (currentView.getKey()==viewType)){
@@ -107,13 +163,15 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
         if (!views.contains(viewType)){
             throw new RuntimeException("View for type: "+viewType+ " has not been registered!");
         }
+        
+        ViewSetEntryContainer newView = getViewForType(viewType);
 
         //call onHide on previous view
         if (this.currentView!=null){
             this.currentView.getViewEntry().onHide();
         }
 
-        this.currentView = views.get(viewType);
+        this.currentView = newView;
 
         //call onShow for new view
         this.currentView.getViewEntry().onShow(this.currentView.isFirstView());
@@ -156,6 +214,33 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
      * @return
      */
     public synchronized T getView(K viewType) {
+        if (currentView.getKey()==viewType){
+            return currentView.getViewEntry();
+        }
+        if (mode==MODE_CREATE_ON_VIEW){
+            throw new ViewSetPanelException("In MODE_CREATE_ON_VIEW mode: getView only defined for current view");
+        }
+
         return views.get(viewType).getViewEntry();
+    }
+
+    private ViewSetEntryContainer getViewForType(K viewType) {
+        ViewSetEntryContainer result = views.get(viewType);
+
+        //in case of mode == MODE_CREATE_ON_VIEW make a copy so, it can be garbaged after hiding the view;
+        if (mode==MODE_CREATE_ON_VIEW){
+            result = getInstancedViewSetEntryContainer(result);
+        }else{            
+            //intantiate view if not already
+            result.checkAndInstantiate();
+        }
+
+        return result;
+    }
+
+    private ViewSetEntryContainer getInstancedViewSetEntryContainer(ViewSetEntryContainer viewContainer) {
+        ViewSetEntryContainer result = new ViewSetEntryContainer(viewContainer.key, viewContainer.entryClass);
+        result.checkAndInstantiate();
+        return result;
     }
 }
