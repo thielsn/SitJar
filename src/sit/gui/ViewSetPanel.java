@@ -20,7 +20,6 @@
 package sit.gui;
 
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,17 +39,12 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
     public static final int MODE_CREATE_ONCE=1;
 
     
-
-    
-
     public static class ViewSetPanelException extends RuntimeException {
 
         public ViewSetPanelException(String message) {
            super(message);
         }
     }
-
-
 
     class ViewSetEntryContainer implements ObjectWithKey<K>{
         private final Class entryClass;
@@ -229,18 +223,14 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
 
         //in case of mode == MODE_CREATE_ON_VIEW make a copy so, it can be garbaged after hiding the view;
         if (mode==MODE_CREATE_ON_VIEW){
-            result = getInstancedViewSetEntryContainer(result);
-        }else{            
-            //intantiate view if not already
-            result.checkAndInstantiate();
+            result = new ViewSetEntryContainer(result.key, result.entryClass);
         }
-
-        return result;
-    }
-
-    private ViewSetEntryContainer getInstancedViewSetEntryContainer(ViewSetEntryContainer viewContainer) {
-        ViewSetEntryContainer result = new ViewSetEntryContainer(viewContainer.key, viewContainer.entryClass);
+        //intantiate view if not already
         result.checkAndInstantiate();
+
+
         return result;
     }
+
+    
 }
