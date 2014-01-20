@@ -37,7 +37,7 @@ import sit.sstl.ObjectWithKey;
 public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
 
     public static final int MODE_CREATE_ON_VIEW=0;
-    public static final int MODE_CREATE_ONCE=0;
+    public static final int MODE_CREATE_ONCE=1;
 
     
 
