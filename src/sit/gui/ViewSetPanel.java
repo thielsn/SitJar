@@ -20,6 +20,7 @@
 package sit.gui;
 
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -103,7 +104,9 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
 
     public ViewSetPanel(JPanel panel, int mode) {
         this.panel = panel;
+        panel.setLayout(new GridBagLayout());
         this.mode = mode;
+
     }
 
     public ViewSetPanel(int mode) {
