@@ -53,12 +53,12 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
 
 
     class ViewSetEntryContainer implements ObjectWithKey<K>{
-        private final Class<T> entryClass;
+        private final Class entryClass;
         private final K key;
         private T viewEntry;
         private boolean firstView = true;
 
-        public ViewSetEntryContainer(K key, Class<T> viewEntryClass){
+        public ViewSetEntryContainer(K key, Class viewEntryClass){
             this.entryClass = viewEntryClass;
             this.key = key;
             this.viewEntry = null;
@@ -67,7 +67,7 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
         public ViewSetEntryContainer(K key, T viewEntry) {
             this.key = key;
             this.viewEntry = viewEntry;
-            this.entryClass = (Class<T>) viewEntry.getClass();
+            this.entryClass = viewEntry.getClass();
         }
 
         public void setFirstView(boolean firstView) {
@@ -89,7 +89,7 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
         private void checkAndInstantiate() {
             if (viewEntry==null){
                 try {
-                    viewEntry = entryClass.newInstance();
+                    viewEntry = (T) entryClass.newInstance();
                 } catch (InstantiationException ex) {
                     Logger.getLogger(ViewSetPanel.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IllegalAccessException ex) {
@@ -125,12 +125,12 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
         this(new JPanel());
     }
 
-    public synchronized void registerView(K key, Class<T> viewClass){
+    public synchronized void registerView(K key, Class<? extends T> viewClass){
         views.add(new ViewSetEntryContainer(key, viewClass));
     }
 
-    public synchronized void registerView(Map<K, Class<T>> viewMap){        
-        for (Map.Entry<K, Class<T>> entry : viewMap.entrySet()){
+    public synchronized void registerView(Map<K, Class<? extends T>> viewMap){
+        for (Map.Entry<K, Class<? extends T>> entry : viewMap.entrySet()){
             this.views.add(new ViewSetEntryContainer(entry.getKey(), entry.getValue()));
         }
     }
