@@ -20,6 +20,7 @@ package sit.db.controller;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import sit.db.ConnectionManager;
 import sit.db.datastructure.DataStructure;
 import sit.db.exception.DBException;
@@ -47,7 +48,7 @@ public abstract class Controller<T extends DataStructure, TABLE_FIELDS extends E
 
     public abstract List<T> getAllEntries() throws SQLException, DBException;
 
-    public abstract List<T> getEntries(List<TABLE_FIELDS> filter) throws SQLException, DBException;
+    public abstract List<T> getEntries(Map<TABLE_FIELDS, String> filter) throws SQLException, DBException;
 
     public abstract T updateEntry(T dataStructure) throws SQLException, DBException;
 

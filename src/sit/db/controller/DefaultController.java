@@ -20,6 +20,7 @@ package sit.db.controller;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import sit.db.ConnectionManager;
 import sit.db.datastructure.DataStructure;
 import sit.db.exception.DBException;
@@ -49,11 +50,16 @@ public class DefaultController<T extends DataStructure, TABLE_FIELDS extends Enu
 
     @Override
     public T deleteEntry(T dataStructure)throws SQLException, DBException{
-        return table.deleteEntry(db, dataStructure);
+        if(table.deleteEntry(db, dataStructure)){
+            return dataStructure;
+        }else{
+            return null;
+        }
+
     }    
 
     @Override
-    public List<T> getEntries(List<TABLE_FIELDS> filter)throws SQLException, DBException{
+    public List<T> getEntries(Map<TABLE_FIELDS, String> filter)throws SQLException, DBException{
         return table.getEntries(db, filter);
     }
 

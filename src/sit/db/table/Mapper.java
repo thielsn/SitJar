@@ -92,4 +92,27 @@ public class Mapper<T> {
         throw new UnsupportedOperationException("Override for using...");
     }
 
+    public String getAsStringRepresentation(T dataStructureEntry, TABLE_ENTRY_TYPE dbType){
+         if (dbType == TABLE_ENTRY_TYPE.BOOLEAN) {
+            return getBoolean(dataStructureEntry ) + "";
+        } else if (dbType == TABLE_ENTRY_TYPE.BYTES) {
+            return getBytes(dataStructureEntry ) + "";
+        } else if (dbType == TABLE_ENTRY_TYPE.DATE) {
+            return getDate(dataStructureEntry ).toString();
+        } else if (dbType == TABLE_ENTRY_TYPE.DOUBLE) {
+            return getDouble(dataStructureEntry ) + "";
+        } else if (dbType == TABLE_ENTRY_TYPE.FLOAT) {
+            return getFloat(dataStructureEntry ) + "";
+        } else if (dbType == TABLE_ENTRY_TYPE.INT) {
+            return getInt(dataStructureEntry ) + "";
+        } else if (dbType == TABLE_ENTRY_TYPE.LONG) {
+            return getLong(dataStructureEntry ) + "";
+        } else if (dbType == TABLE_ENTRY_TYPE.STRING) {
+            return getString(dataStructureEntry);
+        } else if (dbType == TABLE_ENTRY_TYPE.TIMESTAMP) {
+            return getTimestamp(dataStructureEntry).toString();
+        }
+         throw new RuntimeException("Unsupported dbType: "+dbType);
+    }
+
 }
