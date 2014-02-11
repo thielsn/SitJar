@@ -50,9 +50,11 @@ public class TableMapEntry<T> {
             try {
                 if ((method.getName().startsWith("get") 
                         && isSimilar(method.getName().substring(3), dbFieldName))
-                ||( method.getName().startsWith("is")&& isSimilar(method.getName().substring(2), dbFieldName))
-                        )
-                        {
+                ||( method.getName().startsWith("is")&&
+                        (isSimilar(method.getName().substring(2), dbFieldName)
+                        
+                        ||( isSimilar(method.getName(), dbFieldName)))
+                )){
                     return method.getName();
 
 
