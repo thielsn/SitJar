@@ -25,6 +25,7 @@ import sit.tools.StringFormat;
 /**
  *
  * @author simon
+ * @param <T>
  */
 public class TableMapEntry<T> {
 
@@ -47,8 +48,11 @@ public class TableMapEntry<T> {
     String guessGetterForDBEntry(String dbFieldName) {
         for (Method method : dataStructure.getClass().getMethods()) {
             try {
-                if (method.getName().startsWith("get")
-                        && isSimilar(method.getName().substring(4), dbFieldName)) {
+                if ((method.getName().startsWith("get") 
+                        && isSimilar(method.getName().substring(3), dbFieldName))
+                ||( method.getName().startsWith("is")&& isSimilar(method.getName().substring(2), dbFieldName))
+                        )
+                        {
                     return method.getName();
 
 
