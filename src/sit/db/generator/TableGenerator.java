@@ -48,7 +48,7 @@ public class TableGenerator {
     private final FileHelper fh = new FileHelper();
     private final String rootPath;
 
-    class TableMapEntry {
+    public static class TableMapEntry {
 
         final String tableName;
         final String dataStructureName;
