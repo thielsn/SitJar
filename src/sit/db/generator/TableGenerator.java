@@ -244,7 +244,20 @@ public class TableGenerator<T extends DataStructure<T> > {
     }
 
     private String createSetter(String fieldClassName, TableMapEntry tableEntry, ArrayList<DBTableEntry> tableStruct, DBTableEntry dBTableEntry) {
-        return "";
+        StringBuilder result = new StringBuilder();
+        result.append(INDENTATION +INDENTATION + INDENTATION + "@Override\n")
+                .append(INDENTATION +INDENTATION + INDENTATION + "public void ")
+                
+                .append("set").append(dBTableEntry.javaGetSetStub)
+                .append("(").append(tableEntry.dataStructureName)
+                .append(" dataStructureEntry, ")
+                .append(dBTableEntry.javaTypeName)
+                .append(" value) {\n                dataStructureEntry.")
+                .append(tableEntry.guessSetterForDBEntry(dBTableEntry.name))
+                .append("(value);\n            }\n")
+                ;
+
+        return result.toString();
     }
 
    

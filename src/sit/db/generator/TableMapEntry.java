@@ -71,4 +71,22 @@ public class TableMapEntry<T> {
         return methodBareName.toLowerCase().contains(dbFieldName.toLowerCase());
     }
 
+    public String guessSetterForDBEntry(String dbFieldName) {
+        for (Method method : dataStructure.getClass().getMethods()) {
+            try {
+                if ((method.getName().startsWith("set") 
+                        && isSimilar(method.getName().substring(3), dbFieldName))
+                ){
+                    return method.getName();
+
+
+                }
+            } catch (IndexOutOfBoundsException ex) {
+                //skip this method
+            }
+            
+        }
+        return "set"+StringFormat.capitalizeFirstLetter(dbFieldName);
+    }
+
 }
