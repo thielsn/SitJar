@@ -48,7 +48,6 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
     }
 
     private String createInsertString() {
-        //"insert into behandlungspfadvorlage_fachabteilung (behandlungspfadvorlage_id, fachabteilung_id) values(?,?);"
         StringBuilder result = new StringBuilder("insert into ");
 
         result.append(getTableName()).append(" (");
@@ -76,8 +75,6 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
     }
 
     private String createUpdateString() throws DBException {
-        //"update massnahme set bezeichnung=?, isTerminserie=?, kategorie=?,isAnforderung=?,
-        //visualisierung_id=?, status=?, aktualisierer_id=?, lastUpdated=?, archivierer_id=?, archived=? where id=?";
         StringBuilder result = new StringBuilder("update ");
         result.append(getTableName())
                 .append(" set ");
@@ -170,6 +167,16 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         }
     }
 
+
+     public T deleteEntry(ConnectionManager db, T dataStructure){
+         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+  
+
+    public List<T> getEntries(ConnectionManager db, List<TABLE_FIELDS> filter){
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
 
 
@@ -289,4 +296,6 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         }
         throw new DBException(createNewInstance().getTag(), "No primekey defined for table: "+getTableName(), -1);
     }
+
+
 }
