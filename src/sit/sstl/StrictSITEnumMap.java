@@ -43,9 +43,8 @@ public class StrictSITEnumMap<T extends Enum<T>, Q extends StrictSITEnumContaine
      */
     public StrictSITEnumMap(Class type, final Q[] values) {
         super(type);
-
-        for (int i = 0; i < values.length; i++) {
-            this.put((T) values[i].getEnumType(), values[i]);
+        for (Q value : values) {
+            this.put((T) value.getEnumType(), value);
         }
 
     }
