@@ -269,6 +269,10 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
 
     protected abstract T createNewInstance();
 
+    public String getTag(){
+        return createNewInstance().getTag();
+    }
+
     private T getDataStructureFromDBEntry(ResultSet rs) throws SQLException {
 
         T result = createNewInstance();
@@ -319,13 +323,17 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         }
     }
 
-    private TableEntry<T, TABLE_FIELDS> getPrimeKeyEntry() {
+    public TableEntry<T, TABLE_FIELDS> getPrimeKeyEntry() {
         for (TableEntry<T, TABLE_FIELDS> tableEntry : entries.values()) {
             if (tableEntry.isPrimeKey()) {
                 return tableEntry;
             }
         }
         return null;
+    }
+
+    public boolean hasPrimeKey(){
+        return getPrimeKeyEntry()!=null;
     }
 
     private String createSQLEquals(Map.Entry<TABLE_FIELDS, String> filterEntry) {
@@ -346,14 +354,21 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         return result;
     }
 
-    private Map<TABLE_FIELDS, String> createFilterFromDataStructure(T dataStructure) {
+    public Map<TABLE_FIELDS, String> createFilterFromId(int id){
         Map<TABLE_FIELDS, String> result = new LinkedHashMap();
+        result.put(getPrimeKeyEntry().getFieldNameType(), id + "");
+        return result;
+    }
+
+    private Map<TABLE_FIELDS, String> createFilterFromDataStructure(T dataStructure) {
+        
 
         TableEntry<T, TABLE_FIELDS> primeKeyEntry = getPrimeKeyEntry();
-        if (primeKeyEntry != null) {
-            result.put(primeKeyEntry.getFieldNameType(), dataStructure.getId() + "");
-            return result;
+        if (hasPrimeKey()) {
+            return createFilterFromId(dataStructure.getId());
         }//else no primekey defined
+        
+        Map<TABLE_FIELDS, String> result= new LinkedHashMap();
         //create all field filter (except for bytes)
         for (TableEntry<T, TABLE_FIELDS> tableEntry : entries.values()) {
             if (tableEntry.getDbType()!=TABLE_ENTRY_TYPE.BYTES) {

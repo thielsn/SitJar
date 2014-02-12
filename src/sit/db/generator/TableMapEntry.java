@@ -46,47 +46,73 @@ public class TableMapEntry<T> {
     }
 
     String guessGetterForDBEntry(String dbFieldName) {
-        for (Method method : dataStructure.getClass().getMethods()) {
-            try {
-                if ((method.getName().startsWith("get") 
-                        && isSimilar(method.getName().substring(3), dbFieldName))
-                ||( method.getName().startsWith("is")&&
-                        (isSimilar(method.getName().substring(2), dbFieldName)
-                        
-                        ||( isSimilar(method.getName(), dbFieldName)))
-                )){
-                    return method.getName();
-
-
-                }
-            } catch (IndexOutOfBoundsException ex) {
-                //skip this method
-            }
-        }
+        Method method;
+        //first try exact match
+        if ((method = findGetter(dbFieldName, true))!=null) {
+            return method.getName();
+        }//else
+        // try guessing match
+        if ((method = findGetter(dbFieldName, false))!=null) {
+            return method.getName();
+        }//else
 
         return "get"+StringFormat.capitalizeFirstLetter(dbFieldName);
     }
 
-    private boolean isSimilar(String methodBareName, String dbFieldName) {
+    private Method findGetter(String dbFieldName, boolean exactMatch) throws SecurityException {
+        for (Method method : dataStructure.getClass().getMethods()) {
+            try {
+                if ((method.getName().startsWith("get") 
+                        && matches(method.getName().substring(3), dbFieldName, exactMatch))
+                        ||( method.getName().startsWith("is")&&
+                        (matches(method.getName().substring(2), dbFieldName, exactMatch)
+                        
+                        ||( matches(method.getName(), dbFieldName, exactMatch)))
+                        )) {
+                    return method;
+                }
+            }catch (IndexOutOfBoundsException ex) {
+                //skip this method
+            }
+        }
+        return null;
+    }
+
+    private boolean matches(String methodBareName, String dbFieldName, boolean exactMatch) {
+        if (exactMatch){
+            return methodBareName.toLowerCase().equals(dbFieldName.toLowerCase());
+        }//else
+
         return methodBareName.toLowerCase().contains(dbFieldName.toLowerCase());
     }
 
     public String guessSetterForDBEntry(String dbFieldName) {
+
+        Method method;
+        //first try exact match
+        if ((method = findSetter(dbFieldName, true))!=null) {
+            return method.getName();
+        }//else
+        // try guessing match
+        if ((method = findSetter(dbFieldName, false))!=null) {
+            return method.getName();
+        }//else
+
+        return "set"+StringFormat.capitalizeFirstLetter(dbFieldName);
+    }
+
+    private Method findSetter(String dbFieldName, boolean exactMatch) throws SecurityException {
         for (Method method : dataStructure.getClass().getMethods()) {
             try {
-                if ((method.getName().startsWith("set") 
-                        && isSimilar(method.getName().substring(3), dbFieldName))
-                ){
-                    return method.getName();
-
-
+                if (method.getName().startsWith("set") 
+                        && matches(method.getName().substring(3), dbFieldName, exactMatch)) {
+                    return method;
                 }
-            } catch (IndexOutOfBoundsException ex) {
+            }catch (IndexOutOfBoundsException ex) {
                 //skip this method
             }
-            
         }
-        return "set"+StringFormat.capitalizeFirstLetter(dbFieldName);
+        return null;
     }
 
 }

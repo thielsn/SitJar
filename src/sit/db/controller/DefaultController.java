@@ -68,4 +68,19 @@ public class DefaultController<T extends DataStructure, TABLE_FIELDS extends Enu
          return table.getAllEntries(db);
      }
 
+    public T getEntry(int value) throws DBException, SQLException {
+        if (!table.hasPrimeKey()){
+            throw new DBException(table.getTag(), "No PrimeKey defined for table: "+table.getTableName(), -1);
+        }
+        List<T> results = table.getEntries(db, table.createFilterFromId(value));
+        validateSingleResult(results, table.getTableName());
+        return results.get(0);
+    }
+
+    public static <T> void validateSingleResult(List<T> result, String tableName) throws DBException {
+        if (result.size()!=1){
+            throw new DBException(tableName, "received "+result.size()+" result(s) - when expected single result" , -1);
+        }
+    }
+
 }
