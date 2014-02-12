@@ -26,20 +26,35 @@ import sit.db.table.TABLE_ENTRY_TYPE;
  * @author simon
  */
 class DBTableEntry {
+
+    static class DBFlag{
+        final String flagString;
+        final int flagValue;
+
+        public DBFlag(String flagString, int flagValue) {
+            this.flagString = flagString;
+            this.flagValue = flagValue;
+        }
+
+
+    }
+
     final String name;
     final String dbTypeName;
     final TABLE_ENTRY_TYPE dbType;
     final String javaTypeName;
     final String javaGetSetStub;
+    final DBFlag flag;
 
 
 
-    public DBTableEntry(String name, TABLE_ENTRY_TYPE type) {
+    public DBTableEntry(String name, TABLE_ENTRY_TYPE type, DBFlag flag) {
         this.name = name;
         this.dbTypeName = name.toUpperCase();
         this.dbType = type;
         this.javaTypeName = getJavaTypeStringFromDBType(dbType);
         this.javaGetSetStub =  getJavaGetSetStubStringFromDBType(dbType);
+        this.flag = flag;
     }
 
     private String getJavaTypeStringFromDBType(TABLE_ENTRY_TYPE dbType) {
@@ -87,5 +102,6 @@ class DBTableEntry {
         }
          throw new RuntimeException("Unsupported dbType: "+dbType);
     }
+
 
 }

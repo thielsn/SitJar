@@ -22,7 +22,9 @@ import sit.db.Connection;
 import sit.db.exception.DBException;
 import sit.db.ConnectionManager;
 import java.io.IOException;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import java.util.logging.Logger;
 import sit.db.datastructure.DataStructure;
 import sit.db.table.SQLTypeHelper;
 import sit.db.table.TABLE_ENTRY_TYPE;
+import sit.db.table.TableEntry;
 import sit.io.FileHelper;
 
 /**
@@ -38,7 +41,7 @@ import sit.io.FileHelper;
  * @author simon
  * @param <T>
  */
-public class TableGenerator<T extends DataStructure<T> > {
+public class TableGenerator<T extends DataStructure<T>> {
 
     private final String rootDirForGenerateFiles;
     private final String rootPackage;
@@ -50,6 +53,7 @@ public class TableGenerator<T extends DataStructure<T> > {
     private final String controllerPackage;
     private final FileHelper fh = new FileHelper();
     private final String rootPath;
+    private DatabaseMetaData databaseMetaData = null;
 
     public TableGenerator(String rootDirForGenerateFiles, String rootPackage, String rootPath) {
         this.rootDirForGenerateFiles = rootDirForGenerateFiles;
@@ -71,6 +75,7 @@ public class TableGenerator<T extends DataStructure<T> > {
             if (!stmt.execute()) {
                 throw new DBException(tableEntry.tableName, "error when accessing", -1);
             }
+            databaseMetaData = connection.getMetaData();
             createFiles(stmt.getMetaData(), tableEntry);
 
         } finally {
@@ -101,7 +106,8 @@ public class TableGenerator<T extends DataStructure<T> > {
             try {
 
                 TABLE_ENTRY_TYPE dbType = SQLTypeHelper.mapSQLType(metaData.getColumnType(i));
-                tableStruct.add(new DBTableEntry(columnName, dbType));
+                DBTableEntry.DBFlag dbFlag = getDBFlag(tableEntry.tableName, metaData, i);
+                tableStruct.add(new DBTableEntry(columnName, dbType, dbFlag));
 
             } catch (RuntimeException ex) {
                 Logger.getLogger(TableGenerator.class.getName()).log(Level.SEVERE, ex.getMessage() + "for column: " + columnName, ex);
@@ -117,7 +123,8 @@ public class TableGenerator<T extends DataStructure<T> > {
 
         String className = getFieldClassName(tableName);
 
-        content.append(getPackageContent(tablePackage))
+        content.append(TableStrings.header)
+                .append(getPackageContent(tablePackage))
                 .append("\n\npublic enum ")
                 .append(className)
                 .append("{\n\n")
@@ -159,7 +166,8 @@ public class TableGenerator<T extends DataStructure<T> > {
         String className = getBasicClassName(tableEntry.tableName) + "Table";
         String fieldClassName = getFieldClassName(tableEntry.tableName);
 
-        content.append(getPackageContent(tablePackage))
+        content.append(TableStrings.header)
+                .append(getPackageContent(tablePackage))
                 .append(getTableImports(tableEntry));
 
         content.append("\n\npublic class ")
@@ -183,7 +191,7 @@ public class TableGenerator<T extends DataStructure<T> > {
             if (firstEntry) {
                 firstEntry = false;
             } else {
-                content.append(", \n");
+                content.append(", \n\n");
             }
             content.append(createTableTableEntry(fieldClassName, tableEntry, tableStruct, dBTableEntry));
         }
@@ -209,7 +217,7 @@ public class TableGenerator<T extends DataStructure<T> > {
 
     private String createTableTableEntry(String fieldClassName, TableMapEntry tableEntry, ArrayList<DBTableEntry> tableStruct, DBTableEntry dBTableEntry) {
         StringBuilder result = new StringBuilder();
-        result.append(INDENTATION + INDENTATION +"new TableEntry(")
+        result.append(INDENTATION + INDENTATION + "new TableEntry(")
                 .append(fieldClassName)
                 .append(".")
                 .append(dBTableEntry.dbTypeName)
@@ -223,46 +231,76 @@ public class TableGenerator<T extends DataStructure<T> > {
                 .append(createGetter(fieldClassName, tableEntry, tableStruct, dBTableEntry))
                 .append("\n\n")
                 .append(createSetter(fieldClassName, tableEntry, tableStruct, dBTableEntry))
-                .append("\n\n        })");
+                .append("\n\n        }")
+                .append(getPrimKeyParam(dBTableEntry))
+                .append(")");
 
         return result.toString();
     }
 
     private String createGetter(String fieldClassName, TableMapEntry tableEntry, ArrayList<DBTableEntry> tableStruct, DBTableEntry dBTableEntry) {
         StringBuilder result = new StringBuilder();
-        result.append(INDENTATION +INDENTATION + INDENTATION + "@Override\n")
-                .append(INDENTATION +INDENTATION + INDENTATION + "public ")
+        result.append(INDENTATION + INDENTATION + INDENTATION + "@Override\n")
+                .append(INDENTATION + INDENTATION + INDENTATION + "public ")
                 .append(dBTableEntry.javaTypeName)
                 .append(" get").append(dBTableEntry.javaGetSetStub)
                 .append("(").append(tableEntry.dataStructureName)
                 .append(" dataStructureEntry) {\n                return dataStructureEntry.")
                 .append(tableEntry.guessGetterForDBEntry(dBTableEntry.name))
-                .append("();\n            }\n")
-                ;
+                .append("();\n            }\n");
 
         return result.toString();
     }
 
     private String createSetter(String fieldClassName, TableMapEntry tableEntry, ArrayList<DBTableEntry> tableStruct, DBTableEntry dBTableEntry) {
         StringBuilder result = new StringBuilder();
-        result.append(INDENTATION +INDENTATION + INDENTATION + "@Override\n")
-                .append(INDENTATION +INDENTATION + INDENTATION + "public void ")
-                
+        result.append(INDENTATION + INDENTATION + INDENTATION + "@Override\n")
+                .append(INDENTATION + INDENTATION + INDENTATION + "public void ")
                 .append("set").append(dBTableEntry.javaGetSetStub)
                 .append("(").append(tableEntry.dataStructureName)
                 .append(" dataStructureEntry, ")
                 .append(dBTableEntry.javaTypeName)
                 .append(" value) {\n                dataStructureEntry.")
                 .append(tableEntry.guessSetterForDBEntry(dBTableEntry.name))
-                .append("(value);\n            }\n")
-                ;
+                .append("(value);\n            }\n");
 
         return result.toString();
     }
 
-   
+    private Object getPrimKeyParam(DBTableEntry dBTableEntry) {
+        if (dBTableEntry.flag.flagValue != 0) {
+            return ", " + dBTableEntry.flag.flagString;
+        }
+        return "";
+    }
 
-    
-    
+    private DBTableEntry.DBFlag getDBFlag(String tableName, ResultSetMetaData metaData, int i) throws SQLException {
+
+        boolean primKey = isPrimKey(tableName, metaData.getColumnName(i));
+
+        if (primKey) {
+            if (metaData.isAutoIncrement(i)) {
+                return new DBTableEntry.DBFlag("TableEntry.PRIMKEY_AUTOGEN", TableEntry.PRIMKEY_AUTOGEN);
+
+            } else {
+                return new DBTableEntry.DBFlag("TableEntry.PRIMKEY", TableEntry.PRIMKEY);
+            }
+        }
+        return new DBTableEntry.DBFlag(null, 0);
+    }
+
+    private boolean isPrimKey(String tableName, String columnName) throws SQLException {
+        ResultSet rs = databaseMetaData.getPrimaryKeys(null, null, tableName);
+        try {
+            while (rs.next()) {
+                if (rs.getString("COLUMN_NAME").equals(columnName)) {
+                    return true;
+                }
+            }
+        } finally {
+            rs.close();
+        }
+        return false;
+    }
 
 }

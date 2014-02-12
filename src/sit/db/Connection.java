@@ -19,6 +19,7 @@
 
 package sit.db;
 
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -61,6 +62,10 @@ public class Connection {
         Statement result = con.createStatement();
         statements.add(result);
         return result;
+    }
+
+    public DatabaseMetaData getMetaData() throws SQLException {
+        return con.getMetaData();
     }
 
 
