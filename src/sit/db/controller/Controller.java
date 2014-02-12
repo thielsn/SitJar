@@ -19,6 +19,7 @@
 package sit.db.controller;
 
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -73,6 +74,12 @@ public abstract class Controller<T extends DataStructure, TABLE_FIELDS extends E
         if (result.size()!=1){
             throw new DBException(tableName, "received "+result.size()+" result(s) - when expected single result" , -1);
         }
+    }
+    
+    public Map<TABLE_FIELDS, String> createFilter(TABLE_FIELDS field, String value){
+        Map<TABLE_FIELDS, String> filter = new LinkedHashMap();
+        filter.put(field, value);
+        return filter;
     }
     
     
