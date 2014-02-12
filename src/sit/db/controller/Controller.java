@@ -21,6 +21,7 @@ package sit.db.controller;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import sit.db.ConnectionManager;
 import sit.db.datastructure.DataStructure;
 import sit.db.exception.DBException;
@@ -51,5 +52,29 @@ public abstract class Controller<T extends DataStructure, TABLE_FIELDS extends E
     public abstract List<T> getEntries(Map<TABLE_FIELDS, String> filter) throws SQLException, DBException;
 
     public abstract T updateEntry(T dataStructure) throws SQLException, DBException;
+
+    
+    public T getEntry(Map<TABLE_FIELDS, String> filter) throws DBException, SQLException {
+
+        List<T> results = getEntries(filter);
+        validateSingleResult(results, table.getTableName());
+        return results.get(0);
+    }
+
+    public T getEntry(int value) throws DBException, SQLException {
+        if (!table.hasPrimeKey()){
+            throw new DBException(table.getTag(), "No PrimeKey defined for table: "+table.getTableName(), -1);
+        }
+        return getEntry(table.createFilterFromId(value));
+    }
+
+
+    public void validateSingleResult(List<T> result, String tableName) throws DBException {
+        if (result.size()!=1){
+            throw new DBException(tableName, "received "+result.size()+" result(s) - when expected single result" , -1);
+        }
+    }
+    
+    
 
 }

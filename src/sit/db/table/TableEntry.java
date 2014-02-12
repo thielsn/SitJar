@@ -65,7 +65,7 @@ public class TableEntry<T, TABLE_FIELDS extends Enum< TABLE_FIELDS> > implements
 
     @Override
     public TABLE_FIELDS getEnumType() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return fieldNameType;
     }
 
     /**
