@@ -19,6 +19,7 @@
 
 package sit.tools;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -41,5 +42,18 @@ public class ListHelper {
         }
         return result;
     }
+
+    public static <T> Vector<T> entryToVector(T entry){
+        Vector<T> result = new Vector();
+        result.add(entry);
+        return result;
+    }
+
+    public static <T> ArrayList<T> entryToArrayList(T entry){
+        ArrayList<T> result = new ArrayList();
+        result.add(entry);
+        return result;
+    }
+
 
 }
