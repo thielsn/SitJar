@@ -276,9 +276,10 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
     private T getDataStructureFromDBEntry(ResultSet rs) throws SQLException {
 
         T result = createNewInstance();
-        for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
-            TableEntry entry = entries.get(i); //FIXME are we sure the order is always correct? - we could lookup the names from entries...
-            setDatastructureEntry(result, rs, entry, i + 1);
+        int rsCounter = 1;
+        for(TableEntry entry : entries.values()){
+            setDatastructureEntry(result, rs, entry, rsCounter);
+            rsCounter++;
         }
 
         return result;

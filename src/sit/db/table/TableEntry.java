@@ -29,7 +29,7 @@ import sit.sstl.StrictSITEnumContainer;
  */
 public class TableEntry<T, TABLE_FIELDS extends Enum< TABLE_FIELDS> > implements StrictSITEnumContainer<TABLE_FIELDS>{
     public static final int PRIMKEY = 1;
-    public static final int PRIMKEY_AUTOGEN = 4;
+    public static final int PRIMKEY_AUTOGEN = 3;
     
     private final TABLE_FIELDS fieldNameType;
     private final String name;
@@ -56,11 +56,12 @@ public class TableEntry<T, TABLE_FIELDS extends Enum< TABLE_FIELDS> > implements
 
 
     boolean isPrimeKey() {
-        return (PRIMKEY & flag) == PRIMKEY;
+        int primekey = (PRIMKEY & flag);
+        return (primekey == PRIMKEY);
     }
 
     boolean isPrimeKeyAutogen() {
-        return (PRIMKEY_AUTOGEN & flag) == PRIMKEY_AUTOGEN;
+        return  (flag == PRIMKEY_AUTOGEN);
     }
 
     @Override
@@ -95,5 +96,6 @@ public class TableEntry<T, TABLE_FIELDS extends Enum< TABLE_FIELDS> > implements
     public Mapper<T> getMapper() {
         return mapper;
     }
+
 
 }
