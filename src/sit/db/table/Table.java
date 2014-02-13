@@ -44,7 +44,7 @@ import sit.sstl.StrictSITEnumMap;
 public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< TABLE_FIELDS>> {
 
     private final StrictSITEnumMap<TABLE_FIELDS, TableEntry<T, TABLE_FIELDS>> entries;
-    private final boolean verbose = false;
+    private final boolean verbose = true;
 
     public Table(StrictSITEnumMap<TABLE_FIELDS, TableEntry<T, TABLE_FIELDS>> entries) {
         this.entries = entries;
@@ -53,27 +53,27 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
 
     private String createInsertString() {
         StringBuilder result = new StringBuilder("INSERT INTO ");
-
+        StringBuilder params = new StringBuilder();
         result.append(getTableName()).append(" (");
 
         boolean firstEntry = true;
         for (TableEntry entry : entries.values()) {
+            if (entry.isPrimeKeyAutogen()) {
+                //skip this
+                continue;
+            }
             if (firstEntry) {
                 firstEntry = false;
+                params.append("?");
             } else {
-                result.append(" ");
+                result.append(", ");
+                params.append(",?");
             }
             result.append(entry.getName());
         }
-        result.append(") VALUES(");
-        for (int i = 0; i < entries.size(); i++) {
-            if (i == 0) {
-                result.append("?");
-            } else {
-                result.append(",?");
-            }
-        }
-        result.append(");");
+        result.append(") VALUES(")
+                .append(params)
+                .append(");");
         if (verbose) {
             Logger.getLogger(Table.class.getName()).log(Level.INFO, result.toString());
         }
@@ -169,14 +169,13 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
             stmtIndex++;
 
         }
-        T result = null;
+        
         stmt.execute();
-        if (stmt.execute()) {
-            result = (T) dataStructureEntry.getClone();
-            ResultSet rs = stmt.getGeneratedKeys();
-            rs.next();
-            result.setId(rs.getInt(1));
-        }
+        T result = (T) dataStructureEntry.getClone();
+        ResultSet rs = stmt.getGeneratedKeys();
+        rs.next();
+        result.setId(rs.getInt(1));
+
         return result;
     }
 
@@ -252,28 +251,21 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
                 setStatementEntry(stmt, dataStructure, entry, stmtCounter);
                 stmtCounter++;
             }
-            //set id for where part
-            stmt.setInt(stmtCounter, dataStructure.getId());
-            if (stmt.execute()) {
-                T result = (T) dataStructure.getClone();
-                ResultSet rs = stmt.getGeneratedKeys();
-                rs.next();
-                result.setId(rs.getInt(1));
-                return result;
-            }
+            stmt.execute();//UPDATE seems not to return any resultset
+            return dataStructure;
 
         } finally {
             //stmt.close() done by ConnectionManager
             db.returnConnection(con);
         }
-        throw new UpdateException(dataStructure.getTag(), "update of " + getTableName() + " failed for id: " + dataStructure.getId(), -1);
+
     }
 
     public abstract String getTableName();
 
     protected abstract T createNewInstance();
 
-    public String getTag(){
+    public String getTag() {
         return createNewInstance().getTag();
     }
 
@@ -281,7 +273,7 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
 
         T result = createNewInstance();
         int rsCounter = 1;
-        for(TableEntry entry : entries.values()){
+        for (TableEntry entry : entries.values()) {
             setDatastructureEntry(result, rs, entry, rsCounter);
             rsCounter++;
         }
@@ -337,8 +329,8 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         return null;
     }
 
-    public boolean hasPrimeKey(){
-        return getPrimeKeyEntry()!=null;
+    public boolean hasPrimeKey() {
+        return getPrimeKeyEntry() != null;
     }
 
     private String createSQLEquals(Map.Entry<TABLE_FIELDS, String> filterEntry) {
@@ -350,8 +342,7 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         String result = entry.getName() + " = ";
         if (entry.getDbType() == TABLE_ENTRY_TYPE.STRING
                 || entry.getDbType() == TABLE_ENTRY_TYPE.DATE
-                || entry.getDbType() == TABLE_ENTRY_TYPE.TIMESTAMP
-                ) {
+                || entry.getDbType() == TABLE_ENTRY_TYPE.TIMESTAMP) {
             result += "'" + filterEntry.getValue();
         } else {
             result += filterEntry.getValue();
@@ -359,29 +350,27 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         return result;
     }
 
-    public Map<TABLE_FIELDS, String> createFilterFromId(int id){
+    public Map<TABLE_FIELDS, String> createFilterFromId(int id) {
         Map<TABLE_FIELDS, String> result = new LinkedHashMap();
         result.put(getPrimeKeyEntry().getFieldNameType(), id + "");
         return result;
     }
 
     private Map<TABLE_FIELDS, String> createFilterFromDataStructure(T dataStructure) {
-        
+
         if (hasPrimeKey()) {
             return createFilterFromId(dataStructure.getId());
         }//else no primekey defined
-        
-        Map<TABLE_FIELDS, String> result= new LinkedHashMap();
+
+        Map<TABLE_FIELDS, String> result = new LinkedHashMap();
         //create all field filter (except for bytes)
         for (TableEntry<T, TABLE_FIELDS> tableEntry : entries.values()) {
-            if (tableEntry.getDbType()!=TABLE_ENTRY_TYPE.BYTES) {
-                result.put(tableEntry.getEnumType(), 
+            if (tableEntry.getDbType() != TABLE_ENTRY_TYPE.BYTES) {
+                result.put(tableEntry.getEnumType(),
                         tableEntry.getMapper().getAsStringRepresentation(dataStructure, tableEntry.getDbType()));
             }
         }
         return result;
     }
-
-    
 
 }
