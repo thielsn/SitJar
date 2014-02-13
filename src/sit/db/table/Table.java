@@ -44,6 +44,7 @@ import sit.sstl.StrictSITEnumMap;
 public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< TABLE_FIELDS>> {
 
     private final StrictSITEnumMap<TABLE_FIELDS, TableEntry<T, TABLE_FIELDS>> entries;
+    private final boolean verbose = false;
 
     public Table(StrictSITEnumMap<TABLE_FIELDS, TableEntry<T, TABLE_FIELDS>> entries) {
         this.entries = entries;
@@ -73,7 +74,9 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
             }
         }
         result.append(");");
-
+        if (verbose) {
+            Logger.getLogger(Table.class.getName()).log(Level.INFO, result.toString());
+        }
         return result.toString();
     }
 
@@ -98,7 +101,9 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         result.append("=?");
         createSQLCondition(filter, result);
         result.append(";");
-
+        if (verbose) {
+            Logger.getLogger(Table.class.getName()).log(Level.INFO, result.toString());
+        }
         return result.toString();
     }
 
@@ -109,6 +114,9 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         createSQLCondition(filter, result);
 
         result.append(";");
+        if (verbose) {
+            Logger.getLogger(Table.class.getName()).log(Level.INFO, result.toString());
+        }
         return result.toString();
     }
 
@@ -117,7 +125,7 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         for (Map.Entry<TABLE_FIELDS, String> filterEntry : filter.entrySet()) {
             if (firstEntry) {
                 firstEntry = false;
-                result.append(" WHERE ");
+                result.append(" WHERE");
             } else {
                 result.append(" AND");
             }
@@ -260,10 +268,6 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         }
         throw new UpdateException(dataStructure.getTag(), "update of " + getTableName() + " failed for id: " + dataStructure.getId(), -1);
     }
-//
-//    public T deleteEntry(ConnectionManager db, T entry) throws SQLException{
-//
-//    }
 
     public abstract String getTableName();
 
@@ -363,8 +367,6 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
 
     private Map<TABLE_FIELDS, String> createFilterFromDataStructure(T dataStructure) {
         
-
-        TableEntry<T, TABLE_FIELDS> primeKeyEntry = getPrimeKeyEntry();
         if (hasPrimeKey()) {
             return createFilterFromId(dataStructure.getId());
         }//else no primekey defined
@@ -379,5 +381,7 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         }
         return result;
     }
+
+    
 
 }
