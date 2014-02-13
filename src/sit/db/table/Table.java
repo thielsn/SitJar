@@ -173,8 +173,9 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         stmt.execute();
         T result = (T) dataStructureEntry.getClone();
         ResultSet rs = stmt.getGeneratedKeys();
-        rs.next();
-        result.setId(rs.getInt(1));
+        if (rs != null && rs.next()) {
+            result.setId(rs.getInt(1));
+        }
 
         return result;
     }
@@ -242,7 +243,7 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
 
         try {
             String sqlString = createUpdateString(createFilterFromDataStructure(dataStructure));
-            PreparedStatement stmt = con.createPrepStmt(sqlString, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement stmt = con.createPrepStmt(sqlString);
             int stmtCounter = 1;
             for (TableEntry entry : entries.values()) {
                 if (entry.isPrimeKeyAutogen()) {
