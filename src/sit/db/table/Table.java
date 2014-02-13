@@ -38,13 +38,16 @@ import sit.sstl.StrictSITEnumMap;
 
 /**
  *
+ * TODO remove filter from sql-string and use prepared statement parameter instead!!!
+ *
  * @author simon
  * @param <T> ParticepsDataType
+ * @param <TABLE_FIELDS>
  */
 public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< TABLE_FIELDS>> {
 
     private final StrictSITEnumMap<TABLE_FIELDS, TableEntry<T, TABLE_FIELDS>> entries;
-    private final boolean verbose = true;
+    private final boolean verbose = false;
 
     public Table(StrictSITEnumMap<TABLE_FIELDS, TableEntry<T, TABLE_FIELDS>> entries) {
         this.entries = entries;
