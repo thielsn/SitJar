@@ -131,12 +131,12 @@ public class ListPanel<T> implements ListDataListener {
                 Component comp = comps[j];
                 addMouseListener(comp, createMouseAdapter(element, comps));
                 GridBagConstraints gc = getGridBackConstraints(row, j);
-                if (i==0){
-                    gc.insets= new Insets(0, 0, 0, 0);
-                }else if (i==listModel.getSize()-1){                    
+                if (j==0){
+                    gc.insets= new Insets(0, 7, 0, 0);
+                }else if (j==comps.length-1){
                     gc.insets= new Insets(0, 0, 0, 7);
-                    //the last column is oriented to the left
-                    gc.anchor=GridBagConstraints.EAST;
+                    //the last column is oriented to the right
+                    gc.anchor=GridBagConstraints.LAST_LINE_END;
                 }
                 panel.add(comp, gc);
             }
@@ -164,7 +164,7 @@ public class ListPanel<T> implements ListDataListener {
 
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
 
-        gridBagConstraints.anchor = GridBagConstraints.WEST;
+        gridBagConstraints.anchor = GridBagConstraints.LAST_LINE_START;
         gridBagConstraints.weightx = weightx;
         gridBagConstraints.weighty = weighty;
         gridBagConstraints.ipadx = 12;
