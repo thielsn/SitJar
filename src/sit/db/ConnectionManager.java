@@ -18,8 +18,10 @@
 */
 package sit.db;
 
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -89,6 +91,13 @@ public class ConnectionManager  {
     public synchronized void returnConnection(Connection connection) throws SQLException{
         connection.closeAndClearStatements();
         connections.add(connection);
+    }
+
+    public synchronized void shutdown() {
+        for (Connection connection : connections){
+            connection.shutdown();
+        }
+        
     }
 
 

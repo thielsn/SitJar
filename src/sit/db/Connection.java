@@ -24,6 +24,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -66,6 +68,22 @@ public class Connection {
 
     public DatabaseMetaData getMetaData() throws SQLException {
         return con.getMetaData();
+    }
+
+    void shutdown() {
+        try{
+            closeAndClearStatements();
+        } catch (SQLException ex) {
+            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            try {
+                con.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+
     }
 
 
