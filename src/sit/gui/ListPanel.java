@@ -122,7 +122,7 @@ public class ListPanel<T> implements ListDataListener {
 
     private void refreshPanel() {
         int maxCol = getMaxCol();
-        int row = 1;
+        int row = 1; //in row 0 a line will be added
         panel.removeAll();
         for (int i = 0; i < listModel.getSize(); i++) {
             T element = listModel.getElementAt(i);
@@ -132,7 +132,7 @@ public class ListPanel<T> implements ListDataListener {
                 addMouseListener(comp, createMouseAdapter(element, comps));
                 GridBagConstraints gc = getGridBackConstraints(row, j);
                 if (i==0){
-                    gc.insets= new Insets(0, 7, 0, 0);
+                    gc.insets= new Insets(0, 0, 0, 0);
                 }else if (i==listModel.getSize()-1){                    
                     gc.insets= new Insets(0, 0, 0, 7);
                     //the last column is oriented to the left
@@ -221,6 +221,7 @@ public class ListPanel<T> implements ListDataListener {
     }
 
     private void addLines(final int maxCol) {
+        //skip the first line
         for (int i = 0; i < listModel.getSize() + 1; i++) {
             addLine(panel, i * 2, maxCol);
         }
