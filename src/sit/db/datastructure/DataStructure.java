@@ -24,9 +24,8 @@ package sit.db.datastructure;
  * @author simon
  * @param <T>
  */
-public interface DataStructure<T> {
+public interface DataStructure<T> extends GetClonable<T> {
     public String getTag();
-    public T getClone();
     public int getId();
     public void setId(int value);
 
