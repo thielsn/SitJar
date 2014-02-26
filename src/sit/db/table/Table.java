@@ -38,7 +38,8 @@ import sit.sstl.StrictSITEnumMap;
 
 /**
  *
- * TODO remove filter from sql-string and use prepared statement parameter instead!!!
+ * TODO remove filter from sql-string and use prepared statement parameter
+ * instead!!!
  *
  * @author simon
  * @param <T> ParticepsDataType
@@ -146,7 +147,7 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         return result.toString();
     }
 
-    public T createEntry(ConnectionManager db, T entry) throws SQLException {
+    public T createEntry(ConnectionManager db, T entry) throws SQLException, DBException {
         Connection con = db.getConnection();
         T result = null;
         try {
@@ -159,7 +160,7 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         return result;
     }
 
-    protected T createEntryInternal(T dataStructureEntry, PreparedStatement stmt) throws SQLException {
+    protected T createEntryInternal(T dataStructureEntry, PreparedStatement stmt) throws SQLException, DBException {
         int stmtIndex = 1;
         for (TableEntry entry : entries.values()) {
 
@@ -172,12 +173,18 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
             stmtIndex++;
 
         }
-        
+
         stmt.execute();
         T result = (T) dataStructureEntry.getClone();
         ResultSet rs = stmt.getGeneratedKeys();
         if (rs != null && rs.next()) {
             result.setId(rs.getInt(1));
+        }else{
+            if (stmt.getUpdateCount()!=1){
+                throw new DBException(dataStructureEntry.getTag(), "insert returned 0!", -1);
+            }else{
+                Logger.getLogger(Table.class.getName()).log(Level.WARNING, "Insert returned 1, but no ResultSet!");
+            }
         }
 
         return result;
@@ -255,7 +262,11 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
                 setStatementEntry(stmt, dataStructure, entry, stmtCounter);
                 stmtCounter++;
             }
-            stmt.execute();//UPDATE seems not to return any resultset
+            int rowsChanged = stmt.executeUpdate();
+
+            if (rowsChanged!=1){
+                throw new DBException(dataStructure.getTag(), "Update failed! executeUpdate returned: "+rowsChanged, -1);
+            }
             return dataStructure;
 
         } finally {
