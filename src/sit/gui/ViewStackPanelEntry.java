@@ -29,4 +29,10 @@ import javax.swing.JPanel;
 public interface ViewStackPanelEntry <T extends JPanel> extends ViewStackPanelHandler{
     public T getPanel();
     public String getCaption();
+    /**
+     * this call can be overwritten as a general interface to refresh 
+     * content-based view items when some data might have been changed
+     * this is typically called from a controller
+     */
+    public void refreshView();
 }

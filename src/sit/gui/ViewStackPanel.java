@@ -69,6 +69,10 @@ public class ViewStackPanel<T extends JPanel> extends JPanel {
             public void onLoadAfterPush() {
                 handler.onLoadAfterPush();
             }
+
+            public void refreshView() {
+                //do nothing
+            }
         };
         push(stackEntry);
     }
@@ -93,20 +97,35 @@ public class ViewStackPanel<T extends JPanel> extends JPanel {
         this.repaint();
     }
 
-    public synchronized T getTopView() {
+    private ViewStackPanelEntry<T> getTopEntry(){
         int stackSize = viewStack.size();
         if (stackSize == 0) {
             return null;
         }
-        return viewStack.get(stackSize - 1).getPanel();
+        return viewStack.get(stackSize - 1);
+    }
+
+    public synchronized T getTopView() {
+        ViewStackPanelEntry<T> topEntry = getTopEntry();
+        if (topEntry==null){
+            return null;
+        }
+        return topEntry.getPanel();
     }
 
     public synchronized String getTopViewCaption() {
-        int stackSize = viewStack.size();
-        if (stackSize == 0) {
+        ViewStackPanelEntry<T> topEntry = getTopEntry();
+        if (topEntry==null){
             return null;
         }
-        return viewStack.get(stackSize - 1).getCaption();
+        return topEntry.getCaption();
+    }
+
+    public synchronized void refreshTopView(){
+        ViewStackPanelEntry<T> topEntry = getTopEntry();
+        if (topEntry!=null){
+            topEntry.refreshView();
+        }
     }
 
     public synchronized T popView() {
