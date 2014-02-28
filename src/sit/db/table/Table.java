@@ -47,7 +47,7 @@ import sit.sstl.StrictSITEnumMap;
 public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< TABLE_FIELDS>> {
 
     private final StrictSITEnumMap<TABLE_FIELDS, TableEntry<T, TABLE_FIELDS>> entries;
-    private final boolean verbose = true;
+    private final boolean verbose = false;
 
     public Table(StrictSITEnumMap<TABLE_FIELDS, TableEntry<T, TABLE_FIELDS>> entries) {
         this.entries = entries;
@@ -399,7 +399,9 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
                         tableEntry.getMapper().getAsStringRepresentation(dataStructure, tableEntry.getDbType()));
             }
         }
-        Logger.getLogger(Table.class.getName()).log(Level.INFO, "FilterFromDataStructure:\n" + result);
+        if (verbose) {
+            Logger.getLogger(Table.class.getName()).log(Level.INFO, "FilterFromDataStructure:\n" + result);
+        }
         return result;
     }
 
