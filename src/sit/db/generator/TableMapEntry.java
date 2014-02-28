@@ -19,6 +19,8 @@
 package sit.db.generator;
 
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import sit.db.datastructure.DataStructure;
 import sit.tools.StringFormat;
 
@@ -53,6 +55,7 @@ public class TableMapEntry<T> {
         }//else
         // try guessing match
         if ((method = findGetter(dbFieldName, false))!=null) {
+            Logger.getLogger(TableMapEntry.class.getName()).log(Level.INFO, "guess getter: "+dbFieldName+" --> "+method.getName());
             return method.getName();
         }//else
 
@@ -83,7 +86,17 @@ public class TableMapEntry<T> {
             return methodBareName.toLowerCase().equals(dbFieldName.toLowerCase());
         }//else
 
-        return methodBareName.toLowerCase().contains(dbFieldName.toLowerCase());
+        //start guessing
+        String methodStr = methodBareName.toLowerCase();
+        String dbFieldNameStr = dbFieldName.toLowerCase();
+        if (methodStr.contains(dbFieldNameStr)){            
+            return true;
+        }
+
+        //try to remove "_"
+        methodStr = methodStr.replaceAll("_","");
+        dbFieldNameStr = dbFieldNameStr.replaceAll("_","");
+        return methodStr.contains(dbFieldNameStr);
     }
 
     public String guessSetterForDBEntry(String dbFieldName) {
@@ -95,6 +108,8 @@ public class TableMapEntry<T> {
         }//else
         // try guessing match
         if ((method = findSetter(dbFieldName, false))!=null) {
+
+            Logger.getLogger(TableMapEntry.class.getName()).log(Level.INFO, "guess setter: "+dbFieldName+" --> "+method.getName());
             return method.getName();
         }//else
 
