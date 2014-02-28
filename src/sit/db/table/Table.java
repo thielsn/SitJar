@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 import sit.db.Connection;
 import sit.db.ConnectionManager;
 import sit.db.exception.DBException;
-import sit.db.exception.UpdateException;
 import sit.db.datastructure.DataStructure;
 import sit.sstl.StrictSITEnumMap;
 
@@ -48,7 +47,7 @@ import sit.sstl.StrictSITEnumMap;
 public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< TABLE_FIELDS>> {
 
     private final StrictSITEnumMap<TABLE_FIELDS, TableEntry<T, TABLE_FIELDS>> entries;
-    private final boolean verbose = false;
+    private final boolean verbose = true;
 
     public Table(StrictSITEnumMap<TABLE_FIELDS, TableEntry<T, TABLE_FIELDS>> entries) {
         this.entries = entries;
@@ -249,11 +248,12 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         return getEntries(db, new HashMap());
     }
 
-    public T updateEntry(ConnectionManager db, T dataStructure) throws SQLException, DBException {
+    public T updateEntry(ConnectionManager db, T dataStructure, Map<TABLE_FIELDS, String> filter) throws SQLException, DBException {
         Connection con = db.getConnection();
 
         try {
-            String sqlString = createUpdateString(createFilterFromDataStructure(dataStructure));
+
+            String sqlString = createUpdateString(filter);
             PreparedStatement stmt = con.createPrepStmt(sqlString);
             int stmtCounter = 1;
             for (TableEntry entry : entries.values()) {
@@ -275,6 +275,13 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
             db.returnConnection(con);
         }
 
+    }
+
+    public T updateEntry(ConnectionManager db, T dataStructure) throws SQLException, DBException {
+        if (!hasPrimeKey()) {
+            throw new DBException(dataStructure.getTag(), "Cannot update datastructure for table without primekey. Relevant columnset unknown - use updateEntry with filter instead!", -1);
+        }
+        return updateEntry(db, dataStructure, createFilterFromId(dataStructure.getId()));
     }
 
     public abstract String getTableName();
@@ -351,10 +358,9 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
 
     public boolean hasAutorPrimeKey() {
         TableEntry<T, TABLE_FIELDS> primeKeyEntry = getPrimeKeyEntry();
-        return (primeKeyEntry!=null)
+        return (primeKeyEntry != null)
                 && primeKeyEntry.isPrimeKeyAutogen();
     }
-
 
     private String createSQLEquals(Map.Entry<TABLE_FIELDS, String> filterEntry) {
         TableEntry<T, TABLE_FIELDS> entry = entries.get(filterEntry.getKey());
@@ -366,7 +372,7 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         if (entry.getDbType() == TABLE_ENTRY_TYPE.STRING
                 || entry.getDbType() == TABLE_ENTRY_TYPE.DATE
                 || entry.getDbType() == TABLE_ENTRY_TYPE.TIMESTAMP) {
-            result += "'" + filterEntry.getValue();
+            result += "'" + filterEntry.getValue() + "'";
         } else {
             result += filterEntry.getValue();
         }
@@ -393,6 +399,7 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
                         tableEntry.getMapper().getAsStringRepresentation(dataStructure, tableEntry.getDbType()));
             }
         }
+        Logger.getLogger(Table.class.getName()).log(Level.INFO, "FilterFromDataStructure:\n" + result);
         return result;
     }
 
