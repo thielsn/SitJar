@@ -179,11 +179,12 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
         ResultSet rs = stmt.getGeneratedKeys();
         if (rs != null && rs.next()) {
             result.setId(rs.getInt(1));
-        }else{
-            if (stmt.getUpdateCount()!=1){
+        } else {
+            if (stmt.getUpdateCount() != 1) {
                 throw new DBException(dataStructureEntry.getTag(), "insert returned 0!", -1);
-            }else{
-                Logger.getLogger(Table.class.getName()).log(Level.WARNING, "Insert returned 1, but no ResultSet!");
+            } else if (hasAutorPrimeKey()) {
+                Logger.getLogger(Table.class.getName()).log(Level.WARNING, "Generated id was not returned, when inserting into: " + getTableName());
+
             }
         }
 
@@ -264,8 +265,8 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
             }
             int rowsChanged = stmt.executeUpdate();
 
-            if (rowsChanged!=1){
-                throw new DBException(dataStructure.getTag(), "Update failed! executeUpdate returned: "+rowsChanged, -1);
+            if (rowsChanged != 1) {
+                throw new DBException(dataStructure.getTag(), "Update failed! executeUpdate returned: " + rowsChanged, -1);
             }
             return dataStructure;
 
@@ -347,6 +348,13 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
     public boolean hasPrimeKey() {
         return getPrimeKeyEntry() != null;
     }
+
+    public boolean hasAutorPrimeKey() {
+        TableEntry<T, TABLE_FIELDS> primeKeyEntry = getPrimeKeyEntry();
+        return (primeKeyEntry!=null)
+                && primeKeyEntry.isPrimeKeyAutogen();
+    }
+
 
     private String createSQLEquals(Map.Entry<TABLE_FIELDS, String> filterEntry) {
         TableEntry<T, TABLE_FIELDS> entry = entries.get(filterEntry.getKey());
