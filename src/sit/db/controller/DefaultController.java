@@ -48,6 +48,10 @@ public class DefaultController<T extends DataStructure, TABLE_FIELDS extends Enu
         return table.updateEntry(db, dataStructure);
     }
 
+    public T updateEntry(T dataStructure, Map<TABLE_FIELDS, String> filter) throws SQLException, DBException {
+        return table.updateEntry(db, dataStructure, filter);
+    }
+
     @Override
     public T deleteEntry(T dataStructure)throws SQLException, DBException{
         if(table.deleteEntry(db, dataStructure)){
