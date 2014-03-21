@@ -18,6 +18,7 @@
  */
 package sit.tools;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -42,12 +43,31 @@ public class DateHelper {
         return cal.getTime();
     }
 
+    public static Date setTimeForDate(Date date, int h, int m, int s) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, h);
+        cal.set(Calendar.MINUTE, m);
+        cal.set(Calendar.SECOND, s);
+
+        return cal.getTime();
+    }
+
+
+    public static Date setTimeForDate(Date date, Date time) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(time);
+        return setTimeForDate(date, cal.get(Calendar.HOUR_OF_DAY),
+                cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+
+    }
+
     public static boolean dateAreOnSameDay(Date d1, Date d2) {
         Calendar cal1 = Calendar.getInstance();
         Calendar cal2 = Calendar.getInstance();
         cal1.setTime(d1);
         cal2.setTime(d2);
-        
+
         return (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR))
                 && (cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR));
     }
