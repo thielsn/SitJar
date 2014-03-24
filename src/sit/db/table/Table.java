@@ -266,7 +266,12 @@ public abstract class Table<T extends DataStructure, TABLE_FIELDS extends Enum< 
             int rowsChanged = stmt.executeUpdate();
 
             if (rowsChanged != 1) {
-                throw new DBException(dataStructure.getTag(), "Update failed! executeUpdate returned: " + rowsChanged, -1);
+                if (rowsChanged==0) {
+                    Logger.getLogger(Table.class.getName()).log(Level.FINE, "Update of unchanged entry!");
+
+                }else{
+                    throw new DBException(dataStructure.getTag(), "Update failed! executeUpdate returned: " + rowsChanged, -1);
+                }
             }
             return dataStructure;
 
