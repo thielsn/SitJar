@@ -215,7 +215,8 @@ public class ViewSetPanel<K extends Enum,T extends ViewSetEntry<K>>{
             return currentView.getViewEntry();
         }
         if (mode==MODE_CREATE_ON_VIEW){
-            throw new ViewSetPanelException("In MODE_CREATE_ON_VIEW mode: getView only defined for current view");
+            throw new ViewSetPanelException("getView for "+viewType+" but current view: "+currentView.getKey()
+                    +"\nIn MODE_CREATE_ON_VIEW mode: getView only defined for current view.");
         }
 
         return views.get(viewType).getViewEntry();
