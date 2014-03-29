@@ -21,8 +21,12 @@ package sit.gui;
 
 import java.awt.Component;
 import java.awt.Dialog;
+import java.awt.FontMetrics;
 import java.awt.Frame;
+import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.geom.Rectangle2D;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -76,5 +80,18 @@ public class SwingHelper {
         }//else
         throw new RuntimeException("Parent window of component is neither a frame nor a dialog!");
     }
-    
+
+    public static void setBoundsForTextComponent(JComponent comp, String text, int xOffset, int yOffset){
+        Rectangle bounds = calculateBoundsForTextComponent(comp, text, xOffset, yOffset);
+        comp.setBounds(bounds);
+    }
+
+    public static Rectangle calculateBoundsForTextComponent(JComponent comp, String text, int xOffset, int yOffset){
+
+        FontMetrics fm = comp.getFontMetrics(comp.getFont());
+        Rectangle2D bounds = fm.getStringBounds(text, comp.getGraphics());
+        return new Rectangle(xOffset+(int)bounds.getX(), yOffset+(int)bounds.getY(),
+                (int)Math.ceil(bounds.getWidth()), (int)Math.ceil(bounds.getHeight()));
+    }
+
 }

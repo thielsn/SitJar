@@ -28,6 +28,10 @@ import java.util.Date;
  */
 public class DateHelper {
 
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT_SHORT = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT_LONG = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
+
     /**
      * increments date by days
      *
@@ -71,5 +75,15 @@ public class DateHelper {
         return (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR))
                 && (cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR));
     }
+
+
+    public static String getShortDate(Date date){
+        return (SIMPLE_DATE_FORMAT_SHORT).format(date);
+    }
+
+    public static String getLongDate(Date date){
+        return (SIMPLE_DATE_FORMAT_LONG).format(date);
+    }
+
 
 }
