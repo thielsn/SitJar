@@ -90,8 +90,10 @@ public class SwingHelper {
 
         FontMetrics fm = comp.getFontMetrics(comp.getFont());
         Rectangle2D bounds = fm.getStringBounds(text, comp.getGraphics());
-        return new Rectangle(xOffset+(int)bounds.getX(), yOffset+(int)bounds.getY(),
-                (int)Math.ceil(bounds.getWidth()), (int)Math.ceil(bounds.getHeight()));
+
+        return new Rectangle(xOffset+(int)bounds.getX(), yOffset,
+                (int)Math.ceil(bounds.getWidth()), (int)Math.ceil(
+                        bounds.getHeight()+fm.getDescent()));
     }
 
 }
