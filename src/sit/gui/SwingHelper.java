@@ -29,6 +29,7 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 /**
@@ -81,12 +82,17 @@ public class SwingHelper {
         throw new RuntimeException("Parent window of component is neither a frame nor a dialog!");
     }
 
-    public static void setBoundsForTextComponent(JComponent comp, String text, int xOffset, int yOffset){
-        Rectangle bounds = calculateBoundsForTextComponent(comp, text, xOffset, yOffset);
+
+    public static void setBoundsForJLabel(JLabel label, int xOffset, int yOffset){
+        setBoundsForComponent(label, label.getText(), xOffset, yOffset);
+    }
+
+    public static void setBoundsForComponent(JComponent comp, String text, int xOffset, int yOffset){
+        Rectangle bounds = calculateBoundsForComponent(comp, text, xOffset, yOffset);
         comp.setBounds(bounds);
     }
 
-    public static Rectangle calculateBoundsForTextComponent(JComponent comp, String text, int xOffset, int yOffset){
+    public static Rectangle calculateBoundsForComponent(JComponent comp, String text, int xOffset, int yOffset){
 
         FontMetrics fm = comp.getFontMetrics(comp.getFont());
         Rectangle2D bounds = fm.getStringBounds(text, comp.getGraphics());
