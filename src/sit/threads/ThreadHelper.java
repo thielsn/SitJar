@@ -68,4 +68,13 @@ public class ThreadHelper {
         });
         runtime.addShutdownHook(shutdownThread);
     }
+
+    public static void doInBackground(final BackgroundActivity backgroundActivity){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                backgroundActivity.doInBackground();
+            }
+        }).start();
+    }
 }
