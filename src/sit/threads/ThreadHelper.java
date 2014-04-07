@@ -25,6 +25,9 @@
  */
 package sit.threads;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Simon Thiel <simon.thiel at gmx.de>
@@ -73,7 +76,11 @@ public class ThreadHelper {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                backgroundActivity.doInBackground();
+                try{
+                    backgroundActivity.doInBackground();
+                }catch(Exception ex){
+                    Logger.getLogger(ThreadHelper.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                }
             }
         }).start();
     }
