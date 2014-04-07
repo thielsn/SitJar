@@ -71,6 +71,14 @@ public class DBManager {
         }
     }
 
+    public DBManager() {
+        this.defaultType = DatabaseType.MYSQL;
+        this.defaultUser = null;
+        this.defaultPWD = null;
+    }
+
+
+
     public DBManager(DatabaseType defaultType, String defaultUser, String defaultPWD) {
         this.defaultType = defaultType;
         this.defaultUser = defaultUser;
@@ -83,11 +91,10 @@ public class DBManager {
         this.defaultPWD = defaultPWD;
     }
 
-    
-
-
-
-
+   
+     public ConnectionManager getDatabase(String databaseName, String username, String password) {
+         return getDatabase(databaseName, defaultType, username, password);
+     }
 
 
      public ConnectionManager getDatabase(String databaseName) {
