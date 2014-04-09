@@ -27,24 +27,12 @@ import java.nio.charset.Charset;
  */
 public class StringHelper {
 
-    public static String transformToCharset(String string, Charset newCharset){
+    public static String transformWrongCharset(String string, Charset actualCharset){
         if (string ==null){
             return null;
         }
-        return new String(string.getBytes(), newCharset);
+        return new String(string.getBytes(), actualCharset);
     }
 
-    public static String transformCharset(String string, Charset oldCharset){
-        if (string ==null){
-            return null;
-        }
-        return new String(string.getBytes(oldCharset));
-    }
-
-    public static String transformCharset(String string, Charset oldCharset, Charset newCharset){
-        if (string ==null){
-            return null;
-        }
-        return new String(string.getBytes(oldCharset), newCharset);
-    }
+  
 }
