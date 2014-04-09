@@ -20,7 +20,7 @@
 /*
  *  @author Simon Thiel <simon.thiel at gmx.de>
  */
-package sit.tools;
+package sit.string;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;

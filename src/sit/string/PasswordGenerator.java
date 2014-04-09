@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with SitJar. If not, see <http://www.gnu.org/licenses/lgpl.txt>. * 
  */
-package sit.tools;
+package sit.string;
 
 import java.util.Random;
 

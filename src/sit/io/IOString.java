@@ -86,15 +86,12 @@ public class IOString {
         }
     }
 
-    public static void main(String[] args) {
-        IOString target = new IOString();
-        IOString source = new IOString("Hello World.");
-        convert(target.getOutputStream(), source.getInputStream());
-        System.out.println(target.getString());
-    }
 
-    /** <CODE>convert</CODE> doesn't actual convert anything but copies byte
-    for byte
+    /** <CODE>convert</CODE> doesn't actual 
+     * convert anything but copies byte for byte
+     * @param out
+     * @param in
+     * @return 
      */
     public static boolean convert(java.io.OutputStream out, java.io.InputStream in) {
         try {
@@ -106,5 +103,12 @@ public class IOString {
         } catch (java.io.IOException ioe) {
             return false;
         }
+    }
+    
+    public static void main(String[] args) {
+        IOString target = new IOString();
+        IOString source = new IOString("Hello World.");
+        convert(target.getOutputStream(), source.getInputStream());
+        System.out.println(target.getString());
     }
 }

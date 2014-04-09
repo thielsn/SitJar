@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sit.db.datastructure.DataStructure;
-import sit.tools.StringFormat;
+import sit.string.StringFormat;
 
 /**
  *

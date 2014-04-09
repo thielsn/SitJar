@@ -17,7 +17,7 @@
 * along with SitJar. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 */
 
-package sit.tools;
+package sit.string;
 
 /**
  *
@@ -48,6 +48,7 @@ public class StringFormat {
     public static String capitalizeFirstLetter(String input){
         return input.substring(0, 1).toUpperCase()+input.substring(1);
     }
+
 
 
 }
