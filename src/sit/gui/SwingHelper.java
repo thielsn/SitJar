@@ -38,6 +38,7 @@ import javax.swing.SwingUtilities;
  */
 public class SwingHelper {
 
+    public static int PADDING = 1;
 
     public static Window getParentWindowForComponent(Component comp){
         return  SwingUtilities.windowForComponent(comp);
@@ -97,9 +98,16 @@ public class SwingHelper {
         FontMetrics fm = comp.getFontMetrics(comp.getFont());
         Rectangle2D bounds = fm.getStringBounds(text, comp.getGraphics());
 
-        return new Rectangle(xOffset+(int)bounds.getX(), yOffset,
-                (int)Math.ceil(bounds.getWidth()), (int)Math.ceil(
-                        bounds.getHeight()+fm.getDescent()));
+        return new Rectangle(
+                xOffset+(int)bounds.getX(),
+                yOffset,
+                (int)Math.ceil(bounds.getWidth())+(PADDING*2),
+                (int)Math.ceil(bounds.getHeight()+fm.getDescent())+(PADDING*2));
+    }
+
+    public static void setWidthAndHeightForTextComponent(JComponent comp, String text){
+        Rectangle bounds = calculateBoundsForComponent(comp, text, 0, 0);
+        comp.setSize(bounds.width, bounds.height);
     }
 
 }
