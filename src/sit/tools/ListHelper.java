@@ -55,5 +55,14 @@ public class ListHelper {
         return result;
     }
 
+    public static <T> T getEntry(Vector<T> list, T entry) {
+        for (T myEntry : list) {
+            if (myEntry.equals(entry)){
+                return myEntry;
+            }
+        }
+        return null;
+    }
+
 
 }
