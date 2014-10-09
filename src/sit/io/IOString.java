@@ -43,7 +43,7 @@ public class IOString {
     }
 
     
-    private StringBuffer buf;
+    private final StringBuffer buf;
 
     /** Creates a new instance of IOString */
     public IOString() {
