@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.Socket;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,6 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import sit.sstl.ByteBuilder;
 import sit.web.client.HttpHelper;
+import sit.web.socket.SocketI;
 
 /**
  *
@@ -54,7 +54,7 @@ class WebWorker implements HttpConstants, Runnable {
     /*
      * Socket to client we're handling
      */
-    private Socket socket = null;
+    private SocketI socket = null;
     /**
      * indicates whether the thread is ordered to stop
      */
@@ -71,7 +71,7 @@ class WebWorker implements HttpConstants, Runnable {
     private final static String e500Msg="<html><body><h1>Internal Server Error</h1><br/><br/>\n\n"
                 + "The server had an internal error.\n</body></html>";
             
-    public synchronized void setSocket(Socket s) {
+    public synchronized void setSocket(SocketI s) {
         this.socket = s;
         notify();
     }

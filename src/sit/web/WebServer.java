@@ -28,11 +28,12 @@ package sit.web;
  */
 import java.io.File;
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sit.web.socket.DefaultServerSocket;
+import sit.web.socket.ServerSocketI;
+import sit.web.socket.SocketI;
 
 public class WebServer implements HttpConstants, Runnable {
 
@@ -51,8 +52,11 @@ public class WebServer implements HttpConstants, Runnable {
     protected void log(String s) {
         Logger.getLogger(getClass().getName()).log(Level.FINE, s);
     }
+
+    private ServerSocketI serverSocket=null;
+
     /* Where worker threads stand idle */
-    private Vector<WebWorker> threads = new Vector();
+    private final Vector<WebWorker> threads = new Vector();
 
     /* the web server's virtual root */
     private File root = new File(".");
@@ -66,6 +70,7 @@ public class WebServer implements HttpConstants, Runnable {
     private boolean permitDirectoryListing = true;
     private boolean stopping = false;
 
+
     private void init() throws Exception {
 
         /* start worker threads */
@@ -76,12 +81,26 @@ public class WebServer implements HttpConstants, Runnable {
         }
     }
 
+    public void initServerSocket(ServerSocketI serverSocket){
+        if (this.serverSocket!=null){
+            throw new RuntimeException("ServerSocket already initialized!");
+        }//else
+        this.serverSocket = serverSocket;
+    }
+
+    private ServerSocketI getServerSocket() throws IOException{
+        if (this.serverSocket==null){
+            this.serverSocket = new DefaultServerSocket(getPort());
+        }
+        return this.serverSocket;
+    }
+
     public void run() {
-        ServerSocket ss = null;
+        ServerSocketI ss = null;
         try {
             log("init webserver");
             init();
-            ss = new ServerSocket(getPort());
+            ss = getServerSocket();
             Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "Server is listening at port: " + port);
             Logger.getLogger(WebServer.class.getName()).log(Level.INFO, "Root is set to: " + root.getAbsolutePath());
 
@@ -95,7 +114,7 @@ public class WebServer implements HttpConstants, Runnable {
         }
         while (!stopping) {
             try {
-                Socket s = ss.accept(); //wait for incoming connection
+                SocketI s = ss.accept(); //wait for incoming connection
 
                 WebWorker w = null;
                 synchronized (this) {
