@@ -21,6 +21,7 @@
 package sit.sstl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class ByteBuilder {
             }
             buffer[bufferSize++] = (byte)aByte;
         }
-        
+      
         private void appendBuffer(){
             byteBuilder.append(buffer, bufferSize);
             bufferSize = 0;
@@ -131,6 +132,11 @@ public class ByteBuilder {
     private int startIndexOfFirstChunk = 0;
     private int fillIndex = 0;
     private byte[] response = null;
+    
+
+    public ByteBuilder(int chunkSize) {
+        this.chunkSize = chunkSize;
+    }
 
     public ByteBuilder() {
         chunkSize = DEFAULT_CHUNK_SIZE;
